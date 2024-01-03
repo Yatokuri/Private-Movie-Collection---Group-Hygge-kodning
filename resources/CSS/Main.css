@@ -1,0 +1,161 @@
+
+
+/*https://stackoverflow.com/questions/23490320/gap-between-border-and-image-when-border-radius-is-added*/
+
+#anchorPane {
+    -fx-background-color: linear-gradient(to bottom, #6f787e, #6f787e, #60727c); /* Adjust colors as needed */
+}
+
+
+.button {
+    -fx-background-color: linear-gradient(to bottom, #0a5f72, #1080a2); /* Adjust colors as needed */
+    -fx-border-color: #001618;
+    -fx-text-fill: white;
+    -fx-border-radius: 15px 15px 15px 15px;
+    -fx-background-radius: 15px 15px 15px 15px;
+    -fx-border-insets: -1;
+}
+
+.button:hover{
+    -fx-background-color: linear-gradient(to bottom, #00e2e2, #0259ea); /* Adjust colors as needed */
+    -fx-background-radius: 15px 15px 15px 15px;
+}
+
+.buttonSpeed {
+    -fx-background-color: none;
+    -fx-border-color: none;
+    -fx-text-fill: #2f2e2e;
+    -fx-border-radius: none;
+    -fx-background-radius: none;
+    -fx-border-insets: -1;
+}
+
+.buttonSpeed:hover{
+    -fx-text-fill: #333232;
+    -fx-background-color: none;
+    -fx-background-radius: none;
+}
+
+
+.combo-box{
+    -fx-background-color: #9d2323;
+    -fx-background-insets: 0, 0 0 1 0;
+    -fx-background-radius: 0;
+}
+.combo-box:hover {
+    -fx-background-color: linear-gradient(to bottom, #00e2e2, #0259ea);
+}
+.combo-box .list-view .list-cell:hover{
+    -fx-background-color: linear-gradient(to bottom, #00e2e2, #0259ea);
+}
+.combo-box .list-cell {
+    -fx-text-fill: white;
+}
+.combo-box .list-view .list-cell {
+    -fx-text-fill: grey;
+    -fx-background-color: #ff0000;
+}
+.context-menu{
+    -fx-background-color: lightblue;
+    -fx-text-fill: white;
+    -fx-background-radius: 6 6 6 6, 5 5 5 5, 4 4 4 4;
+    -fx-padding: 0.0em 0.333333em 0.0em 0.333333em;
+}
+.menu-item:focused .label {
+    -fx-text-fill: white;
+}
+.table-view .column-header-background{
+    -fx-background-color: linear-gradient(to bottom, #225b81, #1b5173);
+    -fx-background-radius: 7px 7px 0px 0px;
+}
+
+.table-view .virtual-flow .scroll-bar:vertical,
+.table-view .virtual-flow .scroll-bar:vertical .track,
+.table-view .virtual-flow .scroll-bar:vertical .track-background,
+.table-view .virtual-flow .scroll-bar:horizontal,
+.table-view .virtual-flow .scroll-bar:horizontal .track,
+.table-view .virtual-flow .scroll-bar:horizontal .track-background {
+    -fx-background-color: transparent;
+}
+.table-view .virtual-flow .scroll-bar .increment-button,
+.table-view .virtual-flow .scroll-bar .decrement-button {
+    -fx-opacity: 0;
+    -fx-padding: 2;
+}
+
+.table-view .virtual-flow .scroll-bar:vertical .thumb
+{
+    -fx-background-color: linear-gradient(to bottom, #225b81, #1b5173);
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+}
+.table-view .column-header .label {
+    -fx-text-fill: #94efe2;
+    -fx-font-weight: bold;
+}
+.table-view {
+    -fx-background-color: transparent;
+}
+.table-view .column-header-background .filler{
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+}
+.table-view .corner{
+    -fx-background-color: transparent;
+}
+.table-view .table-cell {
+    -fx-background-color: none;
+    -fx-border-color: none;
+    -fx-padding: 2 0 2 10px;
+    -fx-text-fill: white;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #93f9b911 !important;
+    -fx-text-background-color: #02242c !important;
+    -fx-border-radius: 15px 15px 15px 15px;
+    -fx-background-radius: 15px 15px 15px 15px;
+}
+
+.table-row-cell:playing {
+    -fx-background-color: #93f9b911 !important;
+    -fx-text-background-color: #02242c !important;
+    -fx-border-radius: 15px 15px 15px 15px;
+    -fx-background-radius: 15px 15px 15px 15px;
+}
+
+
+.table-row-cell:selected {
+    -fx-background-color: #93f9b911 !important;
+    -fx-text-background-color: #02242c !important;
+    -fx-border-radius: 15px 15px 15px 15px;
+    -fx-background-radius: 15px 15px 15px 15px;
+}
+
+.table-row-cell:even{ /*Row number 0,2,....*/
+    -fx-background-color: linear-gradient(to bottom,  #6f787e, #6f787e, #60727c); /*Same color as #anchorPane*/
+    /*-fx-background-color: none*/
+    -fx-border-color: transparent;
+    -fx-background-insets: 0, 0 0 1 0;
+    -fx-padding: 0.0em;
+
+}
+.table-row-cell:odd { /*Row number 1,3,....*/
+    -fx-background-color: linear-gradient(to bottom, #6b767e, #5d717c);
+    /*-fx-background-color: linear-gradient(to bottom, #164869, #21688f);*/
+    -fx-border-color: transparent;
+    -fx-background-insets: 0,0 0 1 0;
+    -fx-padding: 0.0em;
+    -fx-background-radius: 15px 15px 15px 15px;
+}
+.text-field{
+    -fx-background-color: #23779d;
+    -fx-border-color: transparent;
+    -fx-text-fill: white;
+    -fx-background-radius: 4px;
+}
+.timeText-field:disabled {
+    -fx-opacity: 1.0; /* Set the opacity to 1.0 to make it fully visible */
+}
