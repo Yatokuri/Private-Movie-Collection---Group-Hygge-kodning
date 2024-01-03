@@ -21,7 +21,7 @@ public class CategoryDAO_DB implements ICategoryDataAccess {
         databaseConnector = new MyDatabaseConnector();
     }
 
-    public List<Category> getAllCategories() throws Exception { // Returns all categorys from the database
+    public List<Category> getAllCategories() throws Exception { // Returns all categories from the database
 
         ArrayList<Category> allCategories = new ArrayList<>();
 
@@ -35,11 +35,10 @@ public class CategoryDAO_DB implements ICategoryDataAccess {
             while (rs.next()) {
 
                 //Map DB row to Category object
-                int id = rs.getInt("Id");
-                String title = rs.getString("Name");
-                int movieCount = rs.getInt("MovieCount");
-                double movieTotalTime = rs.getDouble("MovieTotalTime");
-                Category category = new Category(id, title, movieCount, movieTotalTime);
+                int id = rs.getInt("CategoryId");
+                String title = rs.getString("CategoryName");
+                int categoryCount = rs.getInt("CategoryCount");
+                Category category = new Category(id, title, categoryCount);
                 allCategories.add(category);
             }
             return allCategories;
@@ -48,7 +47,7 @@ public class CategoryDAO_DB implements ICategoryDataAccess {
         catch (SQLException ex)
         {
             ex.printStackTrace();
-            throw new Exception("Could not get categorys from database", ex);
+            throw new Exception("Could not get categories from database", ex);
         }
     }
 
@@ -75,7 +74,7 @@ public class CategoryDAO_DB implements ICategoryDataAccess {
 
             // Create category object and send up the layers
             Category createdCategory;
-            createdCategory = new Category(id, category.getCategoryName(), category.getMovieCount(), category.getMovieTotalTime());
+            createdCategory = new Category(id, category.getCategoryName(), category.getMovieCount());
 
             return createdCategory;
         }

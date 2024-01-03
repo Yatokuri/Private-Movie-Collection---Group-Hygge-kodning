@@ -3,8 +3,8 @@
  **/
 package easv.PrivateMovieCollection.GUI.Controller;
 
-import easv.PrivateMovieCollection.BE.Category;
 import easv.PrivateMovieCollection.BE.Movie;
+import easv.PrivateMovieCollection.BE.Category;
 import easv.PrivateMovieCollection.GUI.Model.CategoryModel;
 import easv.PrivateMovieCollection.GUI.Model.DisplayErrorModel;
 import easv.PrivateMovieCollection.GUI.Model.MovieModel;
@@ -113,15 +113,18 @@ public class MediaPlayerCUViewController implements Initializable {
             btnSave.setText("Update");
             txtInputName.setText(currentSelectedMovie.getTitle());
             txtInputYear.setText(String.valueOf(currentSelectedMovie.getYear()));
-            txtInputArtist.setText(currentSelectedMovie.getArtist());
+            txtInputArtist.setText(currentSelectedMovie.getDirector());
             txtInputFilepath.setText(currentSelectedMovie.getMoviePath());
 
+            /*
             for (Category category : comCategory.getItems()) { // Searches the database to try and find the songs category to input into the update window
                 if (category.getCategoryName().equals(currentSelectedMovie.getMovieCategory())) {
                     comCategory.getSelectionModel().select(category);
                     break; // Stop iterating once the matching category is found and select it
                 }
             }
+
+             */
         }
     }
 
@@ -217,22 +220,22 @@ public class MediaPlayerCUViewController implements Initializable {
         Optional<String> result = dialog.showAndWait();
         if (result.isPresent()) {
             String inputValue = result.get(); // Get the actual value from Optional
-            if (inputValue.length() > 40) {
+            if (inputValue.length() > 40)   {
                 displayErrorModel.displayErrorC("Max 40 character");
             } // Here we make sure the category is under 40 char and don't already exist
             /**     else {
-             for (Category category : comCategory.getItems()) {
-             if (category.getSongCategory().equals(inputValue)) {
-             displayErrorModel.displayErrorC("You already have that category");
-             return; // Stop iterating once the matching category is found and display error
-             }
-             }
-             Category newCategory = new Category(inputValue);
-             categoryModel.createNewCategory(newCategory);
-             comCategory.getItems().add(newCategory);
-             } **/
-        }
-    }
+                for (Category category : comCategory.getItems()) {
+                    if (category.getSongCategory().equals(inputValue)) {
+                        displayErrorModel.displayErrorC("You already have that category");
+                        return; // Stop iterating once the matching category is found and display error
+                    }
+                }
+                Category newCategory = new Category(inputValue);
+                categoryModel.createNewCategory(newCategory);
+                comCategory.getItems().add(newCategory);
+            } **/
+       }
+       }
 
     public void btnSave() { // Validate all inputs before saving
         boolean isNameValid = validateModel.validateInput(txtInputName, txtInputName.getText());
@@ -251,16 +254,18 @@ public class MediaPlayerCUViewController implements Initializable {
         }
     }
 
+
     private void createNewMovie() { //Here the song gets created
         String title = txtInputName.getText();
-        String artist = txtInputArtist.getText();
-        String songPath = txtInputFilepath.getText();
-        double songTime = currentMovieLength;
+        String director = txtInputArtist.getText();
+        String moviePath = txtInputFilepath.getText();
+        double movieTime = currentMovieLength;
+        double movieRating = 10;
         int year = Integer.parseInt(txtInputYear.getText());
         String category = String.valueOf(comCategory.getSelectionModel().getSelectedItem());
 
         // Inputs the values from above into a new song and tries to send it up the layers into the DB, table view and sound map
-        Movie movie = new Movie(-1, year, title, artist, songPath, songTime, category);
+        Movie movie = new Movie(-1, year, title, director, moviePath, movieRating, movieTime, null);
 
         try {
             Movie newCreatedMovie = movieModel.createNewMovie(movie);
@@ -275,11 +280,11 @@ public class MediaPlayerCUViewController implements Initializable {
     private void updateMovie() { //Here the song gets updated
         if (currentSelectedMovie != null) {
             currentSelectedMovie.setTitle(txtInputName.getText());
-            currentSelectedMovie.setArtist(txtInputArtist.getText());
+            currentSelectedMovie.setDirector(txtInputArtist.getText());
             currentSelectedMovie.setYear(Integer.parseInt(txtInputYear.getText()));
             currentSelectedMovie.setMoviePath(txtInputFilepath.getText());
             currentSelectedMovie.setMovieLength(currentMovieLength);
-            currentSelectedMovie.setMovieCategory(String.valueOf(comCategory.getSelectionModel().getSelectedItem()));
+            //currentSelectedMovie.setMovieCategory(String.valueOf(comCategory.getSelectionModel().getSelectedItem()));
 
             // Updates the song data and sends it up the layers to the DAL layer and updates the song path in the sound map in case it got changed
             try {

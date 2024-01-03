@@ -177,17 +177,17 @@ public class MediaPlayerViewController implements Initializable {
     private void initializeTableColumns() {
         // Initialize the tables with columns.
         colName.setCellValueFactory(new PropertyValueFactory<>("title"));
-        colArtist.setCellValueFactory(new PropertyValueFactory<>("artist"));
+        colArtist.setCellValueFactory(new PropertyValueFactory<>("director"));
         colYear.setCellValueFactory(new PropertyValueFactory<>("year"));
-        colCategory.setCellValueFactory(new PropertyValueFactory<>("movieCategory"));
+        colCategory.setCellValueFactory(new PropertyValueFactory<>("movieRating"));
         colMovieTime.setCellValueFactory(new PropertyValueFactory<>("MovieLengthHHMMSS"));
 
         colCategoryName.setCellValueFactory(new PropertyValueFactory<>("categoryName"));
         colMovieCount.setCellValueFactory(new PropertyValueFactory<>("movieCount"));
-        colCategoryTime.setCellValueFactory(new PropertyValueFactory<>("MovieLengthHHMMSS"));
+        colCategoryTime.setCellValueFactory(new PropertyValueFactory<>("CategoryLengthHHMMSS"));
 
         colTitleInCategory.setCellValueFactory(new PropertyValueFactory<>("title"));
-        colArtistInCategory.setCellValueFactory(new PropertyValueFactory<>("artist"));
+        colArtistInCategory.setCellValueFactory(new PropertyValueFactory<>("director"));
     }
 
 //*******************************************CONTEXT*MENU**************************************************
@@ -551,7 +551,7 @@ public class MediaPlayerViewController implements Initializable {
         currentMusic = newMovie;
 
         sliderProgressMovie.setMax(newMovie.getTotalDuration().toSeconds()); //Set our progress to the time so, we know maximum value
-        lblPlayingNow.setText("Now playing: " + selectedMovie.getTitle() + " - " + selectedMovie.getArtist());
+        lblPlayingNow.setText("Now playing: " + selectedMovie.getTitle() + " - " + selectedMovie.getDirector());
         currentMusic.seek(Duration.ZERO); //When you start a movie again it should start from start
         currentMusic.setVolume((sliderProgressVolume.getValue())); //We set the volume
         handlePlayingMovieColor();
@@ -680,7 +680,7 @@ public class MediaPlayerViewController implements Initializable {
                     .filter(category -> category.getMovieCount() >= 1).toList();
 
             if (!nonEmptyCategories.isEmpty()) {
-                Random random = new Random(); //Select a random category from categorys
+                Random random = new Random(); //Select a random category from categories
                 currentCategory = nonEmptyCategories.get(random.nextInt(nonEmptyCategories.size()));
                 currentCategoryPlaying = currentCategory;
                 try {
@@ -717,7 +717,7 @@ public class MediaPlayerViewController implements Initializable {
         alert.setContentText("Are you ok with this?");
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(mainIcon);
-        // This sets up the schematic for deleting categorys & movies
+        // This sets up the schematic for deleting categories & movies
 
         if (selectedMovie != null & selectedMovieInCategory == null) {
             alert.setTitle("Movie");
@@ -733,7 +733,7 @@ public class MediaPlayerViewController implements Initializable {
                         categoryMovieModel.deleteMovieFromCategory(selectedMovie, p);
                     }
                     movieModel.deleteMovie(selectedMovie); /// removes movie from database
-                    refreshCategorys(); // Refreshes the categorys so the correct time and count is shown
+                    refreshCategorys(); // Refreshes the categories so the correct time and count is shown
                     refreshMovieList(); // Refreshes the movie list so the deleted movie is no longer there.
                 } catch (Exception e) {
                     displayErrorModel.displayError(e);
@@ -1276,7 +1276,7 @@ public class MediaPlayerViewController implements Initializable {
 
         if (selectedFile != null) {
             MediaPlayer previousMediaPlayer = soundMap.remove(currentMovie.getId());
-            currentMovie = new Movie(-50, 0, selectedFile.getName(), "Unknown", selectedFile.getAbsolutePath(), 0.0, "Movie");
+            currentMovie = new Movie(-50, 0, selectedFile.getName(), "Unknown", selectedFile.getAbsolutePath(), 0.0, 2.2,  null);
             addMoviesToSoundMap(currentMovie).thenRun(() -> {
                 MediaPlayer newMovie = soundMap.get(currentMovie.getId());
                 sliderProgressMovie.setValue(0);
@@ -1298,7 +1298,7 @@ public class MediaPlayerViewController implements Initializable {
     Movie lastMovieName;
     double lastMovieSeek;
     //******************************************BUTTONS*SLIDERS************************************************
-    public void createUpdateCategory(String buttonText) throws Exception { // Method for updating or creating categorys
+    public void createUpdateCategory(String buttonText) throws Exception { // Method for updating or creating categories
         TextInputDialog dialog = new TextInputDialog("");
         if (currentCategory == null && buttonText.equals(btnUpdateCategory.getText())) { // Checks if a valid category was selected when trying to update
             displayErrorModel.displayErrorC("You forgot choose a category");
@@ -1323,7 +1323,7 @@ public class MediaPlayerViewController implements Initializable {
             String inputValue = result.get().strip(); // Get the actual value from Optional and ensure that all white space is removed in front and behind the text input
 
             if (buttonText.equals(btnCreateCategory.getText()) && !inputValue.isEmpty()) {
-                Category p = new Category(-1, inputValue, 0, 0);
+                Category p = new Category(-1, inputValue, 0);
                 categoryModel.createNewCategory(p);
             }
             if (buttonText.equals(btnUpdateCategory.getText()) && !inputValue.isEmpty()) {

@@ -50,7 +50,7 @@ public class MovieManager {
     }
 
     private boolean searchFindsMovies(Movie movie, String searchText) { // Creates the search parameter for the title and artist column to use for the search filter
-        return (movie.getTitle().toLowerCase().contains(searchText.toLowerCase())) || (movie.getArtist().toLowerCase().contains(searchText.toLowerCase()));
+        return (movie.getTitle().toLowerCase().contains(searchText.toLowerCase())) || (movie.getDirector().toLowerCase().contains(searchText.toLowerCase()));
     }
 
     public ObservableList<Movie> filterList(List<Movie> movie, String searchText) { // Creates an observable list for the search function in the GUI that

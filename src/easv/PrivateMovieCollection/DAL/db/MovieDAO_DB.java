@@ -39,14 +39,15 @@ public class MovieDAO_DB implements IMovieDataAccess {
             // Loop through rows from the database result set
             while (rs.next()) {
                 //Map DB row to Movie object
-                int id = rs.getInt("Id");
+                int id = rs.getInt("MovieId");
                 String movieName = rs.getString("MovieName");
-                String artist = rs.getString("MovieArtist");
+                String director = rs.getString("MovieDirector");
                 int year = rs.getInt("MovieYear");
                 String moviePath = rs.getString("MovieFilepath");
                 double movieRating = rs.getDouble("MovieRating");
-                String movieCategory = rs.getString("MovieCategory");
-                Movie movie = new Movie(id, year, movieName, artist, moviePath, movieRating, movieCategory);
+                double movieLength = rs.getDouble("MovieLength");
+                String lastWatched = rs.getString("MovieLastViewed");
+                Movie movie = new Movie(id, year, movieName, director, moviePath, movieRating, movieLength, lastWatched);
                 allMovies.add(movie);
             }
             return allMovies;
@@ -61,18 +62,18 @@ public class MovieDAO_DB implements IMovieDataAccess {
     public Movie createMovie(Movie movie) throws Exception { // creates a movie and adds it to the database
 
         // SQL command
-        String sql = "INSERT INTO dbo.Movies (MovieName, MovieArtist, MovieYear, MovieFilepath, movieLength, movieCategory) VALUES (?,?,?,?,?,?);";
+        String sql = "INSERT INTO dbo.Movies (MovieName, MovieDirector, MovieYear, MovieFilepath, movieLength) VALUES (?,?,?,?,?);";
 
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
         {
             // Bind parameters
             stmt.setString(1, movie.getTitle());
-            stmt.setString(2, movie.getArtist());
+            stmt.setString(2, movie.getDirector());
             stmt.setInt(3, movie.getYear());
             stmt.setString(4, movie.getMoviePath());
             stmt.setDouble(5, movie.getMovieLength());
-            stmt.setString(6, movie.getMovieCategory());
+            //stmt.setString(6, movie.getMovieCategory());
             // Run the specified SQL statement
             stmt.executeUpdate();
 
@@ -86,7 +87,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
 
             // Create Movie object and send up the layers
 
-            Movie newMovie = new Movie(id, movie.getYear(), movie.getTitle(), movie.getArtist(), movie.getMoviePath(), movie.getMovieLength(), movie.getMovieCategory());
+            Movie newMovie = new Movie(id, movie.getYear(), movie.getTitle(), movie.getDirector(), movie.getMoviePath(), movie.getMovieRating(), movie.getMovieLength(), movie.getLastWatched());
             return newMovie;
         }
 
@@ -101,19 +102,19 @@ public class MovieDAO_DB implements IMovieDataAccess {
     public void updateMovie(Movie movie) throws Exception { // updates an existing movie in the database with new data
 
         // SQL command
-        String sql = "UPDATE dbo.Movies SET MovieName = ?, MovieArtist = ?, MovieYear = ?, MovieFilepath = ?, MovieLength = ?, MovieCategory = ? WHERE MovieID = ?";
+        String sql = "UPDATE dbo.Movies SET MovieName = ?, MovieDirector = ?, MovieYear = ?, MovieFilepath = ?, MovieLength = ? WHERE MovieID = ?";
 
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql))
         {
             // Bind parameters
             stmt.setString(1, movie.getTitle());
-            stmt.setString(2, movie.getArtist());
+            stmt.setString(2, movie.getDirector());
             stmt.setInt(3, movie.getYear());
             stmt.setString(4, movie.getMoviePath());
             stmt.setBigDecimal(5, BigDecimal.valueOf(movie.getMovieLength()));
-            stmt.setString(6, movie.getMovieCategory());
-            stmt.setInt(7, movie.getId());
+            //artiststmt.setString(6, movie.getMovieCategory());
+            stmt.setInt(6, movie.getId());
 
             // Run the specified SQL statement
             stmt.executeUpdate();
