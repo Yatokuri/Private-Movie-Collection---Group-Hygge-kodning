@@ -1,3 +1,6 @@
+/**
+ * @author Daniel, Naylin, og Thomas
+ **/
 package easv.PrivateMovieCollection.GUI.Model;
 
 import easv.PrivateMovieCollection.BE.Movie;
@@ -6,6 +9,8 @@ import easv.PrivateMovieCollection.BLL.CategoryMovieManager;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
+import java.util.List;
 
 
 public class CategoryMovieModel {
@@ -43,6 +48,10 @@ public class CategoryMovieModel {
         categoryMovieManager.deleteMovieFromCategory(movie, category);
         categoriesMoviesToBeViewed.clear();
         categoriesMoviesToBeViewed.addAll(categoryMovieManager.getAllMoviesCategory(category)); // Updates the category observable list with the changes
+    }
+
+    public List<Integer> getMovieCatList (Movie movie) throws Exception {
+        return categoryMovieManager.moviesCategories(movie);
     }
 
     public void deleteAllMoviesFromCategory (Category category) throws Exception { // Sends a request to the database to empty the category of all movies

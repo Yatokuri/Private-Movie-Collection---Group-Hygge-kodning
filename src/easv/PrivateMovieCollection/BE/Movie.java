@@ -1,5 +1,5 @@
 /**
- * @author Daniel, Rune, og Thomas
+ * @author Daniel, Naylin, og Thomas
  **/
 package easv.PrivateMovieCollection.BE;
 
@@ -7,9 +7,9 @@ public class Movie {
 
     private String title, director, moviePath, lastWatched;
     private int year;
-    private double movieLength, movieRating;
+    private double movieLength, movieRating, personalRating;
     private int id;
-       public Movie(int id, int year, String title, String director, String moviePath, Double movieRating, Double movieLength, String lastWatched) {
+       public Movie(int id, int year, String title, String director, String moviePath, Double movieRating, Double movieLength, Double personalRating, String lastWatched) {
         this.id = id;
         this.title = title;
         this.year = year;
@@ -17,6 +17,7 @@ public class Movie {
         this.movieRating = movieRating;
         this.movieLength = movieLength;
         this.moviePath = moviePath;
+        this.personalRating = personalRating;
         this.lastWatched = lastWatched;
     }
     public double getMovieLength() {return movieLength;}
@@ -48,4 +49,12 @@ public class Movie {
 
     public String getLastWatched() {return lastWatched;}
     public void setLastWatched(String lastWatched) {this.lastWatched = lastWatched;}
+
+    public double getPersonalRating() {
+        return personalRating;
+    }
+
+    public void setPersonalRating(double personalRating) {
+        this.personalRating = personalRating;
+    }
 }

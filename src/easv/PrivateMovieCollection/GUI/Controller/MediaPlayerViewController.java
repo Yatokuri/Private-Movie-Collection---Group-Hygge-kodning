@@ -1,5 +1,5 @@
 /**
- * @author Daniel, Rune, og Thomas
+ * @author Daniel, Naylin, og Thomas
  **/
 package easv.PrivateMovieCollection.GUI.Controller;
 
@@ -53,7 +53,7 @@ public class MediaPlayerViewController implements Initializable {
     @FXML
     private TableView<Movie> tblMoviesInCategory, tblMovies;
     @FXML
-    private TableColumn<Movie, String> colTitleInCategory, colArtistInCategory, colName, colArtist, colCategoryTime, colMovieTime, colCategoryName, colCategory;
+    private TableColumn<Movie, String> colTitleInCategory, colArtistInCategory, colName, colCategoryName, colIMDBRating, colPersonal;
     @FXML
     private TableColumn<Movie, Integer> colYear, colMovieCount;
     @FXML
@@ -141,6 +141,7 @@ public class MediaPlayerViewController implements Initializable {
         tblCategory.setPlaceholder(new Label("No category found"));
         tblMoviesInCategoryVBOX.setManaged(false); // Hide movies in category while no category is selected
 
+
         // Initializes the Observable list into a Filtered list for use in the search function
         FilteredList<Movie> filteredMovies = new FilteredList<>(FXCollections.observableList(MovieModel.getObservableMovies()));
         tblMovies.setItems(filteredMovies);
@@ -157,6 +158,8 @@ public class MediaPlayerViewController implements Initializable {
         // Add data from observable list
         tblMovies.setItems(MovieModel.getObservableMovies());
         tblCategory.setItems(CategoryModel.getObservableCategories());
+
+
 
         // Set default volume to 10% (↓) and updates movie progress
         sliderProgressVolume.setValue(0.1F);
@@ -177,14 +180,12 @@ public class MediaPlayerViewController implements Initializable {
     private void initializeTableColumns() {
         // Initialize the tables with columns.
         colName.setCellValueFactory(new PropertyValueFactory<>("title"));
-        colArtist.setCellValueFactory(new PropertyValueFactory<>("director"));
         colYear.setCellValueFactory(new PropertyValueFactory<>("year"));
-        colCategory.setCellValueFactory(new PropertyValueFactory<>("movieRating"));
-        colMovieTime.setCellValueFactory(new PropertyValueFactory<>("MovieLengthHHMMSS"));
+        colIMDBRating.setCellValueFactory(new PropertyValueFactory<>("movieRating"));
+        colPersonal.setCellValueFactory(new PropertyValueFactory<>("personalRating"));
 
         colCategoryName.setCellValueFactory(new PropertyValueFactory<>("categoryName"));
         colMovieCount.setCellValueFactory(new PropertyValueFactory<>("movieCount"));
-        colCategoryTime.setCellValueFactory(new PropertyValueFactory<>("CategoryLengthHHMMSS"));
 
         colTitleInCategory.setCellValueFactory(new PropertyValueFactory<>("title"));
         colArtistInCategory.setCellValueFactory(new PropertyValueFactory<>("director"));
@@ -286,7 +287,7 @@ public class MediaPlayerViewController implements Initializable {
                 if (categoryMovieModel.addMovieToCategory(currentMovie, currentCategory)) { //We first need to make sure it not already in the category
                     tblCategory.getSelectionModel().select(currentCategory);
                     categoryMovieModel.categoryMovies(tblCategory.getSelectionModel().getSelectedItem());
-                    refreshCategorys();
+                    refreshCategories();
                     contextMenuMovies.hide();
                 } else {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -342,7 +343,7 @@ public class MediaPlayerViewController implements Initializable {
         deleteAllMovies.setOnAction((event) -> {
             try {
                 categoryMovieModel.deleteAllMoviesFromCategory(tblCategory.getSelectionModel().getSelectedItem());
-                refreshCategorys();
+                refreshCategories();
                 contextMenuCategory.hide();
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -463,9 +464,19 @@ public class MediaPlayerViewController implements Initializable {
                 Movie selectedMovie = tblMovies.getSelectionModel().getSelectedItem();
                 // Checks if a valid movie was selected and if it was, tries to play it
                 if (selectedMovie != null) {
+                    try {
+                        currentMovie = selectedMovie;
+                        MediaPlayerCUViewController.setTypeCU(2);
+                        newInfoWindow(selectedMovie.getTitle());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    /*
                     sliderProgressMovie.setValue(0);
                     isMusicPaused = false;
                     PlayMovie(selectedMovie);
+                     */
                 }
             }
         });
@@ -483,9 +494,17 @@ public class MediaPlayerViewController implements Initializable {
                 Movie selectedMovie = tblMoviesInCategory.getSelectionModel().getSelectedItem();
                 // Checks if a movie exists and if it does, it plays the movie
                 if (selectedMovie != null) {
+                    try {
+                        currentMovie = selectedMovie;
+                        MediaPlayerCUViewController.setTypeCU(2);
+                        newInfoWindow(selectedMovie.getTitle());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                     sliderProgressMovie.setValue(0);
                     isMusicPaused = false;
-                    PlayMovie(selectedMovie);
+                    //PlayMovie(selectedMovie);
+
                 }
             }
         });
@@ -494,6 +513,7 @@ public class MediaPlayerViewController implements Initializable {
     private void clearSelectionForCategorySelect() { //Clears the selection from both movie tableview and movie in category table view when opening a new category
         tblCategory.setOnMouseClicked(event -> {
             if (event.getClickCount() == 1) {
+                System.out.println();
                 tblMovies.getSelectionModel().clearSelection();
                 tblMoviesInCategory.getSelectionModel().clearSelection();
             }
@@ -733,7 +753,7 @@ public class MediaPlayerViewController implements Initializable {
                         categoryMovieModel.deleteMovieFromCategory(selectedMovie, p);
                     }
                     movieModel.deleteMovie(selectedMovie); /// removes movie from database
-                    refreshCategorys(); // Refreshes the categories so the correct time and count is shown
+                    refreshCategories(); // Refreshes the categories so the correct time and count is shown
                     refreshMovieList(); // Refreshes the movie list so the deleted movie is no longer there.
                 } catch (Exception e) {
                     displayErrorModel.displayError(e);
@@ -766,17 +786,33 @@ public class MediaPlayerViewController implements Initializable {
                 currentCategory.setMovieCount(currentCategory.getMovieCount() - 1);
                 currentCategory.setMovieTotalTime(currentCategory.getMovieTotalTime() - selectedMovieInCategory.getMovieLength());
                 categoryMovieModel.deleteMovieFromCategory(selectedMovieInCategory, selectedCategory);
-                refreshCategorys();
+                refreshCategories();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
+    private Stage stage;
     public void newUCWindow(String windowTitle) throws IOException { // Creates the second window that will allow you to update and create new movies
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/View/MediaPlayerCU.fxml"));
         Parent root = loader.load();
-        Stage stage = new Stage();
+        stage = new Stage();
+        stage.getIcons().add(mainIcon);
+        stage.setTitle(windowTitle);
+        stage.setScene(new Scene(root));
+        stage.setResizable(false);
+        stage.initModality(Modality.APPLICATION_MODAL); //Lock the first window until second is close
+        stage.show();
+    }
+    public Stage getUpdateStage() {
+        return stage;
+    }
+
+    public void newInfoWindow(String windowTitle) throws IOException { // Creates the second window that will allow you to update and create new movies
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/View/MediaPlayerInfo.fxml"));
+        Parent root = loader.load();
+        stage = new Stage();
         stage.getIcons().add(mainIcon);
         stage.setTitle(windowTitle);
         stage.setScene(new Scene(root));
@@ -802,7 +838,7 @@ public class MediaPlayerViewController implements Initializable {
         }
     }
 
-    public void refreshCategorys() throws Exception { // Refreshes the category and movies in category table views.
+    public void refreshCategories() throws Exception { // Refreshes the category and movies in category table views.
         if (currentCategory == null) {
             currentCategory = CategoryModel.getObservableCategories().getFirst();
         }
@@ -899,7 +935,7 @@ public class MediaPlayerViewController implements Initializable {
                                 currentCategory = getItem();
                                 tblMoviesInCategoryVBOX.setManaged(true);
                                 tblMoviesInCategoryVBOX.setVisible(true);
-                                refreshCategorys();
+                                refreshCategories();
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
@@ -927,7 +963,7 @@ public class MediaPlayerViewController implements Initializable {
                         currentCategory = getItem();
 
                         try {
-                            refreshCategorys();
+                            refreshCategories();
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
@@ -937,7 +973,7 @@ public class MediaPlayerViewController implements Initializable {
                                 if (categoryMovieModel.addMovieToCategory(selectedMovie, currentCategory)) { //We first need to make sure it not already in the category
                                     tblCategory.getSelectionModel().select(currentCategory);
                                     categoryMovieModel.categoryMovies(tblCategory.getSelectionModel().getSelectedItem());
-                                    refreshCategorys();
+                                    refreshCategories();
                                     success = true;
 
                                 } else {
@@ -1276,7 +1312,7 @@ public class MediaPlayerViewController implements Initializable {
 
         if (selectedFile != null) {
             MediaPlayer previousMediaPlayer = soundMap.remove(currentMovie.getId());
-            currentMovie = new Movie(-50, 0, selectedFile.getName(), "Unknown", selectedFile.getAbsolutePath(), 0.0, 2.2,  null);
+            currentMovie = new Movie(-50, 0, selectedFile.getName(), "Unknown", selectedFile.getAbsolutePath(), 0.0, 2.2, 0.0 ,null);
             addMoviesToSoundMap(currentMovie).thenRun(() -> {
                 MediaPlayer newMovie = soundMap.get(currentMovie.getId());
                 sliderProgressMovie.setValue(0);
@@ -1336,7 +1372,7 @@ public class MediaPlayerViewController implements Initializable {
                 displayErrorModel.displayErrorC("You need to input a valid name for your category");
             }
         }
-        refreshCategorys();
+        refreshCategories();
     }
 
     public void btnCreateCategoryNow() throws Exception { // Functionality for context menu

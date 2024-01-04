@@ -1,5 +1,5 @@
 /**
- * @author Daniel, Rune, og Thomas
+ * @author Daniel, Naylin, og Thomas
  **/
 package easv.PrivateMovieCollection.BE;
 
@@ -16,7 +16,7 @@ public class Category {
         this.movieCount = movieCount;
     }
 
-    public String getCategoryLengthHHMMSS() { // This way you convert moviTotalTime to HH:MM:SS format
+    public String getCategoryLengthHHMMSS() { // This way you convert movie TotalTime to HH:MM:SS format
         long hours = (long) (movieTotalTime / 3600);
         long minutes = (long) ((movieTotalTime % 3600) / 60);
         long remainingSeconds = (long) (movieTotalTime % 60);

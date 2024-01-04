@@ -1,5 +1,5 @@
 /**
- * @author Daniel, Rune, og Thomas
+ * @author Daniel, Naylin, og Thomas
  **/
 package easv.PrivateMovieCollection.DAL;
 
@@ -16,5 +16,6 @@ public interface IMovieDataAccess {
     void updateMovie(Movie movie) throws Exception;
 
     void deleteMovie(Movie movie) throws Exception;
+
 
 }

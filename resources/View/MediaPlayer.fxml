@@ -16,7 +16,7 @@
 <?import javafx.scene.media.MediaView?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="anchorPane" onKeyPressed="#keyboardKeyPressed" onKeyReleased="#keyboardKeyReleased" prefHeight="657.0" prefWidth="948.0" stylesheets="@../CSS/Main.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.PrivateMovieCollection.GUI.Controller.MediaPlayerViewController">
+<AnchorPane fx:id="anchorPane" onKeyPressed="#keyboardKeyPressed" onKeyReleased="#keyboardKeyReleased" prefHeight="657.0" prefWidth="948.0" stylesheets="@../CSS/Main.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.PrivateMovieCollection.GUI.Controller.MediaPlayerViewController">
    <children>
       <HBox fx:id="mediaViewBox" layoutX="1.0" layoutY="-1.0" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -34,22 +34,27 @@
                <children>
                   <TableView fx:id="tblCategory" prefHeight="450.0" prefWidth="454.0" stylesheets="@../CSS/Main.css" VBox.vgrow="ALWAYS">
                      <columns>
-                        <TableColumn fx:id="colCategoryName" editable="false" prefWidth="119.0" text="Category" />
-                        <TableColumn fx:id="colMovieCount" editable="false" prefWidth="50.0" resizable="false" text="Movies" />
-                        <TableColumn fx:id="colCategoryTime" editable="false" prefWidth="75.0" resizable="false" text="MovieTime" />
+                        <TableColumn fx:id="colCategoryName" editable="false" prefWidth="178.0" text="Category" />
+                        <TableColumn fx:id="colMovieCount" editable="false" prefWidth="53.0" resizable="false" text="Movies" />
                      </columns>
                      <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                      </columnResizePolicy>
                   </TableView>
-                  <HBox alignment="TOP_CENTER" prefHeight="30.0" prefWidth="298.0" spacing="10.0">
+                  <HBox alignment="TOP_CENTER" prefHeight="30.0" prefWidth="253.0" spacing="10.0">
                      <children>
                         <Button fx:id="btnCreateCategory" mnemonicParsing="false" onAction="#btnCreateCategoryNow" prefWidth="95.0" stylesheets="@../CSS/Main.css" text="Create Category" HBox.hgrow="ALWAYS">
                            <HBox.margin>
                               <Insets />
                            </HBox.margin>
+                           <font>
+                              <Font size="11.0" />
+                           </font>
                         </Button>
-                        <Button fx:id="btnUpdateCategory" mnemonicParsing="false" onAction="#btnUpdateCategoryNow" prefWidth="95.0" stylesheets="@../CSS/Main.css" text="Update Category" HBox.hgrow="ALWAYS" />
+                        <Button fx:id="btnUpdateCategory" mnemonicParsing="false" onAction="#btnUpdateCategoryNow" prefHeight="25.0" prefWidth="103.0" stylesheets="@../CSS/Main.css" text="Update Category" HBox.hgrow="ALWAYS">
+                           <font>
+                              <Font size="11.0" />
+                           </font></Button>
                      </children>
                      <VBox.margin>
                         <Insets top="10.0" />
@@ -62,7 +67,7 @@
                   <TableView fx:id="tblMoviesInCategory" prefHeight="450.0" prefWidth="268.0" stylesheets="@../CSS/Main.css" VBox.vgrow="ALWAYS">
                      <columns>
                         <TableColumn fx:id="colTitleInCategory" editable="false" prefWidth="117.0" sortable="false" text="Title" />
-                        <TableColumn fx:id="colArtistInCategory" editable="false" prefWidth="81.0" sortable="false" text="Artist" />
+                        <TableColumn fx:id="colArtistInCategory" editable="false" prefWidth="81.0" sortable="false" text="Director" />
                      </columns>
                      <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -79,11 +84,10 @@
                <children>
                   <TableView fx:id="tblMovies" prefHeight="450.0" prefWidth="416.0" stylesheets="@../CSS/Main.css" VBox.vgrow="ALWAYS">
                      <columns>
-                        <TableColumn fx:id="colName" editable="false" prefWidth="149.0" text="Title" />
-                        <TableColumn fx:id="colArtist" editable="false" prefWidth="85.0" text="Artist" />
-                        <TableColumn fx:id="colYear" editable="false" prefWidth="44.0" resizable="false" text="Year" />
-                        <TableColumn fx:id="colCategory" prefWidth="78.0" text="Category" />
-                        <TableColumn fx:id="colMovieTime" prefWidth="58.0" resizable="false" text="Time" />
+                        <TableColumn fx:id="colName" editable="false" prefWidth="239.0" text="Title" />
+                        <TableColumn fx:id="colYear" editable="false" prefWidth="39.0" resizable="false" text="Year" />
+                        <TableColumn fx:id="colIMDBRating" prefWidth="76.0" text="IMDB Rating" />
+                        <TableColumn fx:id="colPersonal" prefWidth="59.0" text="Personal" />
                      </columns>
                      <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -91,12 +95,21 @@
                   </TableView>
                   <HBox alignment="TOP_CENTER" prefHeight="30.0" prefWidth="415.0" spacing="10.0">
                      <children>
-                        <Button mnemonicParsing="false" onAction="#btnNewWindowCreate" prefWidth="90.0" stylesheets="@../CSS/Main.css" text="Create Movie" HBox.hgrow="ALWAYS" />
-                        <Button mnemonicParsing="false" onAction="#btnNewWindowUpdate" prefWidth="90.0" stylesheets="@../CSS/Main.css" text="Update Movie" HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" onAction="#btnNewWindowCreate" prefWidth="90.0" stylesheets="@../CSS/Main.css" text="Create Movie" HBox.hgrow="ALWAYS">
+                           <font>
+                              <Font size="11.0" />
+                           </font></Button>
+                        <Button mnemonicParsing="false" onAction="#btnNewWindowUpdate" prefWidth="90.0" stylesheets="@../CSS/Main.css" text="Update Movie" HBox.hgrow="ALWAYS">
+                           <font>
+                              <Font size="11.0" />
+                           </font></Button>
                         <Button mnemonicParsing="false" onAction="#btnDelete" prefWidth="60.0" stylesheets="@../CSS/Main.css" text="Delete" HBox.hgrow="ALWAYS">
                            <HBox.margin>
                               <Insets left="4.0" />
                            </HBox.margin>
+                           <font>
+                              <Font size="11.0" />
+                           </font>
                         </Button>
                      </children>
                      <VBox.margin>

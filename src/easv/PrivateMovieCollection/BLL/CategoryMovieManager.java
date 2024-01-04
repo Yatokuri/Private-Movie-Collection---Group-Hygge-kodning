@@ -1,5 +1,5 @@
 /**
- * @author Daniel, Rune, og Thomas
+ * @author Daniel, Naylin, og Thomas
  **/
 package easv.PrivateMovieCollection.BLL;
 
@@ -35,6 +35,10 @@ public class CategoryMovieManager {
 
     public void deleteAllMoviesFromCategory(Category category) throws Exception {
         categoryMovieDAO.deleteAllMoviesFromCategory(category);
+    }
+
+    public List<Integer> moviesCategories(Movie selectedMovie) throws Exception {
+        return categoryMovieDAO.getMoviesCategories(selectedMovie);
     }
 
 }

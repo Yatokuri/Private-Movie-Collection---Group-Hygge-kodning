@@ -1,5 +1,5 @@
 /**
- * @author Daniel, Rune, og Thomas
+ * @author Daniel, Naylin, og Thomas
  **/
 package easv.PrivateMovieCollection.GUI.Model;
 
@@ -7,6 +7,7 @@ import easv.PrivateMovieCollection.BE.Movie;
 import javafx.scene.control.TextField;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.FileChooser;
+
 import java.io.File;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -28,6 +29,13 @@ public class ValidateModel {
                 return !value.isEmpty() && value.length() <= 150; // The same number we have set in the nvarchar in SQL
             case "txtInputArtist":
                 return !value.isEmpty() && value.length() <= 100; // -||-
+            case "txtInputMyRate", "txtInputIMDBRate":
+                try {
+                    double rate = Double.parseDouble(value);
+                    return rate >= 0.0 && rate <= 10.0;
+                } catch (NumberFormatException e) {
+                    return false;
+                }
             case "txtInputFilepath":
                 if (setupUpdateOriginal) {
                     setupUpdateOriginalName = value;

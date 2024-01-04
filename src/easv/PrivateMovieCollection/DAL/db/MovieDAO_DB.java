@@ -1,13 +1,13 @@
 /**
- * @author Daniel, Rune, og Thomas
+ * @author Daniel, Naylin, og Thomas
  **/
 package easv.PrivateMovieCollection.DAL.db;
 
 // Project imports
+
 import easv.PrivateMovieCollection.BE.Movie;
 import easv.PrivateMovieCollection.DAL.IMovieDataAccess;
 
-// Java imports
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
@@ -43,10 +43,11 @@ public class MovieDAO_DB implements IMovieDataAccess {
                 String director = rs.getString("MovieDirector");
                 int year = rs.getInt("MovieYear");
                 String moviePath = rs.getString("MovieFilepath");
-                double movieRating = rs.getDouble("MovieRating");
+                double imdbRating = rs.getDouble("MovieRating");
                 double movieLength = rs.getDouble("MovieLength");
+                double personalRating = rs.getDouble("Personal");
                 String lastWatched = rs.getString("MovieLastViewed");
-                Movie movie = new Movie(id, year, movieName, director, moviePath, movieRating, movieLength, lastWatched);
+                Movie movie = new Movie(id, year, movieName, director, moviePath, imdbRating, movieLength, personalRating, lastWatched);
                 allMovies.add(movie);
             }
             return allMovies;
@@ -61,7 +62,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
     public Movie createMovie(Movie movie) throws Exception { // creates a movie and adds it to the database
 
         // SQL command
-        String sql = "INSERT INTO dbo.Movies (MovieName, MovieDirector, MovieYear, MovieFilepath, movieLength) VALUES (?,?,?,?,?);";
+        String sql = "INSERT INTO dbo.Movies (MovieName, MovieDirector, MovieYear, MovieFilepath, movieLength, movieRating, Personal, movieLastViewed) VALUES (?,?,?,?,?,?,?,?);";
 
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
@@ -72,6 +73,9 @@ public class MovieDAO_DB implements IMovieDataAccess {
             stmt.setInt(3, movie.getYear());
             stmt.setString(4, movie.getMoviePath());
             stmt.setDouble(5, movie.getMovieLength());
+            stmt.setDouble(6, movie.getMovieRating());
+            stmt.setDouble(7, movie.getPersonalRating());
+            stmt.setString(8, movie.getLastWatched());
             //stmt.setString(6, movie.getMovieCategory());
             // Run the specified SQL statement
             stmt.executeUpdate();
@@ -86,7 +90,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
 
             // Create Movie object and send up the layers
 
-            Movie newMovie = new Movie(id, movie.getYear(), movie.getTitle(), movie.getDirector(), movie.getMoviePath(), movie.getMovieRating(), movie.getMovieLength(), movie.getLastWatched());
+            Movie newMovie = new Movie(id, movie.getYear(), movie.getTitle(), movie.getDirector(), movie.getMoviePath(), movie.getMovieRating(), movie.getMovieLength(), movie.getPersonalRating(), movie.getLastWatched());
             allMovies.add(newMovie);
             return newMovie;
         }
@@ -102,7 +106,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
     public void updateMovie(Movie movie) throws Exception { // updates an existing movie in the database with new data
 
         // SQL command
-        String sql = "UPDATE dbo.Movies SET MovieName = ?, MovieDirector = ?, MovieYear = ?, MovieFilepath = ?, MovieLength = ? WHERE MovieID = ?";
+        String sql = "UPDATE dbo.Movies SET MovieName = ?, MovieDirector = ?, MovieYear = ?, MovieFilepath = ?, MovieLength = ?, MovieRating = ?, Personal = ?, MovieLastViewed = ? WHERE MovieID = ?";
 
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql))
@@ -113,9 +117,11 @@ public class MovieDAO_DB implements IMovieDataAccess {
             stmt.setInt(3, movie.getYear());
             stmt.setString(4, movie.getMoviePath());
             stmt.setBigDecimal(5, BigDecimal.valueOf(movie.getMovieLength()));
-            //artiststmt.setString(6, movie.getMovieCategory());
-            stmt.setInt(6, movie.getId());
-
+            stmt.setBigDecimal(6, BigDecimal.valueOf(movie.getMovieRating()));
+            stmt.setBigDecimal(7, BigDecimal.valueOf(movie.getPersonalRating()));
+            stmt.setString(8, movie.getLastWatched());
+            //stmt.setString(6, movie.getMovieCategory());
+            stmt.setInt(9, movie.getId());
             // Run the specified SQL statement
             stmt.executeUpdate();
         }
@@ -152,4 +158,9 @@ public class MovieDAO_DB implements IMovieDataAccess {
             throw new Exception("Could not delete Movie", ex);
         }
     }
+
+
+
+
+
 }

@@ -1,11 +1,10 @@
 /**
- * @author Daniel, Rune, og Thomas
+ * @author Daniel, Naylin, og Thomas
  **/
 package easv.PrivateMovieCollection.GUI.Controller;
 
-import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
-import easv.PrivateMovieCollection.BE.Movie;
 import easv.PrivateMovieCollection.BE.Category;
+import easv.PrivateMovieCollection.BE.Movie;
 import easv.PrivateMovieCollection.GUI.Model.CategoryModel;
 import easv.PrivateMovieCollection.GUI.Model.DisplayErrorModel;
 import easv.PrivateMovieCollection.GUI.Model.MovieModel;
@@ -15,11 +14,12 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
@@ -28,17 +28,19 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.json.JSONObject;
 
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Properties;
+import java.util.ResourceBundle;
 
 public class MediaPlayerCUViewController implements Initializable {
+    public TextField txtInputCatagories;
     @FXML
     private ComboBox<Category> comCategory;
     @FXML
-    private TextField txtInputName, txtInputArtist, txtInputYear, txtInputFilepath, txtInputTime;
+    private TextField txtInputName, txtInputArtist, txtInputYear, txtInputFilepath, txtInputTime, txtInputCategories, txtInputIMDBRating, txtInputPersonal;
     @FXML
     private Button btnSave;
     private MediaPlayerViewController mediaPlayerViewController;
@@ -52,6 +54,8 @@ public class MediaPlayerCUViewController implements Initializable {
     private final BooleanProperty isFilepathValid = new SimpleBooleanProperty(true);
     private final BooleanProperty isYearValid = new SimpleBooleanProperty(true);
     private final BooleanProperty isTimeValid = new SimpleBooleanProperty(true);
+    private final BooleanProperty isMyRateValid = new SimpleBooleanProperty(true);
+    private final BooleanProperty isIMDBRateValid = new SimpleBooleanProperty(true);
     private static final Image mainIcon = new Image ("Icons/mainIcon.png");
     private static int typeCU = 0;
     private static Movie currentSelectedMovie = null;
@@ -96,8 +100,11 @@ public class MediaPlayerCUViewController implements Initializable {
         addValidationListener(txtInputFilepath, isFilepathValid);
         addValidationListener(txtInputYear, isYearValid);
         addValidationListener(txtInputTime, isTimeValid);
-        contextSystem();
+        addValidationListener(txtInputPersonal, isMyRateValid);
+        addValidationListener(txtInputIMDBRating, isIMDBRateValid);
+        //contextSystem();
 
+        /*
         // Gets all the categories from the Database
         comCategory.getItems().addAll(CategoryModel.getObservableCategories().sorted());
         comCategory.getSelectionModel().select(0);
@@ -107,6 +114,7 @@ public class MediaPlayerCUViewController implements Initializable {
                 comCategory.hide();
             }
         });
+         */
 
         // Add a listener to the filepath input to make sure its valid and update time automatic
         txtInputFilepath.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -118,8 +126,8 @@ public class MediaPlayerCUViewController implements Initializable {
         startupSetup();
     }
 
-
     private static void findGenreForFilm(String filmTitel) {
+
         try {
             OkHttpClient client = new OkHttpClient(); //We make a request to API
             Request request = new Request.Builder()
@@ -131,29 +139,32 @@ public class MediaPlayerCUViewController implements Initializable {
 
             JSONObject json = new JSONObject(responseData);
 
-            if (json.has("Genre") && json.has("Title")) { //We look for Genre in the json cause that what we need know in comma separat string
+            ArrayList<String> categories = new ArrayList<>();
 
+            if (json.has("Genre") && json.has("Title")) { //We look for Genre in the json cause that what we need know in comma separated string
                 String genreString = json.getString("Genre");
                 String titleString = json.getString("Title");
+                String imdbRatingString = json.getString("imdbRating");
 
                 String[] genres = genreString.split(", ");
 
-                System.out.println("Genrer for " + titleString + ": (Test) ");
+                System.out.println("Genrer for " + titleString + imdbRatingString + ":");
                 for (String genre : genres) {
-                    System.out.println("- " + genre);
+                    System.out.println(genre + ",");
+
+                            categories.add(genre);
+
                 }
             } else {
                 System.out.println("No genre for this movie " + filmTitel);
             }
 
+
+            System.out.println(categories);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-
-
-
 
     public void startupSetup() {
         if (typeCU == 1) { // If TypeCU is 1 we create song
@@ -195,6 +206,7 @@ public class MediaPlayerCUViewController implements Initializable {
         });
     }
 //*******************************************CONTEXT*MENU**************************************************
+    /*
     private void contextSystem() { //Here we create the context menu for the category combo box
         ContextMenu contextMenu = new ContextMenu();
         MenuItem createCategory = new MenuItem("Create Category");
@@ -221,6 +233,7 @@ public class MediaPlayerCUViewController implements Initializable {
             }
         });
     }
+     */
 
 //*******************************************KEYBOARD**************************************************
     @FXML
@@ -259,43 +272,20 @@ public class MediaPlayerCUViewController implements Initializable {
 
     public void btnMoreCategory() throws Exception { //Use to add a new category
         findGenreForFilm(txtInputName.getText()); //The way to test temp
-        TextInputDialog dialog = new TextInputDialog("");
 
-        dialog.setTitle("New Category");
-        dialog.setHeaderText("What do you want to call your new category");
 
-        // Set the icon for the dialog window
-        Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
-        stage.getIcons().add(mainIcon);
 
-        Optional<String> result = dialog.showAndWait();
-        if (result.isPresent()) {
-            String inputValue = result.get(); // Get the actual value from Optional
-            if (inputValue.length() > 40)   {
-                displayErrorModel.displayErrorC("Max 40 character");
-            } // Here we make sure the category is under 40 char and don't already exist
-            /**     else {
-                for (Category category : comCategory.getItems()) {
-                    if (category.getSongCategory().equals(inputValue)) {
-                        displayErrorModel.displayErrorC("You already have that category");
-                        return; // Stop iterating once the matching category is found and display error
-                    }
-                }
-                Category newCategory = new Category(inputValue);
-                categoryModel.createNewCategory(newCategory);
-                comCategory.getItems().add(newCategory);
-            } **/
        }
-       }
-
     public void btnSave() { // Validate all inputs before saving
         boolean isNameValid = validateModel.validateInput(txtInputName, txtInputName.getText());
         boolean isArtistValid = validateModel.validateInput(txtInputArtist, txtInputArtist.getText());
         boolean isFilepathValid = validateModel.validateInput(txtInputFilepath, txtInputFilepath.getText());
         boolean isYearValid = validateModel.validateInput(txtInputYear, txtInputYear.getText());
         boolean isTimeValid = validateModel.validateInput(txtInputTime, txtInputTime.getText());
+        boolean isIMDBRateValid = validateModel.validateInput(txtInputIMDBRating, txtInputIMDBRating.getText());
+        boolean isMyRateValid = validateModel.validateInput(txtInputPersonal, txtInputPersonal.getText());
 
-        if (isNameValid && isArtistValid && isFilepathValid && isYearValid && isTimeValid) {
+        if (isNameValid && isArtistValid && isFilepathValid && isYearValid && isTimeValid && isIMDBRateValid && isMyRateValid) {
             if (typeCU == 1) {
                 createNewMovie();
             }
@@ -307,16 +297,17 @@ public class MediaPlayerCUViewController implements Initializable {
 
 
     private void createNewMovie() { //Here the song gets created
+        int year = Integer.parseInt(txtInputYear.getText());
         String title = txtInputName.getText();
         String director = txtInputArtist.getText();
         String moviePath = txtInputFilepath.getText();
+        double movieRating = Double.parseDouble(txtInputIMDBRating.getText());
         double movieTime = currentMovieLength;
-        double movieRating = 10;
-        int year = Integer.parseInt(txtInputYear.getText());
-        String category = String.valueOf(comCategory.getSelectionModel().getSelectedItem());
-
+        //String category = String.valueOf(comCategory.getSelectionModel().getSelectedItem());
+        double personalRating = 0;
+        String lastWatched = null;
         // Inputs the values from above into a new song and tries to send it up the layers into the DB, table view and sound map
-        Movie movie = new Movie(-1, year, title, director, moviePath, movieRating, movieTime, null);
+        Movie movie = new Movie(-1, year, title, director, moviePath, movieRating, movieTime, personalRating, lastWatched);
 
         try {
             Movie newCreatedMovie = movieModel.createNewMovie(movie);
@@ -335,6 +326,8 @@ public class MediaPlayerCUViewController implements Initializable {
             currentSelectedMovie.setYear(Integer.parseInt(txtInputYear.getText()));
             currentSelectedMovie.setMoviePath(txtInputFilepath.getText());
             currentSelectedMovie.setMovieLength(currentMovieLength);
+            currentSelectedMovie.setMovieRating(Double.valueOf(txtInputIMDBRating.getText()));
+            currentSelectedMovie.setPersonalRating(Double.parseDouble(txtInputPersonal.getText()));
             //currentSelectedMovie.setMovieCategory(String.valueOf(comCategory.getSelectionModel().getSelectedItem()));
 
             // Updates the song data and sends it up the layers to the DAL layer and updates the song path in the sound map in case it got changed
