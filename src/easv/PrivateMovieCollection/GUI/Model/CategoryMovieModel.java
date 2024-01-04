@@ -29,7 +29,6 @@ public class CategoryMovieModel {
         categoriesMoviesToBeViewed.addAll(categoryMovieManager.getAllMoviesCategory(category));
     }
     public boolean addMovieToCategory(Movie newMovie, Category category) throws Exception { // Sends a request to the database to add a song to a playlist
-
         for (Movie m : categoriesMoviesToBeViewed) {
             if (newMovie.getId() == m.getId()) {
                 return false; // Exit the method fast
@@ -38,6 +37,11 @@ public class CategoryMovieModel {
         categoryMovieManager.addMovieToCategory(newMovie, category);
         categoriesMoviesToBeViewed.add(newMovie); // update list // Adds the new song to the playlist observable list
         return true;
+    }
+
+    public void addMovieToCategoryBypass(Movie newMovie, Category category) throws Exception { // Sends a request to the database to add a song to a playlist
+        categoryMovieManager.addMovieToCategory(newMovie, category);
+        categoriesMoviesToBeViewed.add(newMovie); // update list // Adds the new song to the playlist observable list
     }
 
     public void updateMovieInCategory (Movie movie, Movie oldMovie, Category category) throws Exception { // Sends a request to the database to update a song in a category

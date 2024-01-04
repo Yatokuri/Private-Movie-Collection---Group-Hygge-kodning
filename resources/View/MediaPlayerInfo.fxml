@@ -51,9 +51,9 @@
                 <Label stylesheets="@../CSS/MediaPlayerCU.css" text="Last Seen" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                 <TextField fx:id="txtInputDate" editable="false" promptText="Missing" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" GridPane.rowIndex="6" />
                 <Label stylesheets="@../CSS/MediaPlayerCU.css" text="IMDB Rate" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                <TextField fx:id="txtInputIMDBRate" editable="false" promptText="Missing" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                <TextField fx:id="txtInputIMDBRating" editable="false" promptText="Missing" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" GridPane.rowIndex="7" />
                 <Label stylesheets="@../CSS/MediaPlayerCU.css" text="Personal" GridPane.columnIndex="1" GridPane.rowIndex="8" />
-                <TextField fx:id="txtInputMyRate" promptText="Missing" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" GridPane.rowIndex="8" />
+                <TextField fx:id="txtInputPersonal" promptText="Missing" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" GridPane.rowIndex="8" />
                 <Button mnemonicParsing="false" onAction="#btnUpdateRate" styleClass="buttonCU" stylesheets="@../CSS/MediaPlayerCU.css" text="Update" GridPane.columnIndex="3" GridPane.rowIndex="8">
                     <GridPane.margin>
                         <Insets left="10.0" />

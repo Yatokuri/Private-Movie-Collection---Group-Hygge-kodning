@@ -5,24 +5,21 @@ package easv.PrivateMovieCollection.GUI.Controller;
 
 import easv.PrivateMovieCollection.BE.Category;
 import easv.PrivateMovieCollection.BE.Movie;
-import easv.PrivateMovieCollection.GUI.Model.CategoryModel;
-import easv.PrivateMovieCollection.GUI.Model.DisplayErrorModel;
-import easv.PrivateMovieCollection.GUI.Model.MovieModel;
-import easv.PrivateMovieCollection.GUI.Model.ValidateModel;
+import easv.PrivateMovieCollection.GUI.Model.*;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.css.PseudoClass;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -32,11 +29,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
 public class MediaPlayerCUViewController implements Initializable {
-    public TextField txtInputCatagories;
+
+    @FXML
+    public ListView<Category> lstCategory;
     @FXML
     private ComboBox<Category> comCategory;
     @FXML
@@ -47,6 +47,7 @@ public class MediaPlayerCUViewController implements Initializable {
     private long currentMovieLength;
     private final MovieModel movieModel;
     private final CategoryModel categoryModel;
+    private CategoryMovieModel categoryMovieModel;
     private final DisplayErrorModel displayErrorModel;
     private final ValidateModel validateModel = new ValidateModel();
     private final BooleanProperty isNameValid = new SimpleBooleanProperty(true);
@@ -61,6 +62,9 @@ public class MediaPlayerCUViewController implements Initializable {
     private static Movie currentSelectedMovie = null;
     private static MediaPlayerCUViewController instance;
 
+    private List<Category> categoryNames;
+    private List<Category> categoryNamesOld;
+
     private static String API_KEY;
     private static final String configFile = "config/config.settings";
 
@@ -74,6 +78,7 @@ public class MediaPlayerCUViewController implements Initializable {
             movieModel = new MovieModel();
             categoryModel = new CategoryModel();
             displayErrorModel = new DisplayErrorModel();
+            categoryMovieModel = new CategoryMovieModel();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -102,6 +107,7 @@ public class MediaPlayerCUViewController implements Initializable {
         addValidationListener(txtInputTime, isTimeValid);
         addValidationListener(txtInputPersonal, isMyRateValid);
         addValidationListener(txtInputIMDBRating, isIMDBRateValid);
+
         //contextSystem();
 
         /*
@@ -131,7 +137,7 @@ public class MediaPlayerCUViewController implements Initializable {
         try {
             OkHttpClient client = new OkHttpClient(); //We make a request to API
             Request request = new Request.Builder()
-                    .url("http://www.omdbapi.com/?t=" + filmTitel + "&apikey=" + API_KEY)
+                    .url("https://www.omdbapi.com/?t=" + filmTitel + "&apikey=" + API_KEY)
                     .build();
 
             Response response = client.newCall(request).execute(); //We got answer
@@ -160,13 +166,16 @@ public class MediaPlayerCUViewController implements Initializable {
             }
 
 
-            System.out.println(categories);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public void startupSetup() {
+        lstCategory.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        lstCategory.getItems().addAll(categoryModel.getObservableCategories());
+        categorySystem();
+
         if (typeCU == 1) { // If TypeCU is 1 we create song
             btnSave.setText("Create");
         }
@@ -176,17 +185,60 @@ public class MediaPlayerCUViewController implements Initializable {
             txtInputYear.setText(String.valueOf(currentSelectedMovie.getYear()));
             txtInputArtist.setText(currentSelectedMovie.getDirector());
             txtInputFilepath.setText(currentSelectedMovie.getMoviePath());
+            txtInputIMDBRating.setText(String.valueOf(currentSelectedMovie.getMovieRating()));
+            txtInputPersonal.setText(String.valueOf(currentSelectedMovie.getPersonalRating()));
 
-            /*
-            for (Category category : comCategory.getItems()) { // Searches the database to try and find the songs category to input into the update window
-                if (category.getCategoryName().equals(currentSelectedMovie.getMovieCategory())) {
-                    comCategory.getSelectionModel().select(category);
-                    break; // Stop iterating once the matching category is found and select it
+            try { //Duplicate from another Controller?
+                List<Integer> categoryIds  = categoryMovieModel.getMovieCatList(currentSelectedMovie);
+                List<String> categoryNames = new ArrayList<>();
+                categoryNamesOld = new ArrayList<>();
+
+                for (Integer categoryId: categoryIds )  {
+                    categoryNames.add(categoryModel.getCategoryById(categoryId).getCategoryName());
+                    categoryNamesOld.add(categoryModel.getCategoryById(categoryId));
                 }
-            }
 
-             */
+                // Automatically select items in lstCategory that match categoryNamesOld
+                for (Category categoryNameOld : categoryNamesOld) {
+                    lstCategory.getSelectionModel().select(categoryNameOld);
+                }
+
+
+                if (categoryNames.isEmpty())    {
+                    txtInputCategories.setPromptText("Missing");
+                    return;
+                }
+                txtInputCategories.setText(String.valueOf(categoryNames));
+
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
+    }
+
+    private void categorySystem() { //We pass the info to ValidateModel class
+        lstCategory.setOnMouseClicked(event -> {
+            // Get selected items
+            var selectedItems = lstCategory.getSelectionModel().getSelectedItems();
+
+            // Print selected items
+            System.out.println("Selected Items:");
+
+            categoryNames = new ArrayList<>();
+
+            for (Object item : selectedItems) {
+                System.out.println("- " + item);
+                categoryNames.add((Category) item);
+
+
+            }
+            if (!categoryNames.isEmpty())
+                txtInputCategories.setText(categoryNames.toString());
+            else {
+                txtInputCategories.clear();
+                txtInputCategories.setPromptText("Categories");
+            }
+        });
     }
 
     private void addValidationListener(TextField textField, BooleanProperty validationProperty) { //Detect change and validate it
@@ -271,12 +323,14 @@ public class MediaPlayerCUViewController implements Initializable {
 
 
     public void btnMoreCategory() throws Exception { //Use to add a new category
-        findGenreForFilm(txtInputName.getText()); //The way to test temp
+    //    findGenreForFilm(txtInputName.getText()); //The way to test temp API should be another place
 
-
-
-       }
-    public void btnSave() { // Validate all inputs before saving
+        mediaPlayerViewController.createUpdateCategory("Create Category");
+        lstCategory.getItems().clear(); //Should just add new one so select don't get loose
+        lstCategory.getItems().addAll(categoryModel.getObservableCategories());
+        mediaPlayerViewController.refreshCategories();
+    }
+    public void btnSave() throws Exception { // Validate all inputs before saving
         boolean isNameValid = validateModel.validateInput(txtInputName, txtInputName.getText());
         boolean isArtistValid = validateModel.validateInput(txtInputArtist, txtInputArtist.getText());
         boolean isFilepathValid = validateModel.validateInput(txtInputFilepath, txtInputFilepath.getText());
@@ -296,7 +350,7 @@ public class MediaPlayerCUViewController implements Initializable {
     }
 
 
-    private void createNewMovie() { //Here the song gets created
+    private void createNewMovie() throws Exception { //Here the song gets created
         int year = Integer.parseInt(txtInputYear.getText());
         String title = txtInputName.getText();
         String director = txtInputArtist.getText();
@@ -312,6 +366,13 @@ public class MediaPlayerCUViewController implements Initializable {
         try {
             Movie newCreatedMovie = movieModel.createNewMovie(movie);
             mediaPlayerViewController.addMovieToSoundMap(newCreatedMovie);
+
+            if (categoryNames != null) {
+                for (Category c : categoryNames) { //Add all selected category to the movie
+                    categoryMovieModel.addMovieToCategoryBypass(newCreatedMovie, c);
+                }
+            }
+            mediaPlayerViewController.refreshCategories();
             mediaPlayerViewController.refreshMovieList();
             btnCloseWindow();
         } catch (Exception e) {
@@ -319,7 +380,7 @@ public class MediaPlayerCUViewController implements Initializable {
         }
     }
 
-    private void updateMovie() { //Here the song gets updated
+    private void updateMovie() throws Exception { //Here the song gets updated
         if (currentSelectedMovie != null) {
             currentSelectedMovie.setTitle(txtInputName.getText());
             currentSelectedMovie.setDirector(txtInputArtist.getText());
@@ -330,10 +391,20 @@ public class MediaPlayerCUViewController implements Initializable {
             currentSelectedMovie.setPersonalRating(Double.parseDouble(txtInputPersonal.getText()));
             //currentSelectedMovie.setMovieCategory(String.valueOf(comCategory.getSelectionModel().getSelectedItem()));
 
+            if (categoryNames != null) {
+                for (Category c : categoryNamesOld) {
+                    categoryMovieModel.deleteMovieFromCategory(currentSelectedMovie, c);
+                }
+                for (Category c : categoryNames) {
+                    categoryMovieModel.addMovieToCategoryBypass(currentSelectedMovie, c);
+                }
+            }
+
             // Updates the song data and sends it up the layers to the DAL layer and updates the song path in the sound map in case it got changed
             try {
                 movieModel.updateMovie(currentSelectedMovie);
                 mediaPlayerViewController.updateMoviePathSoundMap(currentSelectedMovie);
+                mediaPlayerViewController.refreshCategories();
                 mediaPlayerViewController.refreshMovieList();
                 btnCloseWindow();
             } catch (Exception e) {
@@ -344,7 +415,7 @@ public class MediaPlayerCUViewController implements Initializable {
 
     public void btnCloseWindow() { //Close the window
         Stage parent = (Stage) txtInputYear.getScene().getWindow();
-        parent.close();
+        Event.fireEvent(parent, new WindowEvent(parent, WindowEvent.WINDOW_CLOSE_REQUEST));
     }
 
 //*******************************STYLING***********************************************

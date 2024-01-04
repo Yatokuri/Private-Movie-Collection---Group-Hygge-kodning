@@ -803,6 +803,17 @@ public class MediaPlayerViewController implements Initializable {
         stage.setScene(new Scene(root));
         stage.setResizable(false);
         stage.initModality(Modality.APPLICATION_MODAL); //Lock the first window until second is close
+        // Add event handler to handle the close request, so it update correct
+        stage.setOnCloseRequest(event -> {
+            try {
+                tblCategory.getItems().clear();
+                tblCategory.setItems(CategoryModel.getObservableCategories());
+                tblCategory.refresh();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
         stage.show();
     }
     public Stage getUpdateStage() {
