@@ -9,8 +9,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="microsoft.sqlserver.mssql.jdbc" level="project" />
-    <orderEntry type="library" name="mssql-jdbc-12.4.1.jre11 (3)" level="project" />
-    <orderEntry type="library" name="mssql-jdbc-12.4.1.jre11" level="application" />
+    <orderEntry type="library" name="mssql-jdbc-12.4.1.jre11" level="project" />
+    <orderEntry type="library" name="squareup.okhttp3.logging.interceptor" level="project" />
+    <orderEntry type="library" name="json" level="project" />
   </component>
 </module>

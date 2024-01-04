@@ -31,15 +31,14 @@ public class CategoryMovieDAO_DB {
 
         String sql = """
                 SELECT Movies.MovieId, Movies.MovieName FROM Movies
-                JOIN MovieCategory S1 ON Movies.MovieId = S1.MovieId
+                JOIN CategoryMovies S1 ON Movies.MovieId = S1.MovieId
                 WHERE S1.CategoryId = ?
-                ORDER BY S1.MovieCategoryId ASC""";
+                ORDER BY S1.CategoryOrder ASC""";
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql))
         {
             stmt.setInt(1, category.getId());
             ResultSet rs = stmt.executeQuery();
-
             // Loop through rows from the database result set
             while (rs.next()) {
                 //Map DB row to category object
@@ -64,26 +63,45 @@ public class CategoryMovieDAO_DB {
     public void addMovieToCategory(Movie movie, Category category) throws Exception { // Attempts to add a movie to a category
 
         // SQL command
-        String sql = "INSERT INTO dbo.CategoryMovies (MovieId, CategoryId, MovieCategoryId) VALUES (?,?,?)";
-        String sql2 = "SELECT MAX(MovieCategoryId) AS highest_value FROM dbo.CategoryMovies  WHERE CategoryId = ?";
+        String sql = "INSERT INTO dbo.CategoryMovies (MovieId, CategoryId, MovieCategoryId, CategoryOrder) VALUES (?,?,?,?)";
+
+        String sql3 = "SELECT MAX(CategoryOrder) AS highest_value FROM dbo.CategoryMovies  WHERE CategoryId = ?";
+
+        String sql2 = "SELECT MIN(t.RN) AS next_value " + //The problem here is the ID can be 0?
+                "FROM (SELECT ROW_NUMBER() OVER (ORDER BY MovieCategoryId) AS RN " +
+                "      FROM dbo.CategoryMovies) t " +
+                "WHERE NOT EXISTS (SELECT 1 FROM dbo.CategoryMovies WHERE MovieCategoryId = t.RN)";
+
 
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-             PreparedStatement stmt2 = conn.prepareStatement(sql2))
+             PreparedStatement stmt2 = conn.prepareStatement(sql2);
+              PreparedStatement stmt3 = conn.prepareStatement(sql3))
         {
-            stmt2.setInt(1, category.getId());
+        //    stmt2.setInt(1, category.getId());
             ResultSet rs2 = stmt2.executeQuery();
+
+            stmt3.setInt(1, category.getId());
+            ResultSet rs3 = stmt3.executeQuery();
 
             int nextIdNumber = 1;
             while (rs2.next()) {
                 //Map DB row to category object
-                nextIdNumber = rs2.getInt("highest_value");
+                nextIdNumber = rs2.getInt("next_value");
+                //System.out.println(nextIdNumber + " Næste ID (Debug)");
+            }
+
+            int nextOrderNumber = 1;
+            while (rs3.next()) {
+                //Map DB row to category object
+                nextOrderNumber = rs3.getInt("highest_value");
             }
 
             // Bind parameters
             stmt.setInt(1, movie.getId());
             stmt.setInt(2, category.getId());
-            stmt.setInt(3, nextIdNumber+1);
+            stmt.setInt(3, nextIdNumber);
+            stmt.setInt(4, nextOrderNumber+1);
 
             // Run the specified SQL statement
             stmt.executeUpdate();
@@ -98,9 +116,9 @@ public class CategoryMovieDAO_DB {
 
     public void updateMovieInCategory(Movie movie, Movie oldMovie, Category category) throws Exception { // Updates the movie category order when it gets moved up or down in the list
         // SQL commands
-        String sql = "UPDATE dbo.CategoryMovies SET MovieCategoryId = ? WHERE MovieId = ? AND CategoryId = ?";
-        String sqlOldMovie = "SELECT MovieCategoryId FROM dbo.CategoryMovies WHERE MovieId = ? AND CategoryId = ?";
-        String sqlNewMovie = "SELECT MovieCategoryId FROM dbo.CategoryMovies WHERE MovieId = ? AND CategoryId = ?";
+        String sql = "UPDATE dbo.CategoryMovies SET CategoryOrder = ? WHERE MovieId = ? AND CategoryId = ?";
+        String sqlOldMovie = "SELECT CategoryOrder FROM dbo.CategoryMovies WHERE MovieId = ? AND CategoryId = ?";
+        String sqlNewMovie = "SELECT CategoryOrder FROM dbo.CategoryMovies WHERE MovieId = ? AND CategoryId = ?";
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement oldMoviePlayOrder = conn.prepareStatement(sqlOldMovie);
              PreparedStatement newMoviePlayOrder = conn.prepareStatement(sqlNewMovie);
@@ -118,10 +136,10 @@ public class CategoryMovieDAO_DB {
             int playOrderNewMovie = 1;
             while (rs.next()) {
                 //Map DB row to category object
-                playOrderOld = rs.getInt("MovieCateogryId");
+                playOrderOld = rs.getInt("CategoryOrder");
             }
             while (rs2.next()){
-                playOrderNewMovie = rs2.getInt("MovieCateogryId");
+                playOrderNewMovie = rs2.getInt("CategoryOrder");
             }
 
             // Bind parameters
@@ -132,7 +150,7 @@ public class CategoryMovieDAO_DB {
             // Iterates through the database to update the play order of all the movies when you move the movie upwards in the
             // category, so it will play in the correct order and remember for next time you open it
             if (playOrderNewMovie < playOrderOld) {
-                String sqlUpdateCategory = "UPDATE dbo.CategoryMovies SET MovieCategoryId = MovieCategoryId - 1 WHERE CategoryId =? AND MovieCategoryId <= ? AND MovieCategoryId >=?";
+                String sqlUpdateCategory = "UPDATE dbo.CategoryMovies SET CategoryOrder = CategoryOrder - 1 WHERE CategoryId =? AND CategoryOrder <= ? AND CategoryOrder >=?";
                 try (PreparedStatement stmt4 = conn.prepareStatement(sqlUpdateCategory)) {
                     stmt4.setInt(1, category.getId());
                     stmt4.setInt(2, playOrderOld);
@@ -142,7 +160,7 @@ public class CategoryMovieDAO_DB {
             }
             //Iterates through the database to update the play order of all the movies when you move the movie downwards in the category, so it will play in the correct order
             if (playOrderNewMovie > playOrderOld){
-                String sqlUpdateCategory = "UPDATE dbo.CategoryMovies SET MovieCategoryId = MovieCategoryId + 1 WHERE CategoryId = ? AND MovieCategoryId >= ? AND MovieCategoryId <=?";
+                String sqlUpdateCategory = "UPDATE dbo.CategoryMovies SET CategoryOrder = CategoryOrder + 1 WHERE CategoryId = ? AND CategoryOrder >= ? AND CategoryOrder <=?";
                 try (PreparedStatement stmt4 = conn.prepareStatement(sqlUpdateCategory)) {
                     stmt4.setInt(1, category.getId());
                     stmt4.setInt(2, playOrderOld);
@@ -165,7 +183,7 @@ public class CategoryMovieDAO_DB {
         //When we delete a movie we also need to change there order
 
         // SQL command
-        String sqlMoviesPlayOrder = "SELECT MovieCateogryId FROM dbo.CategoryMovies WHERE MovieId = ? AND CategoryId = ?";
+        String sqlMoviesPlayOrder = "SELECT CategoryOrder FROM dbo.CategoryMovies WHERE MovieId = ? AND CategoryId = ?";
         String sqlDeleteMovie = "DELETE FROM dbo.CategoryMovies WHERE MovieID = ? AND CategoryId = ?";
 
         try (Connection conn = databaseConnector.getConnection();
@@ -183,7 +201,7 @@ public class CategoryMovieDAO_DB {
             int playOrder = -1; //Default if no one is found
             while (rs.next()) {
                 //Map DB row to category object
-                playOrder = rs.getInt("MovieCateogryId");
+                playOrder = rs.getInt("CategoryOrder");
             }
             if (playOrder > -1) {
                 String sqlUpdatePlayOrder = "UPDATE dbo.CategoryMovies SET CategoryOrder = CategoryOrder - 1 WHERE CategoryId = ? AND CategoryOrder >= ?";
@@ -222,4 +240,5 @@ public class CategoryMovieDAO_DB {
             throw new Exception("Could not delete category", ex);
         }
     }
+
 }

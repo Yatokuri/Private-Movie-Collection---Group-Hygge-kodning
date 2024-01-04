@@ -15,16 +15,15 @@ import java.util.List;
 
 public class MovieManager {
 
-    private final IMovieDataAccess movieDAO;
-    private final MovieDAO_DB movieDao_DB;
+    private final IMovieDataAccess movieDao_DB;
+
 
     public MovieManager() throws Exception {
-        movieDAO = new MovieDAO_DB();
         movieDao_DB = new MovieDAO_DB();
     }
 
     public Movie createNewMovie(Movie newMovie) throws Exception {
-        return movieDAO.createMovie(newMovie);
+        return movieDao_DB.createMovie(newMovie);
     }
 
     public List<Movie> getAllMovies() throws Exception {
@@ -32,11 +31,11 @@ public class MovieManager {
     }
 
     public void updateMovie(Movie selectedMovie) throws Exception {
-        movieDAO.updateMovie(selectedMovie);
+        movieDao_DB.updateMovie(selectedMovie);
     }
 
     public void deleteMovie(Movie selectedMovie) throws Exception {
-        movieDAO.deleteMovie(selectedMovie);
+        movieDao_DB.deleteMovie(selectedMovie);
     }
 
 

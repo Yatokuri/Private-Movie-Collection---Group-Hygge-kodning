@@ -21,8 +21,15 @@ public class CategoryModel {
         categoriesToBeViewed.addAll(categoryManager.getAllCategory());
     }
 
-    public void createNewCategory(Category newCategory) throws Exception { // Sends a request to the database to create a new category
-        Category p = categoryManager.createNewCategory(newCategory);categoriesToBeViewed.add(p); // update list
+    public boolean createNewCategory(Category newCategory) throws Exception { // Sends a request to the database to create a new category
+        for (Category existingCategory : categoriesToBeViewed) { //Should use a better way
+            if (existingCategory.getCategoryName().equals(newCategory.getCategoryName())) {
+                return false; // Category with the same name already exists
+            }
+        }
+        Category p = categoryManager.createNewCategory(newCategory);
+        categoriesToBeViewed.add(p); // update list
+        return true;
     }
 
     public static ObservableList<Category> getObservableCategories() {return categoriesToBeViewed;} // Returns the playlists

@@ -23,8 +23,6 @@ public class MovieModel {
     public Movie createNewMovie(Movie newMovie) throws Exception { // Sends a request to the database to add a new movie
         Movie s = movieManager.createNewMovie(newMovie);
         moviesToBeViewed.add(s); // update list
-        moviesToBeViewed.clear();
-        moviesToBeViewed.addAll(movieManager.getAllMovies());
         return s;
     }
     public static ObservableList<Movie> getObservableMovies() { return moviesToBeViewed; } // Returns the movies from the database

@@ -54,7 +54,7 @@ public class CategoryDAO_DB implements ICategoryDataAccess {
     public Category createCategory(Category category) throws Exception { // Creates a category in the database with the given name
 
         // SQL command
-        String sql = "INSERT INTO dbo.Category (Name) VALUES (?);";
+        String sql = "INSERT INTO dbo.Category (CategoryName) VALUES (?);";
 
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
@@ -91,7 +91,7 @@ public class CategoryDAO_DB implements ICategoryDataAccess {
     public void updateCategory(Category category) throws Exception { // Updates the name of a category in the database where the id matches the given category
 
         // SQL command
-        String sql = "UPDATE dbo.Category SET Name = ? WHERE ID = ?";
+        String sql = "UPDATE dbo.Category SET CategoryName = ? WHERE CategoryId = ?";
 
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql))
@@ -132,7 +132,7 @@ public class CategoryDAO_DB implements ICategoryDataAccess {
 
 
         // SQL command
-        sql = "DELETE FROM dbo.Category WHERE ID = ?;";
+        sql = "DELETE FROM dbo.Category WHERE CategoryId = ?;";
 
 
         // DELETE FROM dbo.CategoryMovies WHERE CategoryId = ?;

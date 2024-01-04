@@ -3,6 +3,7 @@
  **/
 package easv.PrivateMovieCollection.GUI.Controller;
 
+import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
 import easv.PrivateMovieCollection.BE.Movie;
 import easv.PrivateMovieCollection.BE.Category;
 import easv.PrivateMovieCollection.GUI.Model.CategoryModel;
@@ -22,8 +23,14 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import org.json.JSONObject;
+
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.net.URL;
 import java.util.*;
 
@@ -50,10 +57,16 @@ public class MediaPlayerCUViewController implements Initializable {
     private static Movie currentSelectedMovie = null;
     private static MediaPlayerCUViewController instance;
 
+    private static String API_KEY;
+    private static final String configFile = "config/config.settings";
+
     public static void setTypeCU(int typeCU) {MediaPlayerCUViewController.typeCU = typeCU;}
 
     public MediaPlayerCUViewController() {
         try {
+            Properties APIProperties = new Properties();
+            APIProperties.load(new FileInputStream((configFile)));
+            API_KEY = (APIProperties.getProperty("API"));
             movieModel = new MovieModel();
             categoryModel = new CategoryModel();
             displayErrorModel = new DisplayErrorModel();
@@ -104,6 +117,43 @@ public class MediaPlayerCUViewController implements Initializable {
         });
         startupSetup();
     }
+
+
+    private static void findGenreForFilm(String filmTitel) {
+        try {
+            OkHttpClient client = new OkHttpClient(); //We make a request to API
+            Request request = new Request.Builder()
+                    .url("http://www.omdbapi.com/?t=" + filmTitel + "&apikey=" + API_KEY)
+                    .build();
+
+            Response response = client.newCall(request).execute(); //We got answer
+            String responseData = response.body().string();
+
+            JSONObject json = new JSONObject(responseData);
+
+            if (json.has("Genre") && json.has("Title")) { //We look for Genre in the json cause that what we need know in comma separat string
+
+                String genreString = json.getString("Genre");
+                String titleString = json.getString("Title");
+
+                String[] genres = genreString.split(", ");
+
+                System.out.println("Genrer for " + titleString + ": (Test) ");
+                for (String genre : genres) {
+                    System.out.println("- " + genre);
+                }
+            } else {
+                System.out.println("No genre for this movie " + filmTitel);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+
 
     public void startupSetup() {
         if (typeCU == 1) { // If TypeCU is 1 we create song
@@ -206,8 +256,9 @@ public class MediaPlayerCUViewController implements Initializable {
             updateTimeText();
         }
 
-    public void btnMoreCategory() throws Exception { //Use to add a new category
 
+    public void btnMoreCategory() throws Exception { //Use to add a new category
+        findGenreForFilm(txtInputName.getText()); //The way to test temp
         TextInputDialog dialog = new TextInputDialog("");
 
         dialog.setTitle("New Category");

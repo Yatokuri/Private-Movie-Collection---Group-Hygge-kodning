@@ -16,26 +16,25 @@ import java.util.List;
 public class MovieDAO_DB implements IMovieDataAccess {
 
     private final MyDatabaseConnector databaseConnector;
-    ArrayList<Movie> allMovies;
+    private static ArrayList<Movie> allMovies;
 
     public MovieDAO_DB() throws Exception {
         databaseConnector = new MyDatabaseConnector();
+        allMovies = new ArrayList<>();
         getAllMovies();
     }
 
-    public List<Movie> getMoviesArray() { return allMovies; } // Returns the arraylist of all movies to send up the layers
+    public List<Movie> getMoviesArray() {
+        return allMovies; } // Returns the arraylist of all movies to send up the layers
 
 
     public List<Movie> getAllMovies() throws Exception { // Queries the database for all movies to insert them in an arraylist
-
-        allMovies = new ArrayList<>();
-
+        allMovies.clear(); // Clear existing data
         try (Connection conn = databaseConnector.getConnection();
              Statement stmt = conn.createStatement())
         {
             String sql = "SELECT * FROM dbo.Movies;";
             ResultSet rs = stmt.executeQuery(sql);
-
             // Loop through rows from the database result set
             while (rs.next()) {
                 //Map DB row to Movie object
@@ -88,6 +87,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
             // Create Movie object and send up the layers
 
             Movie newMovie = new Movie(id, movie.getYear(), movie.getTitle(), movie.getDirector(), movie.getMoviePath(), movie.getMovieRating(), movie.getMovieLength(), movie.getLastWatched());
+            allMovies.add(newMovie);
             return newMovie;
         }
 
@@ -143,6 +143,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
             // Run the specified SQL statement
             stmt2.executeUpdate();
             stmt.executeUpdate();
+            allMovies.removeIf(m -> m.getId() == movie.getId());
         }
         catch (SQLException ex)
         {

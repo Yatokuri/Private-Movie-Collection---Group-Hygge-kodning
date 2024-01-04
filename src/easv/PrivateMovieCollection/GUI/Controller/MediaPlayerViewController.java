@@ -1324,7 +1324,9 @@ public class MediaPlayerViewController implements Initializable {
 
             if (buttonText.equals(btnCreateCategory.getText()) && !inputValue.isEmpty()) {
                 Category p = new Category(-1, inputValue, 0);
-                categoryModel.createNewCategory(p);
+                if (!categoryModel.createNewCategory(p))    {
+                    displayErrorModel.displayErrorC("This category already exist in the system");
+                }
             }
             if (buttonText.equals(btnUpdateCategory.getText()) && !inputValue.isEmpty()) {
                 currentCategory.setCategoryName(inputValue);
