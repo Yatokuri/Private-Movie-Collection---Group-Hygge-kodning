@@ -175,6 +175,33 @@ public class MediaPlayerViewController implements Initializable {
         clearSelectionForCategorySelect();
         contextSystem();
         initializeDragAndDrop();
+
+        //Open new window
+
+
+        if (!MovieModel.getObservableMoviesOld().isEmpty())  {
+            try {
+                test("Warning");
+                Platform.runLater(() -> {
+                    stage.toFront();
+                    stage.show();
+                });
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+    }
+
+    public void test(String windowTitle) throws IOException { // Creates the second window that will allow you to update and create new movies
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/View/MediaPlayerPopUp.fxml"));
+        Parent root = loader.load();
+        stage = new Stage();
+        stage.getIcons().add(mainIcon);
+        stage.setTitle(windowTitle);
+        stage.setScene(new Scene(root));
+        stage.setResizable(false);
+        stage.initModality(Modality.APPLICATION_MODAL); //Lock the first window until second is close
     }
 
     private void initializeTableColumns() {
@@ -749,8 +776,8 @@ public class MediaPlayerViewController implements Initializable {
             // Sets up relevant information for knowing which movie you are trying to delete
             if (result.isPresent() && result.get() == okButton) {
                 try {
-                    for (Category p : CategoryModel.getObservableCategories()) { // This will check through each category and delete the movie from there since the movieId is a key in the DB
-                        categoryMovieModel.deleteMovieFromCategory(selectedMovie, p);
+                    for (Category c : CategoryModel.getObservableCategories()) { // This will check through each category and delete the movie from there since the movieId is a key in the DB
+                        categoryMovieModel.deleteMovieFromCategory(selectedMovie, c);
                     }
                     movieModel.deleteMovie(selectedMovie); /// removes movie from database
                     refreshCategories(); // Refreshes the categories so the correct time and count is shown
@@ -806,9 +833,9 @@ public class MediaPlayerViewController implements Initializable {
         // Add event handler to handle the close request, so it update correct
         stage.setOnCloseRequest(event -> {
             try {
-                tblCategory.getItems().clear();
-                tblCategory.setItems(CategoryModel.getObservableCategories());
-                tblCategory.refresh();
+                refreshMovieList();
+                refreshCategories();
+
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

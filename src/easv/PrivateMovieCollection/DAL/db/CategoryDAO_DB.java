@@ -76,8 +76,6 @@ public class CategoryDAO_DB implements ICategoryDataAccess {
             Category createdCategory;
             createdCategory = new Category(id, category.getCategoryName(), category.getMovieCount());
 
-            System.out.println("Du skabte denne" + createdCategory);
-
             return createdCategory;
         }
 

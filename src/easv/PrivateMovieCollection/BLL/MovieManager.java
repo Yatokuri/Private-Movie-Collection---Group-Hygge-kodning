@@ -3,7 +3,6 @@
  **/
 package easv.PrivateMovieCollection.BLL;
 
-import easv.PrivateMovieCollection.BE.Category;
 import easv.PrivateMovieCollection.BE.Movie;
 import easv.PrivateMovieCollection.DAL.IMovieDataAccess;
 import easv.PrivateMovieCollection.DAL.db.MovieDAO_DB;
@@ -29,6 +28,10 @@ public class MovieManager {
 
     public List<Movie> getAllMovies() throws Exception {
         return movieDao_DB.getAllMovies();
+    }
+
+    public List<Movie> getAllMoviesOld() throws Exception {
+        return movieDao_DB.getAllMoviesOld();
     }
 
     public void updateMovie(Movie selectedMovie) throws Exception {

@@ -11,7 +11,6 @@ import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -21,7 +20,6 @@ import javafx.stage.Stage;
 
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -33,8 +31,6 @@ public class MediaPlayerInfoViewController implements Initializable {
     @FXML
     private TextField txtInputName, txtInputArtist, txtInputYear, txtInputCategories, txtInputFilepath, txtInputTime, txtInputDate, txtInputPersonal, txtInputIMDBRating;
     @FXML
-    private Button btnPlay, btnPlayDirect;
-    @FXML
     private ImageView movieIcon;
     private MediaPlayerViewController mediaPlayerViewController;
     private final MovieModel movieModel;
@@ -45,11 +41,9 @@ public class MediaPlayerInfoViewController implements Initializable {
     private static final Image mainIcon = new Image ("Icons/mainIcon.png");
     private final BooleanProperty isRateValid = new SimpleBooleanProperty(true);
     private static Movie currentSelectedMovie = null;
-    private static MediaPlayerInfoViewController instance;
 
     public MediaPlayerInfoViewController() {
         try {
-
             movieModel = new MovieModel();
             categoryModel = new CategoryModel();
             categoryMovieModel = new CategoryMovieModel();
@@ -58,17 +52,6 @@ public class MediaPlayerInfoViewController implements Initializable {
             throw new RuntimeException(e);
         }
     }
-
-    public static MediaPlayerInfoViewController getInstance() {
-        if (instance == null) {
-            instance = new MediaPlayerInfoViewController();
-        }
-        return instance;
-    }
-
-
-
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try {
@@ -165,13 +148,11 @@ public class MediaPlayerInfoViewController implements Initializable {
     public void btnUpdateFile() throws Exception { //Open movie in update window
         mediaPlayerViewController.newUCWindow("Update");
         Stage updateStage = mediaPlayerViewController.getUpdateStage();
-        updateStage.setOnHidden(event -> {
-            startupSetup();
-        });
+        updateStage.setOnHidden(event -> startupSetup());
+    }
 
-       }
-    public void setBtnPlayDirect() throws IOException { // Play the movie in the computer default media player
-        System.out.print("Afspiller direkte");
+    public void btnPlayDirect() { // Play the movie in the computer default media player
+        System.out.print("Play Direct");
     }
     public void btnPlay() throws Exception { // Play the movie in the computer default media player
         File videoFile = new File(currentSelectedMovie.getMoviePath());

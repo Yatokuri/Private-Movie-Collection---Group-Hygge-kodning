@@ -17,10 +17,12 @@ public class MovieDAO_DB implements IMovieDataAccess {
 
     private final MyDatabaseConnector databaseConnector;
     private static ArrayList<Movie> allMovies;
+    private static ArrayList<Movie> allMoviesOld;
 
     public MovieDAO_DB() throws Exception {
         databaseConnector = new MyDatabaseConnector();
         allMovies = new ArrayList<>();
+        allMoviesOld = new ArrayList<>();
         getAllMovies();
     }
 
@@ -159,8 +161,39 @@ public class MovieDAO_DB implements IMovieDataAccess {
         }
     }
 
+    public List<Movie> getAllMoviesOld() throws Exception { // Queries the database for all movies to insert them in an arraylist
+        allMoviesOld.clear(); // Clear existing data
+        try (Connection conn = databaseConnector.getConnection();
+             Statement stmt = conn.createStatement())
+        {
+            String sql = "" +
+                    "SELECT * FROM dbo.Movies WHERE Personal < 6\n" +
+                    "AND MovieLastViewed < DATEADD(YEAR,-2,CAST(GETDATE() AS DATE));";
 
+            ResultSet rs = stmt.executeQuery(sql);
 
+            // Loop through rows from the database result set
+            while (rs.next()) {
+                //Map DB row to Movie object
+                int id = rs.getInt("MovieId");
+                String movieName = rs.getString("MovieName");
+                String director = rs.getString("MovieDirector");
+                int year = rs.getInt("MovieYear");
+                String moviePath = rs.getString("MovieFilepath");
+                double imdbRating = rs.getDouble("MovieRating");
+                double movieLength = rs.getDouble("MovieLength");
+                double personalRating = rs.getDouble("Personal");
+                String lastWatched = rs.getString("MovieLastViewed");
+                Movie movie = new Movie(id, year, movieName, director, moviePath, imdbRating, movieLength, personalRating, lastWatched);
+                allMoviesOld.add(movie);
+            }
 
-
+            return allMoviesOld;
+        }
+        catch (SQLException ex)
+        {
+            ex.printStackTrace();
+            throw new Exception("Could not get movies from database", ex);
+        }
+    }
 }

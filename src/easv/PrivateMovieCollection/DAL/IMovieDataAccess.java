@@ -18,4 +18,5 @@ public interface IMovieDataAccess {
     void deleteMovie(Movie movie) throws Exception;
 
 
+    List<Movie> getAllMoviesOld() throws Exception;
 }

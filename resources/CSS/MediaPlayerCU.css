@@ -3,7 +3,7 @@
     -fx-background-color: linear-gradient(to bottom, #6f787e, #60727c); /* Adjust colors as needed */
 }
 .buttonCU {
-    -fx-background-color: linear-gradient(to bottom, #1cb7b7, #095ce7); /* Adjust colors as needed */
+    -fx-background-color: linear-gradient(to bottom, #22813d, #22813d); /* Adjust colors as needed */
     -fx-border-color: #001618;
     -fx-text-fill: white;
     -fx-border-radius: 15px 15px 15px 15px;
@@ -11,30 +11,30 @@
     -fx-border-insets: -1;
 }
 .button:hover{
-    -fx-background-color: linear-gradient(to bottom, #00e2e2, #0259ea); /* Adjust colors as needed */
+    -fx-background-color: linear-gradient(to bottom, #47ff00, #02ea06); /* Adjust colors as needed */
     -fx-background-radius: 15px 15px 15px 15px;
 }
 
 .combo-box{
-    -fx-background-color: #23779d;
+    -fx-background-color: #258a42;
     -fx-background-insets: 0, 0 0 1 0;
     -fx-background-radius: 0;
 }
 .combo-box:hover {
-    -fx-background-color: linear-gradient(to bottom, #00e2e2, #0259ea);
+    -fx-background-color: linear-gradient(to bottom, #47ff00, #02ea06);
 }
 .combo-box .list-view .list-cell:hover{
-    -fx-background-color: linear-gradient(to bottom, #00e2e2, #0259ea);
+    -fx-background-color: linear-gradient(to bottom, #47ff00, #02ea06);
 }
 .combo-box .list-cell {
     -fx-text-fill: white;
 }
 .combo-box .list-view .list-cell {
     -fx-text-fill: grey;
-    -fx-background-color: #1a526c;
+    -fx-background-color: #227e3c;
 }
 .context-menu{
-    -fx-background-color: lightblue;
+    -fx-background-color: #ade6b7;
     -fx-text-fill: white;
     -fx-background-radius: 6 6 6 6, 5 5 5 5, 4 4 4 4;
     -fx-padding: 0.0em 0.333333em 0.0em 0.333333em;
@@ -46,7 +46,7 @@
     -fx-text-fill: white;
 }
 .text-field{
-    -fx-background-color: #23779d;
+    -fx-background-color: #258a42;
     -fx-border-color: transparent;
     -fx-text-fill: white;
     -fx-background-radius: 4px;
@@ -77,14 +77,14 @@
 
 .list-cell:hover {
     -fx-background-color: #93f9b911 !important;
-    -fx-text-background-color: #02242c !important;
+    -fx-text-background-color: #022c17 !important;
     -fx-border-radius: 15px 15px 15px 15px;
     -fx-background-radius: 15px 15px 15px 15px;
 }
 
 .list-cell:selected {
     -fx-background-color: #93f9b911 !important;
-    -fx-text-background-color: #02242c !important;
+    -fx-text-background-color: #022c17 !important;
     -fx-border-radius: 15px 15px 15px 15px;
     -fx-background-radius: 15px 15px 15px 15px;
 }
@@ -106,5 +106,5 @@
 
 .list-view .virtual-flow .scroll-bar:vertical .thumb
 {
-    -fx-background-color: linear-gradient(to bottom, #225b81, #1b5173);
+    -fx-background-color: linear-gradient(to bottom, #22813d, #1b7330);
 }

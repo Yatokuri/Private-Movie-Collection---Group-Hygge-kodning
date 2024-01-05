@@ -38,8 +38,6 @@ public class MediaPlayerCUViewController implements Initializable {
     @FXML
     public ListView<Category> lstCategory;
     @FXML
-    private ComboBox<Category> comCategory;
-    @FXML
     private TextField txtInputName, txtInputArtist, txtInputYear, txtInputFilepath, txtInputTime, txtInputCategories, txtInputIMDBRating, txtInputPersonal;
     @FXML
     private Button btnSave;
@@ -47,8 +45,7 @@ public class MediaPlayerCUViewController implements Initializable {
     private long currentMovieLength;
     private final MovieModel movieModel;
     private final CategoryModel categoryModel;
-    private CategoryMovieModel categoryMovieModel;
-    private final DisplayErrorModel displayErrorModel;
+    private final CategoryMovieModel categoryMovieModel;
     private final ValidateModel validateModel = new ValidateModel();
     private final BooleanProperty isNameValid = new SimpleBooleanProperty(true);
     private final BooleanProperty isArtistValid = new SimpleBooleanProperty(true);
@@ -77,7 +74,6 @@ public class MediaPlayerCUViewController implements Initializable {
             API_KEY = (APIProperties.getProperty("API"));
             movieModel = new MovieModel();
             categoryModel = new CategoryModel();
-            displayErrorModel = new DisplayErrorModel();
             categoryMovieModel = new CategoryMovieModel();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -110,17 +106,6 @@ public class MediaPlayerCUViewController implements Initializable {
 
         //contextSystem();
 
-        /*
-        // Gets all the categories from the Database
-        comCategory.getItems().addAll(CategoryModel.getObservableCategories().sorted());
-        comCategory.getSelectionModel().select(0);
-        comCategory.setOnMouseClicked(event -> { // Consume the event to prevent the ComboBox from opening
-            if (event.getButton() == MouseButton.SECONDARY) {
-                event.consume();
-                comCategory.hide();
-            }
-        });
-         */
 
         // Add a listener to the filepath input to make sure its valid and update time automatic
         txtInputFilepath.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -132,15 +117,16 @@ public class MediaPlayerCUViewController implements Initializable {
         startupSetup();
     }
 
-    private static void findGenreForFilm(String filmTitel) {
+    private static void findGenreForFilm(String filmTitle) {
 
         try {
             OkHttpClient client = new OkHttpClient(); //We make a request to API
             Request request = new Request.Builder()
-                    .url("https://www.omdbapi.com/?t=" + filmTitel + "&apikey=" + API_KEY)
+                    .url("https://www.omdbapi.com/?t=" + filmTitle + "&apikey=" + API_KEY)
                     .build();
 
             Response response = client.newCall(request).execute(); //We got answer
+            assert response.body() != null;
             String responseData = response.body().string();
 
             JSONObject json = new JSONObject(responseData);
@@ -154,7 +140,7 @@ public class MediaPlayerCUViewController implements Initializable {
 
                 String[] genres = genreString.split(", ");
 
-                System.out.println("Genrer for " + titleString + imdbRatingString + ":");
+                System.out.println("Genre for " + titleString + imdbRatingString + ":");
                 for (String genre : genres) {
                     System.out.println(genre + ",");
 
@@ -162,7 +148,7 @@ public class MediaPlayerCUViewController implements Initializable {
 
                 }
             } else {
-                System.out.println("No genre for this movie " + filmTitel);
+                System.out.println("No genre for this movie " + filmTitle);
             }
 
 
@@ -173,7 +159,7 @@ public class MediaPlayerCUViewController implements Initializable {
 
     public void startupSetup() {
         lstCategory.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        lstCategory.getItems().addAll(categoryModel.getObservableCategories());
+        lstCategory.getItems().addAll(CategoryModel.getObservableCategories());
         categorySystem();
 
         if (typeCU == 1) { // If TypeCU is 1 we create song
@@ -226,9 +212,9 @@ public class MediaPlayerCUViewController implements Initializable {
 
             categoryNames = new ArrayList<>();
 
-            for (Object item : selectedItems) {
+            for (Category item : selectedItems) {
                 System.out.println("- " + item);
-                categoryNames.add((Category) item);
+                categoryNames.add(item);
 
 
             }
@@ -327,7 +313,7 @@ public class MediaPlayerCUViewController implements Initializable {
 
         mediaPlayerViewController.createUpdateCategory("Create Category");
         lstCategory.getItems().clear(); //Should just add new one so select don't get loose
-        lstCategory.getItems().addAll(categoryModel.getObservableCategories());
+        lstCategory.getItems().addAll(CategoryModel.getObservableCategories());
         mediaPlayerViewController.refreshCategories();
     }
     public void btnSave() throws Exception { // Validate all inputs before saving
@@ -350,7 +336,7 @@ public class MediaPlayerCUViewController implements Initializable {
     }
 
 
-    private void createNewMovie() throws Exception { //Here the song gets created
+    private void createNewMovie() { //Here the movie gets created
         int year = Integer.parseInt(txtInputYear.getText());
         String title = txtInputName.getText();
         String director = txtInputArtist.getText();
@@ -359,9 +345,8 @@ public class MediaPlayerCUViewController implements Initializable {
         double movieTime = currentMovieLength;
         //String category = String.valueOf(comCategory.getSelectionModel().getSelectedItem());
         double personalRating = 0;
-        String lastWatched = null;
         // Inputs the values from above into a new song and tries to send it up the layers into the DB, table view and sound map
-        Movie movie = new Movie(-1, year, title, director, moviePath, movieRating, movieTime, personalRating, lastWatched);
+        Movie movie = new Movie(-1, year, title, director, moviePath, movieRating, movieTime, personalRating, null);
 
         try {
             Movie newCreatedMovie = movieModel.createNewMovie(movie);
@@ -404,8 +389,8 @@ public class MediaPlayerCUViewController implements Initializable {
             try {
                 movieModel.updateMovie(currentSelectedMovie);
                 mediaPlayerViewController.updateMoviePathSoundMap(currentSelectedMovie);
-                mediaPlayerViewController.refreshCategories();
                 mediaPlayerViewController.refreshMovieList();
+                mediaPlayerViewController.refreshCategories();
                 btnCloseWindow();
             } catch (Exception e) {
                 e.printStackTrace();

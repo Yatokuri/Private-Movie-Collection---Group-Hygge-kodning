@@ -12,13 +12,16 @@ import java.util.List;
 
 public class MovieModel {
 
-    private static ObservableList<Movie> moviesToBeViewed = null;
+    private static ObservableList<Movie> moviesToBeViewed, moviesOldToBeViewed = null;
+
     private final MovieManager movieManager;
 
     public MovieModel() throws Exception {
         movieManager = new MovieManager();
         moviesToBeViewed = FXCollections.observableArrayList();
+        moviesOldToBeViewed = FXCollections.observableArrayList();
         moviesToBeViewed.addAll(movieManager.getAllMovies());
+        moviesOldToBeViewed.addAll(movieManager.getAllMoviesOld());
     }
     public Movie createNewMovie(Movie newMovie) throws Exception { // Sends a request to the database to add a new movie
         Movie s = movieManager.createNewMovie(newMovie);
@@ -26,6 +29,8 @@ public class MovieModel {
         return s;
     }
     public static ObservableList<Movie> getObservableMovies() { return moviesToBeViewed; } // Returns the movies from the database
+
+    public static ObservableList<Movie> getObservableMoviesOld() { return moviesOldToBeViewed; } // Returns the old movies from the database
     public void updateMovie(Movie updatedMovie) throws Exception { // Sends a request to the database to update a movie
         // update movie in DAL layer (through the layers)
         movieManager.updateMovie(updatedMovie);
