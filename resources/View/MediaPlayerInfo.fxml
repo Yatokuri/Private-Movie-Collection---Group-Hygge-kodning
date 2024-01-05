@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane onKeyPressed="#keyboardKeyPressed" prefHeight="399.0" prefWidth="824.0" stylesheets="@../CSS/MediaPlayerCU.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.PrivateMovieCollection.GUI.Controller.MediaPlayerInfoViewController">
+<AnchorPane fx:id="anchorPane" onKeyPressed="#keyboardKeyPressed" prefHeight="399.0" prefWidth="824.0" stylesheets="@../CSS/MediaPlayerCU.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.PrivateMovieCollection.GUI.Controller.MediaPlayerInfoViewController">
     <children>
         <GridPane prefHeight="346.0" prefWidth="525.0">
             <columnConstraints>

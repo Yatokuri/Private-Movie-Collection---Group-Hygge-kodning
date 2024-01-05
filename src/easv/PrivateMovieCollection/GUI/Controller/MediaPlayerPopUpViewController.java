@@ -75,7 +75,6 @@ public class MediaPlayerPopUpViewController implements Initializable {
         tblMoviesOld.setItems(MovieModel.getObservableMoviesOld());
     }
 
-
 //*******************************************CONTEXT*MENU**************************************************
 
     private void contextSystem() { //Here we create the context menu for the category combo box
@@ -84,7 +83,6 @@ public class MediaPlayerPopUpViewController implements Initializable {
         MenuItem deleteMovie = new MenuItem("Delete movie");
         contextMenu.getItems().addAll(deleteAllMovies,deleteMovie);
         tblMoviesOld.setContextMenu(contextMenu);
-
 
         tblMoviesOld.setRowFactory(tv -> {
             TableRow<Movie> row = new TableRow<>();
@@ -104,7 +102,6 @@ public class MediaPlayerPopUpViewController implements Initializable {
             return row;
         });
 
-
         deleteAllMovies.setOnAction((event) -> { // Deletes all movie in the list and close window
             try {
                 btnDeleteAll();
@@ -123,7 +120,6 @@ public class MediaPlayerPopUpViewController implements Initializable {
             }
         });
     }
-
 
 //*******************************************KEYBOARD**************************************************
     @FXML
@@ -189,6 +185,10 @@ public class MediaPlayerPopUpViewController implements Initializable {
             mediaPlayerViewController.refreshMovieList();
             btnCloseWindow();
         }
+    }
+
+    public void btnCancel() {
+        btnCloseWindow();
     }
 
     public void btnCloseWindow() { //Close the window

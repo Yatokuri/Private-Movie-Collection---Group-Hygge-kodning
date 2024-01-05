@@ -93,7 +93,7 @@ public class CategoryMovieDAO_DB {
             while (rs2.next()) {
                 //Map DB row to category object
                 nextIdNumber = rs2.getInt("next_value");
-                //System.out.println(nextIdNumber + " Næste ID (Debug)");
+                //System.out.println(nextIdNumber + " Next ID (Debug)");
             }
 
             int nextOrderNumber = 1;

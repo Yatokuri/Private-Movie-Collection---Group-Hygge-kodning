@@ -3,14 +3,19 @@
  **/
 package easv.PrivateMovieCollection.GUI.Controller;
 
-import easv.PrivateMovieCollection.BE.Movie;
 import easv.PrivateMovieCollection.BE.Category;
-import easv.PrivateMovieCollection.GUI.Model.*;
+import easv.PrivateMovieCollection.BE.Movie;
+import easv.PrivateMovieCollection.GUI.Model.CategoryModel;
+import easv.PrivateMovieCollection.GUI.Model.CategoryMovieModel;
+import easv.PrivateMovieCollection.GUI.Model.DisplayErrorModel;
+import easv.PrivateMovieCollection.GUI.Model.MovieModel;
 import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.FilteredList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -43,7 +48,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class MediaPlayerViewController implements Initializable {
     @FXML
-    private HBox vboxTblBtn, mediaViewBox;
+    private HBox vboxTblBtn, mediaViewBox, hboxMediaPlayer;
     @FXML
     private VBox tblMoviesInCategoryVBOX;
     @FXML
@@ -131,6 +136,7 @@ public class MediaPlayerViewController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         mediaPlayerCUViewController = MediaPlayerCUViewController.getInstance();
+        
 
         btnRepeatIcon.setImage(repeatDisableIcon); //We set picture here so the button know what is chosen
         btnShuffleIcon.setImage(shuffleIconDisable); // -||-
@@ -178,10 +184,9 @@ public class MediaPlayerViewController implements Initializable {
 
         //Open new window
 
-
         if (!MovieModel.getObservableMoviesOld().isEmpty())  {
             try {
-                test("Warning");
+                warningWindow("Warning");
                 Platform.runLater(() -> {
                     stage.toFront();
                     stage.show();
@@ -190,19 +195,23 @@ public class MediaPlayerViewController implements Initializable {
                 throw new RuntimeException(e);
             }
         }
+        hboxMediaPlayer.setVisible(false);
+        AnchorPane.setBottomAnchor(vboxTblBtn, 5.0);
+
+        PauseTransition pause = new PauseTransition(Duration.seconds(5));
+        pause.setOnFinished(event -> {
+            hboxMediaPlayer.setVisible(true);
+            AnchorPane.setBottomAnchor(vboxTblBtn, 117.0);
+        });
+
+        // Start the pause transition
+        pause.play();
+
+
 
     }
 
-    public void test(String windowTitle) throws IOException { // Creates the second window that will allow you to update and create new movies
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/View/MediaPlayerPopUp.fxml"));
-        Parent root = loader.load();
-        stage = new Stage();
-        stage.getIcons().add(mainIcon);
-        stage.setTitle(windowTitle);
-        stage.setScene(new Scene(root));
-        stage.setResizable(false);
-        stage.initModality(Modality.APPLICATION_MODAL); //Lock the first window until second is close
-    }
+
 
     private void initializeTableColumns() {
         // Initialize the tables with columns.
@@ -819,8 +828,12 @@ public class MediaPlayerViewController implements Initializable {
             }
         }
     }
-
+//*****************************************WINDOWS********************************************
     private Stage stage;
+
+    public Stage getUpdateStage() {
+        return stage;
+    }
     public void newUCWindow(String windowTitle) throws IOException { // Creates the second window that will allow you to update and create new movies
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/View/MediaPlayerCU.fxml"));
         Parent root = loader.load();
@@ -835,16 +848,11 @@ public class MediaPlayerViewController implements Initializable {
             try {
                 refreshMovieList();
                 refreshCategories();
-
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
-
         stage.show();
-    }
-    public Stage getUpdateStage() {
-        return stage;
     }
 
     public void newInfoWindow(String windowTitle) throws IOException { // Creates the second window that will allow you to update and create new movies
@@ -857,6 +865,17 @@ public class MediaPlayerViewController implements Initializable {
         stage.setResizable(false);
         stage.initModality(Modality.APPLICATION_MODAL); //Lock the first window until second is close
         stage.show();
+    }
+
+    public void warningWindow(String windowTitle) throws IOException { // Creates the second window that will allow you to update and create new movies
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/View/MediaPlayerPopUp.fxml"));
+        Parent root = loader.load();
+        stage = new Stage();
+        stage.getIcons().add(mainIcon);
+        stage.setTitle(windowTitle);
+        stage.setScene(new Scene(root));
+        stage.setResizable(false);
+        stage.initModality(Modality.APPLICATION_MODAL); //Lock the first window until second is close
     }
 
     //******************************************HELPER*METHOD********************************************
@@ -1417,6 +1436,7 @@ public class MediaPlayerViewController implements Initializable {
         createUpdateCategory(btnCreateCategory.getText());
     }
 
+
     public void btnUpdateCategoryNow() throws Exception { // Functionality for context menu
         createUpdateCategory(btnUpdateCategory.getText());
     }
@@ -1455,13 +1475,17 @@ public class MediaPlayerViewController implements Initializable {
         handleMovieSwitch(currentIndex - 1 + currentMovieList.size());
     }
 
-    public void btnPlayMovie() {
+    public void btnPlayMovie() throws Exception {
         handleMoviePlay();
     }
 
     public void btnForwardMovie() { // Moves forward a movie in the currently selected table view
         previousPress = false;
         handleMovieSwitch(currentIndex + 1);
+    }
+
+    public void btnGoBack(ActionEvent actionEvent) {
+        hboxMediaPlayer.setVisible(false);
     }
 
     public void btnRepeatMovie() { // Enables or disables the repeat mode and sets the icon to the relevant one
