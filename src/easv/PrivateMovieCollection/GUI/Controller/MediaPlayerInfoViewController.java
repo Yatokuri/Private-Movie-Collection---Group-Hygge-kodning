@@ -151,8 +151,14 @@ public class MediaPlayerInfoViewController implements Initializable {
         updateStage.setOnHidden(event -> startupSetup());
     }
 
-    public void btnPlayDirect() { // Play the movie in the computer default media player
-        System.out.print("Play Direct");
+    public void btnPlayDirect() throws Exception{ // Play the movie in the computer default media player
+        mediaPlayerViewController.PlayMovie(currentSelectedMovie);
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        LocalDateTime now = LocalDateTime.now();
+        currentSelectedMovie.setLastWatched(dtf.format(now));
+        movieModel.updateMovie(currentSelectedMovie);
+        Stage parent = (Stage) txtInputYear.getScene().getWindow();
+        parent.close();
     }
     public void btnPlay() throws Exception { // Play the movie in the computer default media player
         File videoFile = new File(currentSelectedMovie.getMoviePath());

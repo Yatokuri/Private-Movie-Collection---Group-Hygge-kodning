@@ -10,12 +10,12 @@ import easv.PrivateMovieCollection.GUI.Model.CategoryMovieModel;
 import easv.PrivateMovieCollection.GUI.Model.DisplayErrorModel;
 import easv.PrivateMovieCollection.GUI.Model.MovieModel;
 import javafx.animation.KeyFrame;
-import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -32,7 +32,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
-import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -48,7 +47,9 @@ import java.util.concurrent.CompletableFuture;
 
 public class MediaPlayerViewController implements Initializable {
     @FXML
-    private HBox vboxTblBtn, mediaViewBox, hboxMediaPlayer;
+    public MenuButton btnCategoryFilter;
+    @FXML
+    private HBox vboxTblBtn, mediaViewBox, hboxMediaPlayer, hboxFilter;
     @FXML
     private VBox tblMoviesInCategoryVBOX;
     @FXML
@@ -83,6 +84,7 @@ public class MediaPlayerViewController implements Initializable {
     private int shuffleMode = 0; //Default shuffle
     private int currentIndex = 0;
     private boolean previousPress = false;
+    private boolean isVideoModeActive = false;
     public List<Double> speeds = new ArrayList<>();
     private int currentSpeedIndex = 4; // This should be where 1.00
     private Double currentSpeed = 1.00;
@@ -158,13 +160,14 @@ public class MediaPlayerViewController implements Initializable {
                 tblMovies.setItems(movieModel.filterList(MovieModel.getObservableMovies(), newValue.toLowerCase()))
         );
 
+
+
         // Initialize the tables with columns.
         initializeTableColumns();
 
         // Add data from observable list
         tblMovies.setItems(MovieModel.getObservableMovies());
         tblCategory.setItems(CategoryModel.getObservableCategories());
-
 
 
         // Set default volume to 10% (↓) and updates movie progress
@@ -181,6 +184,7 @@ public class MediaPlayerViewController implements Initializable {
         clearSelectionForCategorySelect();
         contextSystem();
         initializeDragAndDrop();
+        btnCategoryFilter();
 
         //Open new window
 
@@ -195,23 +199,18 @@ public class MediaPlayerViewController implements Initializable {
                 throw new RuntimeException(e);
             }
         }
+
+        //System.out.println(CategoryModel.getObservableCategories());
+
         hboxMediaPlayer.setVisible(false);
         AnchorPane.setBottomAnchor(vboxTblBtn, 5.0);
 
-        PauseTransition pause = new PauseTransition(Duration.seconds(5));
-        pause.setOnFinished(event -> {
-            hboxMediaPlayer.setVisible(true);
-            AnchorPane.setBottomAnchor(vboxTblBtn, 117.0);
-        });
 
-        // Start the pause transition
-        pause.play();
+
 
 
 
     }
-
-
 
     private void initializeTableColumns() {
         // Initialize the tables with columns.
@@ -227,6 +226,43 @@ public class MediaPlayerViewController implements Initializable {
         colArtistInCategory.setCellValueFactory(new PropertyValueFactory<>("director"));
     }
 
+//*******************************************Search & Filter***********************************************
+public void btnCategoryFilter(){
+    CategoryModel.getObservableCategories().forEach(category -> {
+        CheckMenuItem categoryItem = new CheckMenuItem(category.getCategoryName());
+        categoryItem.setUserData(category.getId()); // Store the category as user data id
+        categoryItem.setOnAction(event);
+        btnCategoryFilter.getItems().add(categoryItem);
+    });
+}
+    static ArrayList<Integer> categoryFilter = new ArrayList<>();
+
+    public EventHandler<ActionEvent> event = e -> {
+        if (((CheckMenuItem) e.getSource()).isSelected()) {
+            // Parse the ID as an integer and add it to categoryFilter
+            categoryFilter.add((Integer) ((CheckMenuItem) e.getSource()).getUserData());
+            // Retrieve and print the Category object stored as user data
+            try { movieModel.updateMovieListFilter(); }
+            catch (Exception ex) { throw new RuntimeException(ex); }
+        }
+        else {
+            categoryFilter.remove((Integer) ((CheckMenuItem) e.getSource()).getUserData());
+            if (categoryFilter.isEmpty()) {
+                try { movieModel.updateMovieList();}
+                catch (Exception ex) { throw new RuntimeException(ex);}
+            }
+            else
+                try { movieModel.updateMovieListFilter();}
+                catch (Exception ex) { throw new RuntimeException(ex); }
+        }
+    };
+
+    public static ArrayList<String> getCategoryFilter(){
+        ArrayList<String> categoryFilterString = new ArrayList<String>();
+        for (Integer i: categoryFilter)
+            categoryFilterString.add(String.valueOf(i));
+        return categoryFilterString;
+    }
 //*******************************************CONTEXT*MENU**************************************************
 
     ContextMenu contextMenuMoviesInCategory = new ContextMenu();
@@ -254,10 +290,10 @@ public class MediaPlayerViewController implements Initializable {
     private void contextSystem() {
         MenuItem createMovie = new MenuItem("Create Movie");
         MenuItem updateMovie = new MenuItem("Update Movie");
-
+        MenuItem playMovie = new MenuItem("Play Movie");
 
         contextMenuCategory.getItems().addAll(createCategory, updateCategory, deleteCategory, deleteAllMovies);
-        contextMenuMovies.getItems().addAll(createMovie, updateMovie, deleteMovie, categorySubMenu);
+        contextMenuMovies.getItems().addAll(playMovie, createMovie, updateMovie, deleteMovie, categorySubMenu);
         contextMenuMoviesInCategory.getItems().addAll(deleteMovieInCategory);
 
         tblMovies.setContextMenu(contextMenuMovies);
@@ -276,7 +312,7 @@ public class MediaPlayerViewController implements Initializable {
                         contextMenuMovies.getItems().addAll(createMovie);
                     } else {
                         contextSystemSubMenuAddMovies(); //We update the category list
-                        contextMenuMovies.getItems().addAll(createMovie, updateMovie, deleteMovie, categorySubMenu);
+                        contextMenuMovies.getItems().addAll(playMovie, createMovie, updateMovie, deleteMovie, categorySubMenu);
                     }
                 }
             });
@@ -290,6 +326,11 @@ public class MediaPlayerViewController implements Initializable {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+        });
+
+        playMovie.setOnAction((event) -> {
+                PlayMovie(currentMovie);
+                contextMenuMovies.hide();
         });
 
         updateMovie.setOnAction((event) -> {
@@ -549,7 +590,6 @@ public class MediaPlayerViewController implements Initializable {
     private void clearSelectionForCategorySelect() { //Clears the selection from both movie tableview and movie in category table view when opening a new category
         tblCategory.setOnMouseClicked(event -> {
             if (event.getClickCount() == 1) {
-                System.out.println();
                 tblMovies.getSelectionModel().clearSelection();
                 tblMoviesInCategory.getSelectionModel().clearSelection();
             }
@@ -601,6 +641,19 @@ public class MediaPlayerViewController implements Initializable {
         if (currentMusic != null) {
             currentMusic.stop();
         }
+
+    //    onStartMovieBtnClick();
+        vboxTblBtn.setVisible(false);
+        hboxMediaPlayer.setVisible(true);
+        hboxFilter.setVisible(false);
+        AnchorPane.setBottomAnchor(vboxTblBtn, 117.0);
+        mediaView.fitWidthProperty().bind(mediaViewBox.widthProperty());
+        mediaView.fitHeightProperty().bind(mediaViewBox.heightProperty());
+        mediaView.setMediaPlayer(newMovie);
+        mediaViewBox.setVisible(true);
+        anchorPane.setStyle("-fx-background-color: #454b4f;");
+        isVideoModeActive = false;
+
 
         currentMoviePlaying = selectedMovie;
         sliderProgressMovie.setDisable(false);
@@ -663,7 +716,7 @@ public class MediaPlayerViewController implements Initializable {
         }
     }
 
-    public void onEndOfMovie() {
+    public void onEndOfMovie(){
         if (repeatMode == 2) {//Repeat 1
             handleNewMovie(currentMusic, currentMoviePlaying);
             return;
@@ -672,14 +725,44 @@ public class MediaPlayerViewController implements Initializable {
             shuffleMode();
             return;
         }
+
+
         currentMusic = null;
         sliderProgressMovie.setValue(0);
         lblPlayingNow.setText("No movie playing");
         sliderProgressMovie.setDisable(true);
         updateMovieProgressTimer();
         btnPlayIcon.setImage(playIcon);
-        handleMovieSwitch(currentIndex + 1); //Moves the user to the next movie in the table view index
+        onEndMovieBtnClick();
+        if (repeatMode != -1) { // If enabled, the shuffle mode will play a random movie from the selected table view, not including the category table view
+            handleMovieSwitch(currentIndex + 1); //Moves the user to the next movie in the table view index
+            return;
+        }
     }
+
+    private void onEndMovieBtnClick() {
+        hboxMediaPlayer.setVisible(false);
+        vboxTblBtn.setVisible(true);
+        hboxFilter.setVisible(true);
+        mediaViewBox.setVisible(false);
+        mediaView.setMediaPlayer(null);
+        anchorPane.setStyle("");
+        AnchorPane.setBottomAnchor(vboxTblBtn, 5.0);
+        isVideoModeActive = true;
+    }
+
+    private void onStartMovieBtnClick() {
+        vboxTblBtn.setVisible(false);
+        hboxMediaPlayer.setVisible(true);
+        hboxFilter.setVisible(false);
+        AnchorPane.setBottomAnchor(vboxTblBtn, 117.0);
+        mediaView.fitWidthProperty().bind(mediaViewBox.widthProperty());
+        mediaView.fitHeightProperty().bind(mediaViewBox.heightProperty());
+        mediaViewBox.setVisible(true);
+        anchorPane.setStyle("-fx-background-color: #454b4f;");
+        isVideoModeActive = false;
+    }
+
 
     //********************************REPEAT*SHUFFLE*FUNCTION**************************************************
     public boolean repeatModeDisable() { // Method to run when repeat is not enabled
@@ -1263,30 +1346,31 @@ public class MediaPlayerViewController implements Initializable {
             }
         }
 
-        if (!isSecreteModeActive) { //Disable key under media
+        if (event.isControlDown()) {
+            if (keyCode == KeyCode.H) { // Enable/Disable shuffle movie function
+                btnShuffleMovie();
+            }
+        }
+        if (event.isControlDown()) {
+            if (keyCode == KeyCode.T) { // Enable/Disable repeat movie function
+                btnRepeatMovie();
+            }
+        }
+
+        if (event.isControlDown()) {
+            if (keyCode == KeyCode.B) { // Go to previously played movie
+                btnBackwardMovie();
+            }
+        }
+        if (event.isControlDown()) {
+            if (keyCode == KeyCode.F) { // Go to next movie to be played
+                btnForwardMovie();
+            }
+        }
+
+        if (!isVideoModeActive) { //Disable key under media
             if (keyCode == KeyCode.DELETE) { // Tries to delete the selected movie, category or movie in category. Will still show relevant warning screen
                 handleDelete();
-            }
-
-            if (event.isControlDown()) {
-                if (keyCode == KeyCode.H) { // Enable/Disable shuffle movie function
-                    btnShuffleMovie();
-                }
-            }
-            if (event.isControlDown()) {
-                if (keyCode == KeyCode.T) { // Enable/Disable repeat movie function
-                    btnRepeatMovie();
-                }
-            }
-            if (event.isControlDown()) {
-                if (keyCode == KeyCode.B) { // Go to previously played movie
-                    btnBackwardMovie();
-                }
-            }
-            if (event.isControlDown()) {
-                if (keyCode == KeyCode.F) { // Go to next movie to be played
-                    btnForwardMovie();
-                }
             }
 
             if (event.isControlDown()) {
@@ -1309,87 +1393,8 @@ public class MediaPlayerViewController implements Initializable {
                     btnNewWindowUpdate();
                 }
             }
-            // A secret attempt at a semi working movie Player - Changes the layout of the GUI to show the media player
-            // When shift + M + T is clicked at the same time - Only works up to 1 gb size files
-            if (pressedKeys.contains(KeyCode.SHIFT) && pressedKeys.containsAll(Arrays.asList(KeyCode.M, KeyCode.T))) {
-                lastMovieName = currentMoviePlaying;
-                lastMovie = currentMusic;
-                lastMovieSeek = sliderProgressMovie.getValue();
-                System.out.println("Secret combination pressed");
-                repeatMode = 2;
-                isSecreteModeActive = true;
-                btnRepeatIcon.setImage(repeatDisableIcon);
-                btnShuffleIcon.setImage(shuffleIconDisable);
-                btnVideo.setVisible(true);
-                btnRepeat.setDisable(true);
-                btnShuffle.setDisable(true);
-                txtMovieSearch.setVisible(false);
-                vboxTblBtn.setVisible(false);
-                anchorPane.setStyle("-fx-background-color: #454b4f;");
-                mediaView.setMediaPlayer(mp);
-                isMusicPaused = false;
-                handleNewMovie(mp, currentMovie);
-                mediaView.fitWidthProperty().bind(mediaViewBox.widthProperty());
-                mediaView.fitHeightProperty().bind(mediaViewBox.heightProperty());
-            }
-        }
-        // Closes the movie player and attempts to reset everything to how it was before it opened which includes trying to find how far along you were
-        // in your movie if one was playing
-        else if (pressedKeys.contains(KeyCode.SHIFT) && pressedKeys.containsAll(Arrays.asList(KeyCode.M, KeyCode.T))) {
-            isSecreteModeActive = false;
-            System.out.println("Secret system closed");
-            repeatMode = 0;
-            btnRepeatIcon.setImage(repeatDisableIcon);
-            btnShuffleIcon.setImage(repeatDisableIcon);
-            btnVideo.setVisible(false);
-            btnRepeat.setDisable(false);
-            btnShuffle.setDisable(false);
-            txtMovieSearch.setVisible(true);
-            vboxTblBtn.setVisible(true);
-            anchorPane.setStyle("");
-            mediaView.setMediaPlayer(null);
-            mediaView.fitWidthProperty().bind(mediaViewBox.widthProperty());
-            mediaView.fitHeightProperty().bind(mediaViewBox.heightProperty());
-            if (lastMovie != null)   {
-                handleNewMovie(lastMovie, lastMovieName);
-                Platform.runLater(() -> sliderProgressMovie.setValue(lastMovieSeek));
-            }
-            else {
-                currentMusic.seek(Duration.millis(1000000000)); //So its 100% is done
-            }
         }
     }
-
-    public void btnNewVideo() { // Semi working movie player - Can sometimes take two attempted uploads for the movie to load
-        FileChooser fileChooser = new FileChooser();
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Video Files", "*.mp4", "*.avi");
-        fileChooser.getExtensionFilters().add(extFilter);
-        // Show the file chooser dialog
-        File selectedFile = fileChooser.showOpenDialog(null);
-
-        if (selectedFile != null) {
-            MediaPlayer previousMediaPlayer = soundMap.remove(currentMovie.getId());
-            currentMovie = new Movie(-50, 0, selectedFile.getName(), "Unknown", selectedFile.getAbsolutePath(), 0.0, 2.2, 0.0 ,null);
-            addMoviesToSoundMap(currentMovie).thenRun(() -> {
-                MediaPlayer newMovie = soundMap.get(currentMovie.getId());
-                sliderProgressMovie.setValue(0);
-                mediaView.setMediaPlayer(newMovie);
-                handleNewMovie(newMovie, currentMovie);
-                if (previousMediaPlayer != null) {
-                    previousMediaPlayer.dispose(); //Clear up resources
-                }
-            });
-
-        }
-
-    }
-
-    MediaPlayer mp = new MediaPlayer(new Media(new File("resources/Videos/SECRET.mp4").toURI().toString()));
-    //currentMovie = new Movie(-50, 2013, "Choose a", "Movie", "resources/Videos/SECRET.mp4", 0.0, "Movie");
-    boolean isSecreteModeActive = false;
-    MediaPlayer lastMovie;
-    Movie lastMovieName;
-    double lastMovieSeek;
     //******************************************BUTTONS*SLIDERS************************************************
     public void createUpdateCategory(String buttonText) throws Exception { // Method for updating or creating categories
         TextInputDialog dialog = new TextInputDialog("");
@@ -1475,7 +1480,7 @@ public class MediaPlayerViewController implements Initializable {
         handleMovieSwitch(currentIndex - 1 + currentMovieList.size());
     }
 
-    public void btnPlayMovie() throws Exception {
+    public void btnPlayMovie() {
         handleMoviePlay();
     }
 
@@ -1485,7 +1490,12 @@ public class MediaPlayerViewController implements Initializable {
     }
 
     public void btnGoBack(ActionEvent actionEvent) {
-        hboxMediaPlayer.setVisible(false);
+        if (currentMusic != null) {
+            repeatMode = -1;
+            currentMusic.seek(Duration.millis(1000000000)); //So its 100% is done
+        }
+        btnRepeatMovie();
+        onEndMovieBtnClick();
     }
 
     public void btnRepeatMovie() { // Enables or disables the repeat mode and sets the icon to the relevant one

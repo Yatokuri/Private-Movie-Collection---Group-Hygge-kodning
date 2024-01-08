@@ -343,10 +343,10 @@ public class MediaPlayerCUViewController implements Initializable {
         String moviePath = txtInputFilepath.getText();
         double movieRating = Double.parseDouble(txtInputIMDBRating.getText());
         double movieTime = currentMovieLength;
-        //String category = String.valueOf(comCategory.getSelectionModel().getSelectedItem());
+        String category = String.valueOf(txtInputCategories.getText());
         double personalRating = 0;
         // Inputs the values from above into a new song and tries to send it up the layers into the DB, table view and sound map
-        Movie movie = new Movie(-1, year, title, director, moviePath, movieRating, movieTime, personalRating, null);
+        Movie movie = new Movie(-1, year, title, director, moviePath, movieRating, movieTime, personalRating, null, category);
 
         try {
             Movie newCreatedMovie = movieModel.createNewMovie(movie);
@@ -374,7 +374,7 @@ public class MediaPlayerCUViewController implements Initializable {
             currentSelectedMovie.setMovieLength(currentMovieLength);
             currentSelectedMovie.setMovieRating(Double.valueOf(txtInputIMDBRating.getText()));
             currentSelectedMovie.setPersonalRating(Double.parseDouble(txtInputPersonal.getText()));
-            //currentSelectedMovie.setMovieCategory(String.valueOf(comCategory.getSelectionModel().getSelectedItem()));
+            currentSelectedMovie.setCategory(txtInputCategories.getText());
 
             if (categoryNames != null) {
                 for (Category c : categoryNamesOld) {

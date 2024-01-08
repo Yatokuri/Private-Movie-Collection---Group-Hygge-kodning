@@ -16,9 +16,11 @@ import java.util.List;
 public class MovieManager {
 
     private final IMovieDataAccess movieDao_DB;
+    private final CategoryManager categoryManager;
 
 
     public MovieManager() throws Exception {
+        categoryManager = new CategoryManager();
         movieDao_DB = new MovieDAO_DB();
     }
 
@@ -28,6 +30,10 @@ public class MovieManager {
 
     public List<Movie> getAllMovies() throws Exception {
         return movieDao_DB.getAllMovies();
+    }
+
+    public List<Movie> getAllMoviesFilter(List<String> categoriesFilter) throws Exception {
+        return movieDao_DB.getAllMoviesFilter(categoriesFilter);
     }
 
     public List<Movie> getAllMoviesOld() throws Exception {
@@ -41,8 +47,6 @@ public class MovieManager {
     public void deleteMovie(Movie selectedMovie) throws Exception {
         movieDao_DB.deleteMovie(selectedMovie);
     }
-
-
 
     public Movie getMovieById(int movieId) {
         for (Movie s : MovieModel.getObservableMovies()) {
@@ -58,17 +62,15 @@ public class MovieManager {
                 (movie.getDirector().toLowerCase().contains(searchText.toLowerCase())) ||
                 (String.valueOf(movie.getMovieRating()).toLowerCase().contains(searchText.toLowerCase())) ||
                 (String.valueOf(movie.getYear()).toLowerCase().contains(searchText.toLowerCase()));
-
     }
 
     public ObservableList<Movie> filterList(List<Movie> movie, String searchText) { // Creates an observable list for the search function in the GUI that
-        List<Movie> filterList = new ArrayList<>();                               // mirrors the movie list but changes based on search input from the above method
-        for (Movie m : movie) {
-            if (searchFindsMovies(m, searchText)) {
-                filterList.add(m);
+        List<Movie> filterList = new ArrayList<>();// mirrors the movie list but changes based on search input from the above method
+            for (Movie m : movie) {
+                if (searchFindsMovies(m, searchText)) {
+                    filterList.add(m);
+                }
             }
-        }
         return FXCollections.observableList(filterList);
     }
-
 }

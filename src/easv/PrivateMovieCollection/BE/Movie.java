@@ -5,11 +5,11 @@ package easv.PrivateMovieCollection.BE;
 
 public class Movie {
 
-    private String title, director, moviePath, lastWatched;
+    private String title, director, moviePath, lastWatched, category;
     private int year;
     private double movieLength, movieRating, personalRating;
     private int id;
-       public Movie(int id, int year, String title, String director, String moviePath, Double movieRating, Double movieLength, Double personalRating, String lastWatched) {
+       public Movie(int id, int year, String title, String director, String moviePath, Double movieRating, Double movieLength, Double personalRating, String lastWatched, String category) {
         this.id = id;
         this.title = title;
         this.year = year;
@@ -19,6 +19,7 @@ public class Movie {
         this.moviePath = moviePath;
         this.personalRating = personalRating;
         this.lastWatched = lastWatched;
+        this.category = category;
     }
     public double getMovieLength() {return movieLength;}
 
@@ -56,5 +57,13 @@ public class Movie {
 
     public void setPersonalRating(double personalRating) {
         this.personalRating = personalRating;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

@@ -10,7 +10,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane fx:id="anchorPane" onKeyPressed="#keyboardKeyPressed" prefHeight="600.0" prefWidth="604.0" stylesheets="@../CSS/Main.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.PrivateMovieCollection.GUI.Controller.MediaPlayerPopUpViewController">
+<AnchorPane fx:id="anchorPane" onKeyPressed="#keyboardKeyPressed" prefHeight="600.0" prefWidth="604.0" stylesheets="@../CSS/Main.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.PrivateMovieCollection.GUI.Controller.MediaPlayerPopUpViewController">
     <children>
         <HBox layoutX="13.0" layoutY="55.0" prefHeight="490.0" prefWidth="579.0" spacing="20.0" AnchorPane.bottomAnchor="55.0" AnchorPane.leftAnchor="13.0" AnchorPane.rightAnchor="12.0" AnchorPane.topAnchor="55.0">
             <children>
@@ -54,7 +54,7 @@
                 </VBox>
             </children>
         </HBox>
-        <Text layoutX="13.0" layoutY="37.0" strokeType="OUTSIDE" strokeWidth="0.0" text="These movies have a personal rating under 6, and haven't been watched in 2 years!" textAlignment="CENTER" wrappingWidth="579.0">
+        <Text fx:id="txtPopUp" layoutX="13.0" layoutY="37.0" strokeType="OUTSIDE" strokeWidth="0.0" text="These movies have a personal rating under 6, and haven't been watched in 2 years!" textAlignment="CENTER" wrappingWidth="579.0">
             <font>
                 <Font size="14.0" />
             </font></Text>

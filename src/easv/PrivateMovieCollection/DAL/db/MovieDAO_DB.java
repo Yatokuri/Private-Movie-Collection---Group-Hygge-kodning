@@ -18,11 +18,13 @@ public class MovieDAO_DB implements IMovieDataAccess {
     private final MyDatabaseConnector databaseConnector;
     private static ArrayList<Movie> allMovies;
     private static ArrayList<Movie> allMoviesOld;
+    private static ArrayList<Movie> allMoviesFilter;
 
     public MovieDAO_DB() throws Exception {
         databaseConnector = new MyDatabaseConnector();
         allMovies = new ArrayList<>();
         allMoviesOld = new ArrayList<>();
+        allMoviesFilter = new ArrayList<>();
         getAllMovies();
     }
 
@@ -49,7 +51,8 @@ public class MovieDAO_DB implements IMovieDataAccess {
                 double movieLength = rs.getDouble("MovieLength");
                 double personalRating = rs.getDouble("Personal");
                 String lastWatched = rs.getString("MovieLastViewed");
-                Movie movie = new Movie(id, year, movieName, director, moviePath, imdbRating, movieLength, personalRating, lastWatched);
+                String category = rs.getString("MovieCategories");
+                Movie movie = new Movie(id, year, movieName, director, moviePath, imdbRating, movieLength, personalRating, lastWatched, category);
                 allMovies.add(movie);
             }
             return allMovies;
@@ -64,7 +67,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
     public Movie createMovie(Movie movie) throws Exception { // creates a movie and adds it to the database
 
         // SQL command
-        String sql = "INSERT INTO dbo.Movies (MovieName, MovieDirector, MovieYear, MovieFilepath, movieLength, movieRating, Personal, movieLastViewed) VALUES (?,?,?,?,?,?,?,?);";
+        String sql = "INSERT INTO dbo.Movies (MovieName, MovieDirector, MovieYear, MovieFilepath, movieLength, movieRating, Personal, movieLastViewed, MovieCategories) VALUES (?,?,?,?,?,?,?,?,?);";
 
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
@@ -78,7 +81,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
             stmt.setDouble(6, movie.getMovieRating());
             stmt.setDouble(7, movie.getPersonalRating());
             stmt.setString(8, movie.getLastWatched());
-            //stmt.setString(6, movie.getMovieCategory());
+            stmt.setString(9, movie.getCategory());
             // Run the specified SQL statement
             stmt.executeUpdate();
 
@@ -92,7 +95,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
 
             // Create Movie object and send up the layers
 
-            Movie newMovie = new Movie(id, movie.getYear(), movie.getTitle(), movie.getDirector(), movie.getMoviePath(), movie.getMovieRating(), movie.getMovieLength(), movie.getPersonalRating(), movie.getLastWatched());
+            Movie newMovie = new Movie(id, movie.getYear(), movie.getTitle(), movie.getDirector(), movie.getMoviePath(), movie.getMovieRating(), movie.getMovieLength(), movie.getPersonalRating(), movie.getLastWatched(), movie.getCategory());
             allMovies.add(newMovie);
             return newMovie;
         }
@@ -108,7 +111,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
     public void updateMovie(Movie movie) throws Exception { // updates an existing movie in the database with new data
 
         // SQL command
-        String sql = "UPDATE dbo.Movies SET MovieName = ?, MovieDirector = ?, MovieYear = ?, MovieFilepath = ?, MovieLength = ?, MovieRating = ?, Personal = ?, MovieLastViewed = ? WHERE MovieID = ?";
+        String sql = "UPDATE dbo.Movies SET MovieName = ?, MovieDirector = ?, MovieYear = ?, MovieFilepath = ?, MovieLength = ?, MovieRating = ?, Personal = ?, MovieLastViewed = ?, MovieCategories = ? WHERE MovieID = ?";
 
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql))
@@ -122,8 +125,8 @@ public class MovieDAO_DB implements IMovieDataAccess {
             stmt.setBigDecimal(6, BigDecimal.valueOf(movie.getMovieRating()));
             stmt.setBigDecimal(7, BigDecimal.valueOf(movie.getPersonalRating()));
             stmt.setString(8, movie.getLastWatched());
-            //stmt.setString(6, movie.getMovieCategory());
-            stmt.setInt(9, movie.getId());
+            stmt.setString(9, movie.getCategory());
+            stmt.setInt(10, movie.getId());
             // Run the specified SQL statement
             stmt.executeUpdate();
         }
@@ -184,12 +187,53 @@ public class MovieDAO_DB implements IMovieDataAccess {
                 double movieLength = rs.getDouble("MovieLength");
                 double personalRating = rs.getDouble("Personal");
                 String lastWatched = rs.getString("MovieLastViewed");
-                Movie movie = new Movie(id, year, movieName, director, moviePath, imdbRating, movieLength, personalRating, lastWatched);
+                String category = rs.getString("MovieCategories");
+                Movie movie = new Movie(id, year, movieName, director, moviePath, imdbRating, movieLength, personalRating, lastWatched, category);
                 allMoviesOld.add(movie);
             }
 
             return allMoviesOld;
         }
+        catch (SQLException ex)
+        {
+            ex.printStackTrace();
+            throw new Exception("Could not get movies from database", ex);
+        }
+    }
+
+    public List<Movie> getAllMoviesFilter(List<String> categoriesFilter) throws Exception { // Queries the database for all movies to insert them in an arraylist
+        allMoviesFilter.clear(); // Clear existing data
+
+        try (Connection conn = databaseConnector.getConnection();
+             Statement stmt = conn.createStatement())
+            {
+
+                String sql = "SELECT DISTINCT M.* " +
+                        "FROM Movies M " +
+                        "JOIN CategoryMovies CM ON M.MovieId = CM.MovieId " +
+                        "WHERE CM.CategoryId IN (" + String.join(",", categoriesFilter) + ")";
+
+                ResultSet rs = stmt.executeQuery(sql);
+                
+                // Loop through rows from the database result set
+                while (rs.next()) {
+                    //Map DB row to Movie object
+                    int id = rs.getInt("MovieId");
+                    String movieName = rs.getString("MovieName");
+                    String director = rs.getString("MovieDirector");
+                    int year = rs.getInt("MovieYear");
+                    String moviePath = rs.getString("MovieFilepath");
+                    double imdbRating = rs.getDouble("MovieRating");
+                    double movieLength = rs.getDouble("MovieLength");
+                    double personalRating = rs.getDouble("Personal");
+                    String lastWatched = rs.getString("MovieLastViewed");
+                    String category = rs.getString("MovieCategories");
+                    Movie movie = new Movie(id, year, movieName, director, moviePath, imdbRating, movieLength, personalRating, lastWatched, category);
+                    allMoviesFilter.add(movie);
+                }
+                System.out.println(allMoviesFilter);
+                return allMoviesFilter;
+            }
         catch (SQLException ex)
         {
             ex.printStackTrace();

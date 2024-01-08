@@ -35,7 +35,13 @@
     -fx-background-color: none;
     -fx-background-radius: none;
 }
-
+#btnCategoryFilter{
+    -fx-background-color: linear-gradient(to bottom, #22813d, #22813d);
+    -fx-border-color: #001618;
+    -fx-background-radius: 15px 15px 15px 15px;
+    -fx-border-radius:   15px 15px 15px 15px;
+    -fx-text-fill: white;
+}
 
 .combo-box{
     -fx-background-color: #9d2323;
@@ -61,6 +67,7 @@
     -fx-background-radius: 6 6 6 6, 5 5 5 5, 4 4 4 4;
     -fx-padding: 0.0em 0.333333em 0.0em 0.333333em;
 }
+
 .menu-item:focused .label {
     -fx-text-fill: white;
 }

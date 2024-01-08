@@ -17,6 +17,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -37,6 +38,8 @@ public class MediaPlayerPopUpViewController implements Initializable {
     public TableColumn<Movie, Date> colLastViewedOld;
     @FXML
     public Button btnDelete;
+    @FXML
+    private Text txtPopUp;
     private MediaPlayerViewController mediaPlayerViewController;
     private final MovieModel movieModel;
     private Movie currentMovie;
@@ -54,6 +57,7 @@ public class MediaPlayerPopUpViewController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        txtPopUp.setText("These movies have a personal rating under 6, and haven't been watched in 2 years!");
         try {
             mediaPlayerViewController = MediaPlayerViewController.getInstance();
         } catch (Exception e) {
@@ -73,6 +77,10 @@ public class MediaPlayerPopUpViewController implements Initializable {
 
     public void startupSetup() {
         tblMoviesOld.setItems(MovieModel.getObservableMoviesOld());
+
+        if (tblMoviesOld.getItems().size() == 1)    {
+            txtPopUp.setText("This movie has a personal rating under 6, and hasn't been watched in 2 years!");
+        }
     }
 
 //*******************************************CONTEXT*MENU**************************************************
