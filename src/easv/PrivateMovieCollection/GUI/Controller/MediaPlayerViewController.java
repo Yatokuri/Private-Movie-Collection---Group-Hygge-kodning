@@ -226,15 +226,15 @@ public class MediaPlayerViewController implements Initializable {
         colArtistInCategory.setCellValueFactory(new PropertyValueFactory<>("director"));
     }
 
-//*******************************************Search & Filter***********************************************
-public void btnCategoryFilter(){
-    CategoryModel.getObservableCategories().forEach(category -> {
-        CheckMenuItem categoryItem = new CheckMenuItem(category.getCategoryName());
-        categoryItem.setUserData(category.getId()); // Store the category as user data id
-        categoryItem.setOnAction(event);
-        btnCategoryFilter.getItems().add(categoryItem);
-    });
-}
+//*******************************************Search*&*Filter***********************************************
+    public void btnCategoryFilter(){
+        CategoryModel.getObservableCategories().forEach(category -> {
+            CheckMenuItem categoryItem = new CheckMenuItem(category.getCategoryName());
+            categoryItem.setUserData(category.getId()); // Store the category as user data id
+            categoryItem.setOnAction(event);
+            btnCategoryFilter.getItems().add(categoryItem);
+        });
+    }
     static ArrayList<Integer> categoryFilter = new ArrayList<>();
 
     public EventHandler<ActionEvent> event = e -> {
@@ -242,19 +242,20 @@ public void btnCategoryFilter(){
             // Parse the ID as an integer and add it to categoryFilter
             categoryFilter.add((Integer) ((CheckMenuItem) e.getSource()).getUserData());
             // Retrieve and print the Category object stored as user data
-            try { movieModel.updateMovieListFilter(); }
+            try {tblMovies.setItems(movieModel.updateMovieListFilter());}
             catch (Exception ex) { throw new RuntimeException(ex); }
         }
         else {
             categoryFilter.remove((Integer) ((CheckMenuItem) e.getSource()).getUserData());
             if (categoryFilter.isEmpty()) {
-                try { movieModel.updateMovieList();}
+                try {tblMovies.setItems(movieModel.updateMovieList());}
                 catch (Exception ex) { throw new RuntimeException(ex);}
             }
             else
-                try { movieModel.updateMovieListFilter();}
+                try {tblMovies.setItems(movieModel.updateMovieListFilter());}
                 catch (Exception ex) { throw new RuntimeException(ex); }
-        }
+        }   // Make sure we search again what there is already in search text in the new list automatic
+        tblMovies.setItems(movieModel.filterList(MovieModel.getObservableMovies(), txtMovieSearch.getText().toLowerCase()));
     };
 
     public static ArrayList<String> getCategoryFilter(){

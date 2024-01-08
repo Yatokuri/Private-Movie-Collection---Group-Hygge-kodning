@@ -208,10 +208,9 @@ public class MovieDAO_DB implements IMovieDataAccess {
              Statement stmt = conn.createStatement())
             {
 
-                String sql = "SELECT DISTINCT M.* " +
-                        "FROM Movies M " +
-                        "JOIN CategoryMovies CM ON M.MovieId = CM.MovieId " +
-                        "WHERE CM.CategoryId IN (" + String.join(",", categoriesFilter) + ")";
+                String sql = "SELECT M.* FROM Movies M WHERE M.MovieId IN (SELECT CM.MovieId FROM CategoryMovies CM" +
+                " JOIN Category C ON CM.CategoryId = C.CategoryId WHERE C.CategoryId IN (" + String.join(",", categoriesFilter) + ")" +
+                " GROUP BY CM.MovieId HAVING COUNT(DISTINCT C.CategoryName) = "+ categoriesFilter.size() + ")";
 
                 ResultSet rs = stmt.executeQuery(sql);
                 
@@ -231,7 +230,6 @@ public class MovieDAO_DB implements IMovieDataAccess {
                     Movie movie = new Movie(id, year, movieName, director, moviePath, imdbRating, movieLength, personalRating, lastWatched, category);
                     allMoviesFilter.add(movie);
                 }
-                System.out.println(allMoviesFilter);
                 return allMoviesFilter;
             }
         catch (SQLException ex)
