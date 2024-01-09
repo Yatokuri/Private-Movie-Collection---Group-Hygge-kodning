@@ -162,10 +162,10 @@ public class MediaPlayerCUViewController implements Initializable {
         lstCategory.getItems().addAll(CategoryModel.getObservableCategories());
         categorySystem();
 
-        if (typeCU == 1) { // If TypeCU is 1 we create song
+        if (typeCU == 1) { // If TypeCU is 1 we create Movie
             btnSave.setText("Create");
         }
-        if (typeCU == 2 & currentSelectedMovie != null) { // If TypeCU is 2 we update song
+        if (typeCU == 2 & currentSelectedMovie != null) { // If TypeCU is 2 we update Movie
             btnSave.setText("Update");
             txtInputName.setText(currentSelectedMovie.getTitle());
             txtInputYear.setText(String.valueOf(currentSelectedMovie.getYear()));
@@ -236,8 +236,8 @@ public class MediaPlayerCUViewController implements Initializable {
     }
 
     private void updateTimeText() { //We pass the info to ValidateModel class
-        MediaPlayer newSong = new MediaPlayer(new Media(new File(txtInputFilepath.getText()).toURI().toString()));
-        validateModel.updateTimeText(newSong, formattedTime   -> { //This is because we need to wait because setOnReady is an asynchronous operation,
+        MediaPlayer newMovie = new MediaPlayer(new Media(new File(txtInputFilepath.getText()).toURI().toString()));
+        validateModel.updateTimeText(newMovie, formattedTime   -> { //This is because we need to wait because setOnReady is an asynchronous operation,
             String[] parts = formattedTime.split("-"); //We need to split the return because we got time in HH:MM:SS and just seconds
             txtInputTime.setText(parts[0]);
             currentMovieLength = Long.parseLong(parts[1]);
@@ -294,7 +294,7 @@ public class MediaPlayerCUViewController implements Initializable {
         }
 
         if (event.isControlDown()) {
-            if (keyCode == KeyCode.S || keyCode == KeyCode.U) { // attempts to save the song or update the song depending on the window opened
+            if (keyCode == KeyCode.S || keyCode == KeyCode.U) { // attempts to save the Movie or update the Movie depending on the window opened
                 btnSave();
             }
         }
@@ -345,7 +345,7 @@ public class MediaPlayerCUViewController implements Initializable {
         double movieTime = currentMovieLength;
         String category = String.valueOf(txtInputCategories.getText());
         double personalRating = 0;
-        // Inputs the values from above into a new song and tries to send it up the layers into the DB, table view and sound map
+        // Inputs the values from above into a new movie and tries to send it up the layers into the DB, table view and sound map
         Movie movie = new Movie(-1, year, title, director, moviePath, movieRating, movieTime, personalRating, null, category);
 
         try {
@@ -365,7 +365,7 @@ public class MediaPlayerCUViewController implements Initializable {
         }
     }
 
-    private void updateMovie() throws Exception { //Here the song gets updated
+    private void updateMovie() throws Exception { //Here the movie gets updated
         if (currentSelectedMovie != null) {
             currentSelectedMovie.setTitle(txtInputName.getText());
             currentSelectedMovie.setDirector(txtInputArtist.getText());
@@ -385,7 +385,7 @@ public class MediaPlayerCUViewController implements Initializable {
                 }
             }
 
-            // Updates the song data and sends it up the layers to the DAL layer and updates the song path in the sound map in case it got changed
+            // Updates the movie data and sends it up the layers to the DAL layer and updates the movie path in the sound map in case it got changed
             try {
                 movieModel.updateMovie(currentSelectedMovie);
                 mediaPlayerViewController.updateMoviePathSoundMap(currentSelectedMovie);

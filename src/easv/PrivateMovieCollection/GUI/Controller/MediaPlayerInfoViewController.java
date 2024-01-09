@@ -119,7 +119,7 @@ public class MediaPlayerInfoViewController implements Initializable {
         }
 
         if (event.isControlDown()) {
-            if (keyCode == KeyCode.U) { // Open selected song in update window
+            if (keyCode == KeyCode.U) { // Open selected Movie in update window
                 btnUpdateFile();
             }
         }

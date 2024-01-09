@@ -75,11 +75,11 @@ public class MediaPlayerViewController implements Initializable {
     @FXML
     private Slider sliderProgressMovie, sliderProgressVolume;
     @FXML
-    private MediaPlayer currentMusic = null;
+    private MediaPlayer currentVideo = null;
     private final Map<Integer, MediaPlayer> soundMap = new HashMap<>(); //Every movie has a unique id
     private List<Movie> currentMovieList = new ArrayList<>();
     private boolean isUserChangingSlider = false;
-    private boolean isMusicPaused = false;
+    private boolean isVideoPaused = false;
     private int repeatMode = 0; //Default repeat mode
     private int shuffleMode = 0; //Default shuffle
     private int currentIndex = 0;
@@ -138,7 +138,7 @@ public class MediaPlayerViewController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         mediaPlayerCUViewController = MediaPlayerCUViewController.getInstance();
-        
+
 
         btnRepeatIcon.setImage(repeatDisableIcon); //We set picture here so the button know what is chosen
         btnShuffleIcon.setImage(shuffleIconDisable); // -||-
@@ -198,10 +198,8 @@ public class MediaPlayerViewController implements Initializable {
                 throw new RuntimeException(e);
             }
         }
-
         hboxMediaPlayer.setVisible(false);
         AnchorPane.setBottomAnchor(vboxTblBtn, 5.0);
-
     }
 
     private void initializeTableColumns() {
@@ -218,7 +216,7 @@ public class MediaPlayerViewController implements Initializable {
         colArtistInCategory.setCellValueFactory(new PropertyValueFactory<>("director"));
     }
 
-//********************************************Search&*Filter***********************************************
+    //********************************************Search&*Filter***********************************************
     private static final ArrayList<Integer> categoryFilter = new ArrayList<>();
     private static double minimumIMDBRating;
     private static String filterIMDBArrow = "⯅"; // So filter know we want result under or over a number
@@ -230,9 +228,6 @@ public class MediaPlayerViewController implements Initializable {
             btnCategoryFilter.getItems().add(categoryItem);
         });
     }
-
-    // Opret en ArrayList til decimaltal
-    List<Double> decimalArrayList = new ArrayList<>();
 
     public void btnMinimumIMDBRating(){
         ToggleGroup imdbToggleGroup = new ToggleGroup();
@@ -367,8 +362,8 @@ public class MediaPlayerViewController implements Initializable {
         });
 
         playMovie.setOnAction((event) -> {
-                PlayMovie(currentMovie);
-                contextMenuMovies.hide();
+            PlayMovie(currentMovie);
+            contextMenuMovies.hide();
         });
 
         updateMovie.setOnAction((event) -> {
@@ -493,17 +488,17 @@ public class MediaPlayerViewController implements Initializable {
         int percentage = (int) (progress * 100);
         lblVolume.setText(String.format("%d%%", percentage));
 
-        if (currentMusic != null) {
-            currentMusic.setVolume((sliderProgressVolume.getValue()));
+        if (currentVideo != null) {
+            currentVideo.setVolume((sliderProgressVolume.getValue()));
         }
     }
 
     private void updateMovieProgressTimer() { // Update the slider for movies with time
-        if (currentMusic != null) {
+        if (currentVideo != null) {
             double progressValue = sliderProgressMovie.getValue();
             long currentSeconds = (long) progressValue;
             lblCurrentMovieProgress.setText(String.format("%02d:%02d:%02d", currentSeconds / 3600, (currentSeconds % 3600) / 60, currentSeconds % 60)); //Format HH:MM:SS
-            Duration totalDuration = currentMusic.getTotalDuration();
+            Duration totalDuration = currentVideo.getTotalDuration();
             long totalSeconds = (long) totalDuration.toSeconds();
             lblMovieDuration.setText(String.format("%02d:%02d:%02d", totalSeconds / 3600, (totalSeconds % 3600) / 60, totalSeconds % 60)); //Format HH:MM:SS
         } else {
@@ -546,7 +541,7 @@ public class MediaPlayerViewController implements Initializable {
 
     private void handleMoviePlay() { //Tries to figure out in which table view the movie you want to play is located
         Movie selectedMovie;
-        if (currentMusic != null) {
+        if (currentVideo != null) {
             selectedMovie = null;
             togglePlayPause();
         } else if (tblMovies.getSelectionModel().getSelectedItem() != null)
@@ -561,7 +556,7 @@ public class MediaPlayerViewController implements Initializable {
             addMoviesToSoundMap(selectedMovie).thenRun(() -> {
 
                 MediaPlayer newMovie = soundMap.get(selectedMovie.getId());
-                if (currentMusic != newMovie && newMovie != null) {
+                if (currentVideo != newMovie && newMovie != null) {
                     handleNewMovie(newMovie, selectedMovie);
                 }
             });
@@ -589,7 +584,7 @@ public class MediaPlayerViewController implements Initializable {
 
                     /*
                     sliderProgressMovie.setValue(0);
-                    isMusicPaused = false;
+                    isVideoPaused = false;
                     PlayMovie(selectedMovie);
                      */
                 }
@@ -617,7 +612,7 @@ public class MediaPlayerViewController implements Initializable {
                         throw new RuntimeException(e);
                     }
                     sliderProgressMovie.setValue(0);
-                    isMusicPaused = false;
+                    isVideoPaused = false;
                     //PlayMovie(selectedMovie);
 
                 }
@@ -635,15 +630,15 @@ public class MediaPlayerViewController implements Initializable {
     }
 
     public void togglePlayPause() { // This controls the play/Pause functionality of the program when listening ot movies
-        if (currentMusic != null) {
-            if (currentMusic.getStatus() == MediaPlayer.Status.PLAYING) { //If it was playing we pause it
-                currentMusic.pause();
-                isMusicPaused = true;
+        if (currentVideo != null) {
+            if (currentVideo.getStatus() == MediaPlayer.Status.PLAYING) { //If it was playing we pause it
+                currentVideo.pause();
+                isVideoPaused = true;
                 btnPlayIcon.setImage(playIcon);
             } else { // If it was instead paused, we start playing the movie again
-                currentMusic.seek(Duration.seconds(sliderProgressMovie.getValue()));
-                currentMusic.play();
-                isMusicPaused = false;
+                currentVideo.seek(Duration.seconds(sliderProgressMovie.getValue()));
+                currentVideo.play();
+                isVideoPaused = false;
                 btnPlayIcon.setImage(pauseIcon);
             }
         }
@@ -676,64 +671,53 @@ public class MediaPlayerViewController implements Initializable {
     }
 
     private void handleNewMovie(MediaPlayer newMovie, Movie selectedMovie) {
-        if (currentMusic != null) {
-            currentMusic.stop();
+        if (currentVideo != null) {
+            currentVideo.stop();
         }
 
-    //    onStartMovieBtnClick();
-        vboxTblBtn.setVisible(false);
-        hboxMediaPlayer.setVisible(true);
-        hboxFilter.setVisible(false);
-        AnchorPane.setBottomAnchor(vboxTblBtn, 117.0);
-        mediaView.fitWidthProperty().bind(mediaViewBox.widthProperty());
-        mediaView.fitHeightProperty().bind(mediaViewBox.heightProperty());
+        onStartMovieBtnClick();
         mediaView.setMediaPlayer(newMovie);
-        mediaViewBox.setVisible(true);
-        anchorPane.setStyle("-fx-background-color: #454b4f;");
-        isVideoModeActive = false;
-
 
         currentMoviePlaying = selectedMovie;
         sliderProgressMovie.setDisable(false);
-        currentMusic = newMovie;
+        currentVideo = newMovie;
 
         sliderProgressMovie.setMax(newMovie.getTotalDuration().toSeconds()); //Set our progress to the time so, we know maximum value
         lblPlayingNow.setText("Now playing: " + selectedMovie.getTitle() + " - " + selectedMovie.getDirector());
-        currentMusic.seek(Duration.ZERO); //When you start a movie again it should start from start
-        currentMusic.setVolume((sliderProgressVolume.getValue())); //We set the volume
+        currentVideo.seek(Duration.ZERO); //When you start a movie again it should start from start
+        currentVideo.setVolume((sliderProgressVolume.getValue())); //We set the volume
         handlePlayingMovieColor();
         tblMoviesInCategory.refresh(); //So the movie in movie category get its color
         tblCategory.refresh(); //So the category in category get its color
-        currentMusic.setRate(currentSpeed);
+        currentVideo.setRate(currentSpeed);
 
-        // Play or pause based on the isMusicPaused flag
-        if (isMusicPaused) {
-            currentMusic.pause();
+        // Play or pause based on the isVideoPaused flag
+        if (isVideoPaused) {
+            currentVideo.pause();
             btnPlayIcon.setImage(playIcon);
         } else {
-            currentMusic.play();
+            currentVideo.play();
             btnPlayIcon.setImage(pauseIcon);
         }
-        currentMusic.currentTimeProperty().addListener((observable, oldValue, newValue) -> {
+        currentVideo.currentTimeProperty().addListener((observable, oldValue, newValue) -> {
             // Update the slider value as the movie progresses
-
             if (!isUserChangingSlider) {
                 sliderProgressMovie.setValue(newValue.toSeconds());
             }
         });
         //Do these when movie is finished
-        currentMusic.setOnEndOfMedia(this::onEndOfMovie);
+        currentVideo.setOnEndOfMedia(this::onEndOfMovie);
     }
 
     public void PlayMovie(Movie movie) {
         addMoviesToSoundMap(movie).thenRun(() -> {
-            MediaPlayer newMusic = soundMap.get(movie.getId());
-            if (newMusic == null) {// Checks if the selected music will work or if it should throw this error instead
+            MediaPlayer newVideo = soundMap.get(movie.getId());
+            if (newVideo == null) {// Checks if the selected video will work or if it should throw this error instead
                 soundMap.put(movie.getId(), new MediaPlayer(new Media(new File("resources/Sounds/missingFileErrorSound.mp3").toURI().toString())));
-                newMusic = soundMap.get(movie.getId());
+                newVideo = soundMap.get(movie.getId());
                 sliderProgressMovie.setValue(0);
             }
-            handleNewMovie(newMusic, movie);
+            handleNewMovie(newVideo, movie);
         });
     }
 
@@ -756,7 +740,7 @@ public class MediaPlayerViewController implements Initializable {
 
     public void onEndOfMovie(){
         if (repeatMode == 2) {//Repeat 1
-            handleNewMovie(currentMusic, currentMoviePlaying);
+            handleNewMovie(currentVideo, currentMoviePlaying);
             return;
         }
         if (shuffleMode == 1) { // If enabled, the shuffle mode will play a random movie from the selected table view, not including the category table view
@@ -765,7 +749,7 @@ public class MediaPlayerViewController implements Initializable {
         }
 
 
-        currentMusic = null;
+        currentVideo = null;
         sliderProgressMovie.setValue(0);
         lblPlayingNow.setText("No movie playing");
         sliderProgressMovie.setDisable(true);
@@ -949,7 +933,7 @@ public class MediaPlayerViewController implements Initializable {
             }
         }
     }
-//*****************************************WINDOWS********************************************
+    //*****************************************WINDOWS********************************************
     private Stage stage;
 
     public Stage getUpdateStage() {
@@ -1011,8 +995,8 @@ public class MediaPlayerViewController implements Initializable {
         btnSpeed.setText(currentSpeed + "x");
 
         // Set the media player's playback speed to the new speed
-        if (currentMusic != null) {
-            currentMusic.setRate(currentSpeed);
+        if (currentVideo != null) {
+            currentVideo.setRate(currentSpeed);
         }
     }
 
@@ -1039,15 +1023,15 @@ public class MediaPlayerViewController implements Initializable {
         return (int) (Math.random() * range) + min;
     }
 
-    public void seekCurrentMusic10Plus() { // Goes 10 seconds forwards in the currently playing movie
-        if (currentMusic != null) {
-            currentMusic.seek(Duration.seconds(sliderProgressMovie.getValue() + 10));
+    public void seekCurrentVideo10Plus() { // Goes 10 seconds forwards in the currently playing movie
+        if (currentVideo != null) {
+            currentVideo.seek(Duration.seconds(sliderProgressMovie.getValue() + 10));
         }
     }
 
-    public void seekCurrentMusic10Minus() { // Goes 10 seconds backwards in the currently playing movie
-        if (currentMusic != null) {
-            currentMusic.seek(Duration.seconds(sliderProgressMovie.getValue() - 10));
+    public void seekCurrentVideo10Minus() { // Goes 10 seconds backwards in the currently playing movie
+        if (currentVideo != null) {
+            currentVideo.seek(Duration.seconds(sliderProgressMovie.getValue() - 10));
         }
     }
 
@@ -1362,13 +1346,13 @@ public class MediaPlayerViewController implements Initializable {
         if (event.isControlDown()) { // Checks if control key is held down
             if (keyCode == KeyCode.LEFT) { // Tries to move 10 seconds backwards in the currently playing movie
                 sliderProgressMovie.requestFocus();
-                seekCurrentMusic10Minus();
+                seekCurrentVideo10Minus();
             }
         }
         if (event.isControlDown()) {
             if (keyCode == KeyCode.RIGHT) { // Tries to move 10 seconds forwards in the currently playing movie
                 sliderProgressMovie.requestFocus();
-                seekCurrentMusic10Plus();
+                seekCurrentVideo10Plus();
             }
         }
 
@@ -1527,10 +1511,10 @@ public class MediaPlayerViewController implements Initializable {
         handleMovieSwitch(currentIndex + 1);
     }
 
-    public void btnGoBack(ActionEvent actionEvent) {
-        if (currentMusic != null) {
+    public void btnGoBack() {
+        if (currentVideo != null) {
             repeatMode = -1;
-            currentMusic.seek(Duration.millis(1000000000)); //So its 100% is done
+            currentVideo.seek(Duration.millis(1000000000)); //So its 100% is done
         }
         btnRepeatMovie();
         onEndMovieBtnClick();
@@ -1571,18 +1555,18 @@ public class MediaPlayerViewController implements Initializable {
     }
 
     public void onSlideProgressPressed() { // Tries to move the movie progress to the selected duration
-        if (currentMusic != null) {
+        if (currentVideo != null) {
             isUserChangingSlider = true; // This prevents the system from trying to update itself
-            currentMusic.seek(Duration.seconds(sliderProgressMovie.getValue()));
-            currentMusic.pause();
+            currentVideo.seek(Duration.seconds(sliderProgressMovie.getValue()));
+            currentVideo.pause();
         }
     }
 
     public void onSlideProgressReleased() { // Tries to start the movie when the user release the slider at a location
-        if (currentMusic != null) {
-            if (!isMusicPaused) {
-                currentMusic.seek(Duration.seconds(sliderProgressMovie.getValue()));
-                currentMusic.play();
+        if (currentVideo != null) {
+            if (!isVideoPaused) {
+                currentVideo.seek(Duration.seconds(sliderProgressMovie.getValue()));
+                currentVideo.play();
                 isUserChangingSlider = false; // This prevents the system from trying to update itself
                 anchorPane.requestFocus();
             }

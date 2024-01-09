@@ -41,19 +41,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
             ResultSet rs = stmt.executeQuery(sql);
             // Loop through rows from the database result set
             while (rs.next()) {
-                //Map DB row to Movie object
-                int id = rs.getInt("MovieId");
-                String movieName = rs.getString("MovieName");
-                String director = rs.getString("MovieDirector");
-                int year = rs.getInt("MovieYear");
-                String moviePath = rs.getString("MovieFilepath");
-                double imdbRating = rs.getDouble("MovieRating");
-                double movieLength = rs.getDouble("MovieLength");
-                double personalRating = rs.getDouble("Personal");
-                String lastWatched = rs.getString("MovieLastViewed");
-                String category = rs.getString("MovieCategories");
-                Movie movie = new Movie(id, year, movieName, director, moviePath, imdbRating, movieLength, personalRating, lastWatched, category);
-                allMovies.add(movie);
+                allMovies.add(generateMovie(rs));
             }
             return allMovies;
         }
@@ -169,8 +157,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
         try (Connection conn = databaseConnector.getConnection();
              Statement stmt = conn.createStatement())
         {
-            String sql = "" +
-                    "SELECT * FROM dbo.Movies WHERE Personal < 6\n" +
+            String sql = "SELECT * FROM dbo.Movies WHERE Personal < 6\n" +
                     "AND MovieLastViewed < DATEADD(YEAR,-2,CAST(GETDATE() AS DATE));";
 
             ResultSet rs = stmt.executeQuery(sql);
@@ -178,18 +165,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
             // Loop through rows from the database result set
             while (rs.next()) {
                 //Map DB row to Movie object
-                int id = rs.getInt("MovieId");
-                String movieName = rs.getString("MovieName");
-                String director = rs.getString("MovieDirector");
-                int year = rs.getInt("MovieYear");
-                String moviePath = rs.getString("MovieFilepath");
-                double imdbRating = rs.getDouble("MovieRating");
-                double movieLength = rs.getDouble("MovieLength");
-                double personalRating = rs.getDouble("Personal");
-                String lastWatched = rs.getString("MovieLastViewed");
-                String category = rs.getString("MovieCategories");
-                Movie movie = new Movie(id, year, movieName, director, moviePath, imdbRating, movieLength, personalRating, lastWatched, category);
-                allMoviesOld.add(movie);
+                allMoviesOld.add(generateMovie(rs));
             }
 
             return allMoviesOld;
@@ -211,40 +187,43 @@ public class MovieDAO_DB implements IMovieDataAccess {
 
         try (Connection conn = databaseConnector.getConnection();
              Statement stmt = conn.createStatement())
-            {
-                String sql = "SELECT M.* FROM Movies M WHERE M.MovieId IN (SELECT CM.MovieId FROM CategoryMovies CM" +
-                " JOIN Category C ON CM.CategoryId = C.CategoryId WHERE C.CategoryId IN (" + String.join(",", categoriesFilter) + ")" +
-                " GROUP BY CM.MovieId HAVING COUNT(DISTINCT C.CategoryName) = "+ categoriesFilter.size() + ")" +
+        {
+            String sql = "SELECT M.* FROM Movies M WHERE M.MovieId IN (SELECT CM.MovieId FROM CategoryMovies CM" +
+                    " JOIN Category C ON CM.CategoryId = C.CategoryId WHERE C.CategoryId IN (" + String.join(",", categoriesFilter) + ")" +
+                    " GROUP BY CM.MovieId HAVING COUNT(DISTINCT C.CategoryName) = "+ categoriesFilter.size() + ")" +
                     "AND M.MovieRating "+WayValue+"= " + IMDBFilter;
 
-                String sqlIMDBOnly = "SELECT * FROM Movies M WHERE M.MovieRating "+WayValue+"="+ IMDBFilter;
+            String sqlIMDBOnly = "SELECT * FROM Movies M WHERE M.MovieRating "+WayValue+"="+ IMDBFilter;
+            ResultSet rs;
+            if (categoriesFilter.isEmpty()) {rs = stmt.executeQuery(sqlIMDBOnly);}
+            else rs = stmt.executeQuery(sql);
 
-                ResultSet rs;
-                if (categoriesFilter.isEmpty()) {rs = stmt.executeQuery(sqlIMDBOnly);}
-                else rs = stmt.executeQuery(sql);
 
-                // Loop through rows from the database result set
-                while (rs.next()) {
-                    //Map DB row to Movie object
-                    int id = rs.getInt("MovieId");
-                    String movieName = rs.getString("MovieName");
-                    String director = rs.getString("MovieDirector");
-                    int year = rs.getInt("MovieYear");
-                    String moviePath = rs.getString("MovieFilepath");
-                    double imdbRating = rs.getDouble("MovieRating");
-                    double movieLength = rs.getDouble("MovieLength");
-                    double personalRating = rs.getDouble("Personal");
-                    String lastWatched = rs.getString("MovieLastViewed");
-                    String category = rs.getString("MovieCategories");
-                    Movie movie = new Movie(id, year, movieName, director, moviePath, imdbRating, movieLength, personalRating, lastWatched, category);
-                    allMoviesFilter.add(movie);
-                }
-                return allMoviesFilter;
+            // Loop through rows from the database result set
+            while (rs.next()) {
+                allMoviesFilter.add(generateMovie(rs));
+                System.out.println(allMoviesFilter);
             }
+            return allMoviesFilter;
+        }
         catch (SQLException ex)
         {
             ex.printStackTrace();
             throw new Exception("Could not get movies from database", ex);
         }
+    }
+
+    private Movie generateMovie (ResultSet rs) throws Exception    {
+        int id = rs.getInt("MovieId");
+        String movieName = rs.getString("MovieName");
+        String director = rs.getString("MovieDirector");
+        int year = rs.getInt("MovieYear");
+        String moviePath = rs.getString("MovieFilepath");
+        double imdbRating = rs.getDouble("MovieRating");
+        double movieLength = rs.getDouble("MovieLength");
+        double personalRating = rs.getDouble("Personal");
+        String lastWatched = rs.getString("MovieLastViewed");
+        String category = rs.getString("MovieCategories");
+        return new Movie(id, year, movieName, director, moviePath, imdbRating, movieLength, personalRating, lastWatched, category);
     }
 }

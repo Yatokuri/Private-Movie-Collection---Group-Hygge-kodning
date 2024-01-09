@@ -41,19 +41,19 @@ public class ValidateModel {
                     setupUpdateOriginalName = value;
                     setupUpdateOriginal = false;
                 }
-                if (setupUpdateOriginalName.equals(value))  { // When updating a song the filepath can be the same as before of cause
+                if (setupUpdateOriginalName.equals(value))  { // When updating a movie the filepath can be the same as before of cause
                     return isValidMediaPath(value);
                 }
-                for  (Movie m : MovieModel.getObservableMovies()) { // We don't want people to have the same song path twice
+                for  (Movie m : MovieModel.getObservableMovies()) { // We don't want people to have the same movie path twice
                     if (m.getMoviePath().equals(value)) {
                         return false;
                     }
                 }
-                return isValidMediaPath(value); // If there time is 00:00:00 that mean the song is invalid
+                return isValidMediaPath(value); // If there time is 00:00:00 that mean the movie is invalid
             case "txtInputTime":
                 return !value.equals("00:00:00");
 
-            case "txtInputYear": //You can add a Song from year 1 to current year
+            case "txtInputYear": //You can add a movie from year 1 to current year
                 try {
                     int year = Integer.parseInt(value);
                     int currentYear = Year.now().getValue();
@@ -93,9 +93,9 @@ public class ValidateModel {
         }
     }
 
-    public void updateTimeText(MediaPlayer newSong, Consumer<String> onReadyCallback) { // Method to get a song time in HH:MM:SS format
-        newSong.setOnReady(() -> {
-            long totalSeconds = (long) newSong.getTotalDuration().toSeconds();
+    public void updateTimeText(MediaPlayer newMovie, Consumer<String> onReadyCallback) { // Method to get a movie time in HH:MM:SS format
+        newMovie.setOnReady(() -> {
+            long totalSeconds = (long) newMovie.getTotalDuration().toSeconds();
             String formattedTime = String.format("%02d:%02d:%02d " +  "-" + totalSeconds , totalSeconds / 3600, (totalSeconds % 3600) / 60, totalSeconds % 60);
             // Execute the callback with the formatted time
             if (onReadyCallback != null) {
