@@ -201,19 +201,28 @@ public class MovieDAO_DB implements IMovieDataAccess {
         }
     }
 
-    public List<Movie> getAllMoviesFilter(List<String> categoriesFilter) throws Exception { // Queries the database for all movies to insert them in an arraylist
+    public List<Movie> getAllMoviesFilter(List<String> categoriesFilter, Double IMDBFilter, String Way) throws Exception { // Queries the database for all movies to insert them in an arraylist
         allMoviesFilter.clear(); // Clear existing data
+        String WayValue;
+        if (Way.equals("D")) //Determine we want filter up or down
+            WayValue = "<";
+        else
+            WayValue = ">";
 
         try (Connection conn = databaseConnector.getConnection();
              Statement stmt = conn.createStatement())
             {
-
                 String sql = "SELECT M.* FROM Movies M WHERE M.MovieId IN (SELECT CM.MovieId FROM CategoryMovies CM" +
                 " JOIN Category C ON CM.CategoryId = C.CategoryId WHERE C.CategoryId IN (" + String.join(",", categoriesFilter) + ")" +
-                " GROUP BY CM.MovieId HAVING COUNT(DISTINCT C.CategoryName) = "+ categoriesFilter.size() + ")";
+                " GROUP BY CM.MovieId HAVING COUNT(DISTINCT C.CategoryName) = "+ categoriesFilter.size() + ")" +
+                    "AND M.MovieRating "+WayValue+"= " + IMDBFilter;
 
-                ResultSet rs = stmt.executeQuery(sql);
-                
+                String sqlIMDBOnly = "SELECT * FROM Movies M WHERE M.MovieRating "+WayValue+"="+ IMDBFilter;
+
+                ResultSet rs;
+                if (categoriesFilter.isEmpty()) {rs = stmt.executeQuery(sqlIMDBOnly);}
+                else rs = stmt.executeQuery(sql);
+
                 // Loop through rows from the database result set
                 while (rs.next()) {
                     //Map DB row to Movie object

@@ -42,7 +42,13 @@
     -fx-border-radius:   15px 15px 15px 15px;
     -fx-text-fill: white;
 }
-
+#btnMinimumIMDB{
+    -fx-background-color: linear-gradient(to bottom, #22813d, #22813d);
+    -fx-border-color: #001618;
+    -fx-background-radius: 15px 15px 15px 15px;
+    -fx-border-radius:   15px 15px 15px 15px;
+    -fx-text-fill: white;
+}
 .combo-box{
     -fx-background-color: #9d2323;
     -fx-background-insets: 0, 0 0 1 0;

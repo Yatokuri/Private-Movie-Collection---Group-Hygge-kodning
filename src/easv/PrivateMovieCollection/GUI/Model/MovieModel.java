@@ -35,7 +35,7 @@ public class MovieModel {
 
     public ObservableList<Movie> updateMovieListFilter() throws Exception { // Updates the movie list from the database to be accurate again
         moviesToBeViewed.clear();
-        moviesToBeViewed.addAll(movieManager.getAllMoviesFilter(MediaPlayerViewController.getCategoryFilter()));
+        moviesToBeViewed.addAll(movieManager.getAllMoviesFilter(MediaPlayerViewController.getCategoryFilter(), MediaPlayerViewController.getMinimumIMDBFilter(), MediaPlayerViewController.getFilterIMDBArrow()));
         return moviesToBeViewed;
     }
 

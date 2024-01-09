@@ -32,8 +32,8 @@ public class MovieManager {
         return movieDao_DB.getAllMovies();
     }
 
-    public List<Movie> getAllMoviesFilter(List<String> categoriesFilter) throws Exception {
-        return movieDao_DB.getAllMoviesFilter(categoriesFilter);
+    public List<Movie> getAllMoviesFilter(List<String> categoriesFilter, Double IMDBRate, String Way) throws Exception {
+        return movieDao_DB.getAllMoviesFilter(categoriesFilter, IMDBRate, Way);
     }
 
     public List<Movie> getAllMoviesOld() throws Exception {

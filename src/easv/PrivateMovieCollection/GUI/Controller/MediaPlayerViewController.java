@@ -47,7 +47,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class MediaPlayerViewController implements Initializable {
     @FXML
-    public MenuButton btnCategoryFilter;
+    public MenuButton btnCategoryFilter, btnMinimumIMDB;
     @FXML
     private HBox vboxTblBtn, mediaViewBox, hboxMediaPlayer, hboxFilter;
     @FXML
@@ -67,7 +67,7 @@ public class MediaPlayerViewController implements Initializable {
     @FXML
     private ImageView btnPlayIcon, btnRepeatIcon, btnShuffleIcon;
     @FXML
-    private Button btnCreateCategory, btnUpdateCategory, btnPlay, btnRepeat, btnShuffle, btnVideo, btnSpeed;
+    private Button btnCreateCategory, btnUpdateCategory, btnPlay, btnRepeat, btnShuffle, btnVideo, btnSpeed, btnFilterIMDBArrow;
     @FXML
     private TextField txtMovieSearch;
     @FXML
@@ -160,8 +160,6 @@ public class MediaPlayerViewController implements Initializable {
                 tblMovies.setItems(movieModel.filterList(MovieModel.getObservableMovies(), newValue.toLowerCase()))
         );
 
-
-
         // Initialize the tables with columns.
         initializeTableColumns();
 
@@ -185,6 +183,7 @@ public class MediaPlayerViewController implements Initializable {
         contextSystem();
         initializeDragAndDrop();
         btnCategoryFilter();
+        btnMinimumIMDBRating();
 
         //Open new window
 
@@ -200,15 +199,8 @@ public class MediaPlayerViewController implements Initializable {
             }
         }
 
-        //System.out.println(CategoryModel.getObservableCategories());
-
         hboxMediaPlayer.setVisible(false);
         AnchorPane.setBottomAnchor(vboxTblBtn, 5.0);
-
-
-
-
-
 
     }
 
@@ -226,7 +218,10 @@ public class MediaPlayerViewController implements Initializable {
         colArtistInCategory.setCellValueFactory(new PropertyValueFactory<>("director"));
     }
 
-//*******************************************Search*&*Filter***********************************************
+//********************************************Search&*Filter***********************************************
+    private static final ArrayList<Integer> categoryFilter = new ArrayList<>();
+    private static double minimumIMDBRating;
+    private static String filterIMDBArrow = "⯅"; // So filter know we want result under or over a number
     public void btnCategoryFilter(){
         CategoryModel.getObservableCategories().forEach(category -> {
             CheckMenuItem categoryItem = new CheckMenuItem(category.getCategoryName());
@@ -235,7 +230,42 @@ public class MediaPlayerViewController implements Initializable {
             btnCategoryFilter.getItems().add(categoryItem);
         });
     }
-    static ArrayList<Integer> categoryFilter = new ArrayList<>();
+
+    // Opret en ArrayList til decimaltal
+    List<Double> decimalArrayList = new ArrayList<>();
+
+    public void btnMinimumIMDBRating(){
+        ToggleGroup imdbToggleGroup = new ToggleGroup();
+
+        RadioMenuItem imdbOffItem = new RadioMenuItem("Off");
+        imdbOffItem.setToggleGroup(imdbToggleGroup);
+        btnMinimumIMDB.getItems().add(imdbOffItem);
+
+        List<Double> decimalValues = new ArrayList<>();
+        for (double i = 1.0; i <= 10.0; i += 1.0) {
+            decimalValues.add(i);
+        }
+        decimalValues.forEach(imdbRating -> {
+            RadioMenuItem imdbItem = new RadioMenuItem(String.valueOf(imdbRating));
+            imdbItem.setToggleGroup(imdbToggleGroup);
+
+            imdbOffItem.setOnAction(event -> {
+                if (imdbOffItem.isSelected() && categoryFilter.isEmpty())   {
+                    minimumIMDBRating = 0.0;
+                    try {tblMovies.setItems(movieModel.updateMovieList());}
+                    catch (Exception ex) { throw new RuntimeException(ex);}
+                }
+            });
+            imdbItem.setOnAction(event -> {
+                if (imdbItem.isSelected() || imdbOffItem.isSelected()) {
+                    minimumIMDBRating = imdbRating;
+                    try {tblMovies.setItems(movieModel.updateMovieListFilter());}
+                    catch (Exception ex) { throw new RuntimeException(ex);}
+                }
+            });
+            btnMinimumIMDB.getItems().add(imdbItem);
+        });
+    }
 
     public EventHandler<ActionEvent> event = e -> {
         if (((CheckMenuItem) e.getSource()).isSelected()) {
@@ -257,13 +287,20 @@ public class MediaPlayerViewController implements Initializable {
         }   // Make sure we search again what there is already in search text in the new list automatic
         tblMovies.setItems(movieModel.filterList(MovieModel.getObservableMovies(), txtMovieSearch.getText().toLowerCase()));
     };
-
     public static ArrayList<String> getCategoryFilter(){
         ArrayList<String> categoryFilterString = new ArrayList<String>();
         for (Integer i: categoryFilter)
             categoryFilterString.add(String.valueOf(i));
         return categoryFilterString;
     }
+    public static double getMinimumIMDBFilter(){
+        return minimumIMDBRating;
+    }
+
+    public static String getFilterIMDBArrow(){
+        return filterIMDBArrow;
+    }
+
 //*******************************************CONTEXT*MENU**************************************************
 
     ContextMenu contextMenuMoviesInCategory = new ContextMenu();
@@ -1499,6 +1536,19 @@ public class MediaPlayerViewController implements Initializable {
         onEndMovieBtnClick();
     }
 
+    public void btnAFilterIMDBArrow() {
+        if (Objects.equals(btnFilterIMDBArrow.getText(), "⯆")) {
+            filterIMDBArrow = "U";
+            btnFilterIMDBArrow.setText("⯅");
+        }
+        else {
+            filterIMDBArrow = "D";
+            btnFilterIMDBArrow.setText("⯆");
+        }
+        try {tblMovies.setItems(movieModel.updateMovieListFilter());}
+        catch (Exception ex) { throw new RuntimeException(ex);}
+    }
+
     public void btnRepeatMovie() { // Enables or disables the repeat mode and sets the icon to the relevant one
         if (btnRepeatIcon.getImage().equals(repeat1Icon)) {
             btnRepeatIcon.setImage(repeatDisableIcon);
@@ -1553,4 +1603,5 @@ public class MediaPlayerViewController implements Initializable {
                 "#92dc9b %.10f%%, #92dc9b 100%%);", percentage * 100, percentage * 100);
         sliderProgressMovie.lookup(".track").setStyle(color);
     }
+
 }

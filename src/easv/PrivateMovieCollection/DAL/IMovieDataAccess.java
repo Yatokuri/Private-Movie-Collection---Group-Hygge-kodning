@@ -21,5 +21,5 @@ public interface IMovieDataAccess {
 
     List<Movie> getAllMoviesOld() throws Exception;
 
-    List<Movie> getAllMoviesFilter(List<String> categoriesFilter) throws Exception;
+    List<Movie> getAllMoviesFilter(List<String> categoriesFilter, Double IMDB, String u) throws Exception;
 }
