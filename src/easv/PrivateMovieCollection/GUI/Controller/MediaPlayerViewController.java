@@ -951,6 +951,7 @@ public class MediaPlayerViewController implements Initializable {
         // Add event handler to handle the close request, so it update correct
         stage.setOnCloseRequest(event -> {
             try {
+                System.out.println("Refresh");
                 refreshMovieList();
                 refreshCategories();
             } catch (Exception e) {
@@ -983,7 +984,7 @@ public class MediaPlayerViewController implements Initializable {
         stage.initModality(Modality.APPLICATION_MODAL); //Lock the first window until second is close
     }
 
-    //******************************************HELPER*METHOD********************************************
+//******************************************HELPER*METHOD********************************************
     public void setSpeedMovie(int value) { // Method to change what speed we use
         if (currentSpeedIndex == speeds.size())
             currentSpeedIndex = -1;
@@ -1006,6 +1007,7 @@ public class MediaPlayerViewController implements Initializable {
         }
         categoryMovieModel.categoryMovies(currentCategory);
         tblMoviesInCategory.setItems(categoryMovieModel.getObservableCategoriesMovie());
+        tblCategory.setItems(CategoryModel.getObservableCategories());
         tblCategory.refresh();
         tblMoviesInCategory.refresh();
     }
@@ -1035,7 +1037,7 @@ public class MediaPlayerViewController implements Initializable {
         }
     }
 
-    //******************************************DRAG*DROP************************************************
+//******************************************DRAG*DROP************************************************
     @FXML
     private void initializeDragAndDrop() { // Sets up the drag & drop functionality for the entire program
         tblMovies.setOnDragDetected(event -> { //When user drag a movie from movie list

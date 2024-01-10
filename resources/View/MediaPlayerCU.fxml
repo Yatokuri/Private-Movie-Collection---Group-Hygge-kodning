@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane fx:id="anchorPane" onKeyPressed="#keyboardKeyPressed" prefHeight="346.0" prefWidth="503.0" stylesheets="@../CSS/MediaPlayerCU.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.PrivateMovieCollection.GUI.Controller.MediaPlayerCUViewController">
+<AnchorPane fx:id="anchorPane" onKeyPressed="#keyboardKeyPressed" prefHeight="346.0" prefWidth="503.0" stylesheets="@../CSS/MediaPlayerCU.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.PrivateMovieCollection.GUI.Controller.MediaPlayerCUViewController">
     <children>
         <GridPane prefHeight="346.0" prefWidth="376.0">
             <columnConstraints>
@@ -26,48 +26,50 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <children>
                 <TextField fx:id="txtInputName" promptText="Title" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" />
-                <TextField fx:id="txtInputArtist" promptText="Director" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                <TextField fx:id="txtInputDirector" promptText="Director" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                 <HBox prefHeight="22.0" prefWidth="368.0" spacing="30.0" GridPane.columnIndex="2" GridPane.rowIndex="8">
                     <children>
                         <Button mnemonicParsing="false" onAction="#btnCloseWindow" prefWidth="60.0" styleClass="buttonCU" stylesheets="@../CSS/MediaPlayerCU.css" text="Cancel">
-                     <HBox.margin>
-                        <Insets left="40.0" />
-                     </HBox.margin></Button>
+                            <HBox.margin>
+                                <Insets left="40.0" />
+                            </HBox.margin></Button>
                         <Button fx:id="btnSave" mnemonicParsing="false" onAction="#btnSave" prefWidth="60.0" styleClass="buttonCU" stylesheets="@../CSS/MediaPlayerCU.css" text="Save" />
                     </children>
                 </HBox>
                 <TextField fx:id="txtInputYear" promptText="Year" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                 <TextField fx:id="txtInputFilepath" promptText="Filepath" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" GridPane.rowIndex="7" />
                 <Button mnemonicParsing="false" onAction="#btnChooseFile" styleClass="buttonCU" stylesheets="@../CSS/MediaPlayerCU.css" text="Choose" GridPane.columnIndex="3" GridPane.rowIndex="7">
-               <GridPane.margin>
-                  <Insets left="5.0" />
-               </GridPane.margin></Button>
+                    <GridPane.margin>
+                        <Insets left="5.0" />
+                    </GridPane.margin></Button>
                 <HBox alignment="CENTER_LEFT" prefHeight="14.0" prefWidth="243.0" GridPane.columnIndex="2" GridPane.rowIndex="4">
                     <children>
                         <TextField fx:id="txtInputTime" disable="true" editable="false" prefHeight="25.0" prefWidth="134.0" promptText="00:00:00" styleClass="timeText-field" stylesheets="@../CSS/MediaPlayerCU.css" />
                     </children>
                 </HBox>
-            <Label stylesheets="@../CSS/MediaPlayerCU.css" text="Title:" GridPane.columnIndex="1" />
-            <Label stylesheets="@../CSS/MediaPlayerCU.css" text="Director:" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Label stylesheets="@../CSS/MediaPlayerCU.css" text="Category:" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <Label stylesheets="@../CSS/MediaPlayerCU.css" text="Year:" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-            <Label stylesheets="@../CSS/MediaPlayerCU.css" text="Time:" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-            <Label stylesheets="@../CSS/MediaPlayerCU.css" text="File:" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-            <TextField fx:id="txtInputCategories" disable="true" editable="false" promptText="Categories" styleClass="timeText-field" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-            <Label stylesheets="@../CSS/MediaPlayerCU.css" text="IMDB:" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-            <Label stylesheets="@../CSS/MediaPlayerCU.css" text="Personal:" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-            <TextField fx:id="txtInputIMDBRating" promptText="IMDB Rating" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" GridPane.rowIndex="5" />
-            <TextField fx:id="txtInputPersonal" promptText="Personal" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                <Label stylesheets="@../CSS/MediaPlayerCU.css" text="Title:" GridPane.columnIndex="1" />
+                <Label stylesheets="@../CSS/MediaPlayerCU.css" text="Director:" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Label stylesheets="@../CSS/MediaPlayerCU.css" text="Category:" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <Label stylesheets="@../CSS/MediaPlayerCU.css" text="Year:" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <Label stylesheets="@../CSS/MediaPlayerCU.css" text="Time:" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                <Label stylesheets="@../CSS/MediaPlayerCU.css" text="File:" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                <TextField fx:id="txtInputCategories" disable="true" editable="false" promptText="Categories" styleClass="timeText-field" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                <Label stylesheets="@../CSS/MediaPlayerCU.css" text="IMDB:" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                <Label stylesheets="@../CSS/MediaPlayerCU.css" text="Personal:" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                <TextField fx:id="txtInputIMDBRating" promptText="IMDB Rating" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                <TextField fx:id="txtInputPersonal" promptText="Personal" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" GridPane.rowIndex="6" />
             </children>
         </GridPane>
-      <ListView fx:id="lstCategory" layoutX="331.0" layoutY="95.0" prefHeight="163.0" prefWidth="147.0" stylesheets="@../CSS/MediaPlayerCU.css" />
-          <Button layoutX="347.0" layoutY="46.0" mnemonicParsing="false" onAction="#btnMoreCategory" prefHeight="25.0" prefWidth="115.0" styleClass="buttonCU" stylesheets="@../CSS/MediaPlayerCU.css" text="New Category" />
+        <ListView fx:id="lstCategory" layoutX="331.0" layoutY="95.0" prefHeight="163.0" prefWidth="147.0" stylesheets="@../CSS/MediaPlayerCU.css" />
+        <Button layoutX="347.0" layoutY="46.0" mnemonicParsing="false" onAction="#btnMoreCategory" prefHeight="25.0" prefWidth="115.0" styleClass="buttonCU" stylesheets="@../CSS/MediaPlayerCU.css" text="New Category" />
+        <Button layoutX="472.0" layoutY="46.0" mnemonicParsing="false" onAction="#btnAPI" prefHeight="25.0" prefWidth="40.0" styleClass="buttonCU" stylesheets="@../CSS/MediaPlayerCU.css" text="API" />
+        <TextField fx:id="txtInputAPI" layoutX="353.0" layoutY="8.0" promptText="TMDB Link" stylesheets="@../CSS/MediaPlayerCU.css" />
     </children>
 </AnchorPane>
