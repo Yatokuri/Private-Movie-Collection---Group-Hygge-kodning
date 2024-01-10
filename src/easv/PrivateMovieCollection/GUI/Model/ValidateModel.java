@@ -29,7 +29,7 @@ public class ValidateModel {
                 return !value.isEmpty() && value.length() <= 150; // The same number we have set in the nvarchar in SQL
             case "txtInputArtist":
                 return !value.isEmpty() && value.length() <= 100; // -||-
-            case "txtInputMyRate", "txtInputIMDBRate":
+            case "txtInputPersonalRating", "txtInputIMDBRating":
                 try {
                     double rate = Double.parseDouble(value);
                     return rate >= 0.0 && rate <= 10.0;

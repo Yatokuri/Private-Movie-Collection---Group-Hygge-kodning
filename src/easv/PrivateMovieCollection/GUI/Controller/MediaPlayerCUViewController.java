@@ -36,17 +36,14 @@ import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class MediaPlayerCUViewController implements Initializable {
 
     @FXML
     public ListView<Category> lstCategory;
     @FXML
-    private TextField txtInputAPI, txtInputName, txtInputDirector, txtInputYear, txtInputFilepath, txtInputTime, txtInputCategories, txtInputIMDBRating, txtInputPersonal;
+    private TextField txtInputAPI, txtInputName, txtInputDirector, txtInputYear, txtInputFilepath, txtInputTime, txtInputCategories, txtInputIMDBRating, txtInputPersonalRating;
     @FXML
     private Button btnSave;
     private MediaPlayerViewController mediaPlayerViewController;
@@ -67,8 +64,8 @@ public class MediaPlayerCUViewController implements Initializable {
     private static Movie currentSelectedMovie = null;
     private static MediaPlayerCUViewController instance;
 
-    private final List<Category> categoryNames = new ArrayList<>();
-    private List<Category> categoryNamesOld;
+    private List<Category> categoryNames = new ArrayList<>();
+    private final List<Category> categoryNamesOld = new ArrayList<>();
 
     private static String API_KEY;
     private static final String configFile = "config/config.settings";
@@ -109,11 +106,10 @@ public class MediaPlayerCUViewController implements Initializable {
         addValidationListener(txtInputFilepath, isFilepathValid);
         addValidationListener(txtInputYear, isYearValid);
         addValidationListener(txtInputTime, isTimeValid);
-        addValidationListener(txtInputPersonal, isMyRateValid);
+        addValidationListener(txtInputPersonalRating, isMyRateValid);
         addValidationListener(txtInputIMDBRating, isIMDBRateValid);
 
         //contextSystem();
-
 
         // Add a listener to the filepath input to make sure its valid and update time automatic
         txtInputFilepath.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -128,7 +124,7 @@ public class MediaPlayerCUViewController implements Initializable {
 
     @FXML
     private void btnAPI()   {
-        if (!txtInputAPI.getText().isEmpty())    {
+        if (!txtInputAPI.getText().isEmpty() && txtInputAPI.getText().contains("www.themoviedb.org"))    {
             findGenreForFilm(txtInputAPI.getText());
         }
     }
@@ -145,7 +141,7 @@ public class MediaPlayerCUViewController implements Initializable {
             assert response.body() != null;
             String responseData = response.body().string();
 */
-            filmTitle = filmTitle.substring(filmTitle.indexOf("org") + 4);
+            filmTitle = filmTitle.substring(filmTitle.indexOf("org/") + 4, filmTitle.indexOf("-", filmTitle.indexOf("org/") + 4));
 
             categoryNames.clear();
             HttpRequest request = HttpRequest.newBuilder()
@@ -197,18 +193,7 @@ public class MediaPlayerCUViewController implements Initializable {
                     }
                 }
 
-                for (int i = 0; i < genresArray.length(); i++) {
-                    JSONObject genreObject = genresArray.getJSONObject(i);
-                    String genre = genreObject.getString("name");
-                    Category p = new Category(-1, genre, 0);
-                    categoryNames.add(p);
-                    lstCategory.getSelectionModel().select(p);
-                    if (categoryModel.createNewCategory(p)) {
-                        System.out.println("Sejt du skal brugte noget nyt " + p);
-                        lstCategory.getItems().add(p);
-                        lstCategory.getSelectionModel().select(p);
-                    }
-                }
+                updateGenreFromAPI(genresArray);
 
             }
 
@@ -234,18 +219,7 @@ public class MediaPlayerCUViewController implements Initializable {
                     }
                 }
 
-                for (int i = 0; i < genres1Array.length(); i++) {
-                    JSONObject genreObject = genres1Array.getJSONObject(i);
-                    String genre = genreObject.getString("name");
-                    Category p = new Category(-1, genre, 0);
-                    categoryNames.add(p);
-                    lstCategory.getSelectionModel().select(p);
-                    if (categoryModel.createNewCategory(p)) {
-                        System.out.println("Sejt du skal brugte noget nyt " + p);
-                        lstCategory.getItems().add(p);
-                        lstCategory.getSelectionModel().select(p);
-                    }
-                }
+                updateGenreFromAPI(genres1Array);
 
             }
 
@@ -261,21 +235,36 @@ public class MediaPlayerCUViewController implements Initializable {
             txtInputDirector.setText(directorName);
 
             //txtInputIMDBRating.setText(String.valueOf(currentSelectedMovie.getMovieRating()));
-
-            // Automatically select items in lstCategory that match categoryNames
-            /*
-            for (Category c : categoryNames) {
-                lstCategory.getSelectionModel().select(c);
-                System.out.println(categoryNames);
-                System.out.println(lstCategory.getSelectionModel().getSelectedItems());
-            }
-             */
-            categorySystem();
-
+            updateListviewSelected();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void updateGenreFromAPI(JSONArray genreArray) throws Exception {
+        for (int i = 0; i < genreArray.length(); i++) {
+            JSONObject genreObject = genreArray.getJSONObject(i);
+            String genre = genreObject.getString("name");
+            Category p = new Category(-1, genre, 0);
+            categoryNames.add(p);
+            if (categoryModel.createNewCategory(p)) {
+                System.out.println("Sejt du skal brugte noget nyt " + p); //If user for some reason don't need these remove them
+                lstCategory.getItems().add(p);
+            }
+        }
+    }
+
+    private void updateListviewSelected()  {
+       // Automatically select items in lstCategory that match categoryNames
+        lstCategory.getItems().clear(); //Should just add new one so select don't get loose
+        lstCategory.getItems().addAll(CategoryModel.getObservableCategories());
+      for (Category c : categoryNames) { //Find the right instance there is in the list view and select it
+            lstCategory.getItems().stream()
+                    .filter(category -> category.getCategoryName().equals(c.getCategoryName()))
+                    .findFirst().ifPresent(correspondingCategory -> lstCategory.getSelectionModel().select(correspondingCategory));
+        }
+        categorySystem();
     }
 
     public void startupSetup() {
@@ -285,39 +274,39 @@ public class MediaPlayerCUViewController implements Initializable {
 
         if (typeCU == 1) { // If TypeCU is 1 we create Movie
             btnSave.setText("Create");
-            txtInputPersonal.setText(String.valueOf("0"));
+            txtInputPersonalRating.setText(String.valueOf("0"));
         }
         if (typeCU == 2 & currentSelectedMovie != null) { // If TypeCU is 2 we update Movie
             btnSave.setText("Update");
             txtInputName.setText(currentSelectedMovie.getTitle());
             txtInputYear.setText(String.valueOf(currentSelectedMovie.getYear()));
             txtInputDirector.setText(currentSelectedMovie.getDirector());
+            txtInputTime.setText(currentSelectedMovie.getMovieLengthHHMMSS());
             txtInputFilepath.setText(currentSelectedMovie.getMoviePath());
             txtInputIMDBRating.setText(String.valueOf(currentSelectedMovie.getMovieRating()));
-            txtInputPersonal.setText(String.valueOf(currentSelectedMovie.getPersonalRating()));
+            txtInputPersonalRating.setText(String.valueOf(currentSelectedMovie.getPersonalRating()));
 
             try { //Duplicate from another Controller?
                 List<Integer> categoryIds = categoryMovieModel.getMovieCatList(currentSelectedMovie);
-                List<String> categoryNames = new ArrayList<>();
-                categoryNamesOld = new ArrayList<>();
+                List<String> categoryNamesTemp = new ArrayList<>();
 
                 for (Integer categoryId : categoryIds) {
-                    categoryNames.add(categoryModel.getCategoryById(categoryId).getCategoryName());
+                    categoryNamesTemp.add(categoryModel.getCategoryById(categoryId).getCategoryName());
                     categoryNamesOld.add(categoryModel.getCategoryById(categoryId));
                 }
 
                 // Automatically select items in lstCategory that match categoryNamesOld
                 for (Category categoryNamesOld : categoryNamesOld) {
                     lstCategory.getSelectionModel().select(categoryNamesOld);
-                    lstCategory.refresh();
-                    System.out.println("" +lstCategory.getSelectionModel().getSelectedItems());
                 }
 
-                if (categoryNames.isEmpty()) {
+
+                if (categoryNamesTemp.isEmpty()) {
                     txtInputCategories.setPromptText("Missing");
                     return;
                 }
-                txtInputCategories.setText(String.valueOf(categoryNames));
+                txtInputCategories.setText(String.valueOf(categoryNamesTemp));
+                categoryNames = new ArrayList<>(categoryNamesOld); //We let it copy a clone, so they don't pointing to the same underlying list.
 
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -329,15 +318,13 @@ public class MediaPlayerCUViewController implements Initializable {
         lstCategory.setOnMouseClicked(event -> {
             // Get selected items
             var selectedItems = lstCategory.getSelectionModel().getSelectedItems();
-
+            categoryNames.clear();
             // Print selected items
             System.out.println("Selected Items:");
 
             for (Category item : selectedItems) {
                 System.out.println("- " + item);
                 categoryNames.add(item);
-
-
             }
             if (!categoryNames.isEmpty())
                 txtInputCategories.setText(categoryNames.toString());
@@ -430,12 +417,13 @@ public class MediaPlayerCUViewController implements Initializable {
 
 
     public void btnMoreCategory() throws Exception { //Use to add a new category
-        //    findGenreForFilm(txtInputName.getText()); //The way to test temp API should be another place
-
-        mediaPlayerViewController.createUpdateCategory("Create Category");
-        lstCategory.getItems().clear(); //Should just add new one so select don't get loose
-        lstCategory.getItems().addAll(CategoryModel.getObservableCategories());
-        mediaPlayerViewController.refreshCategories();
+        if (mediaPlayerViewController.createUpdateCategory("Create Category"))  {
+            updateListviewSelected();
+            mediaPlayerViewController.refreshCategories();
+            categoryNames.add(lstCategory.getItems().getLast()); //Update stuff
+            lstCategory.getSelectionModel().selectLast();
+            txtInputCategories.setText(String.valueOf(categoryNames));
+        };
     }
     public void btnSave() throws Exception { // Validate all inputs before saving
         boolean isNameValid = validateModel.validateInput(txtInputName, txtInputName.getText());
@@ -444,8 +432,7 @@ public class MediaPlayerCUViewController implements Initializable {
         boolean isYearValid = validateModel.validateInput(txtInputYear, txtInputYear.getText());
         boolean isTimeValid = validateModel.validateInput(txtInputTime, txtInputTime.getText());
         boolean isIMDBRateValid = validateModel.validateInput(txtInputIMDBRating, txtInputIMDBRating.getText());
-        boolean isMyRateValid = validateModel.validateInput(txtInputPersonal, txtInputPersonal.getText());
-
+        boolean isMyRateValid = validateModel.validateInput(txtInputPersonalRating, txtInputPersonalRating.getText());
         if (isNameValid && isArtistValid && isFilepathValid && isYearValid && isTimeValid && isIMDBRateValid && isMyRateValid) {
             if (typeCU == 1) {
                 createNewMovie();
@@ -473,15 +460,12 @@ public class MediaPlayerCUViewController implements Initializable {
             Movie newCreatedMovie = movieModel.createNewMovie(movie);
             mediaPlayerViewController.addMovieToSoundMap(newCreatedMovie);
 
-
-
-            System.out.println(categoryNames + "Bien flyver");
+            var selectedItems = lstCategory.getSelectionModel().getSelectedItems();
+            categoryNames.clear();
+            categoryNames.addAll(selectedItems);
 
             if (categoryNames != null) {
                 for (Category c : categoryNames) { //Add all selected category to the movie
-
-
-
                     categoryMovieModel.addMovieToCategoryBypass(newCreatedMovie, c);
                 }
             }
@@ -501,7 +485,7 @@ public class MediaPlayerCUViewController implements Initializable {
             currentSelectedMovie.setMoviePath(txtInputFilepath.getText());
             currentSelectedMovie.setMovieLength(currentMovieLength);
             currentSelectedMovie.setMovieRating(Double.valueOf(txtInputIMDBRating.getText()));
-            currentSelectedMovie.setPersonalRating(Double.parseDouble(txtInputPersonal.getText()));
+            currentSelectedMovie.setPersonalRating(Double.parseDouble(txtInputPersonalRating.getText()));
             currentSelectedMovie.setCategory(txtInputCategories.getText());
 
             if (categoryNames != null) {

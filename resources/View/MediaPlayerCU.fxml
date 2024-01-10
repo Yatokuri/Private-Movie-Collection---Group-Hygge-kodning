@@ -64,7 +64,7 @@
                 <Label stylesheets="@../CSS/MediaPlayerCU.css" text="IMDB:" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                 <Label stylesheets="@../CSS/MediaPlayerCU.css" text="Personal:" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                 <TextField fx:id="txtInputIMDBRating" promptText="IMDB Rating" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" GridPane.rowIndex="5" />
-                <TextField fx:id="txtInputPersonal" promptText="Personal" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                <TextField fx:id="txtInputPersonalRating" promptText="Personal" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" GridPane.rowIndex="6" />
             </children>
         </GridPane>
         <ListView fx:id="lstCategory" layoutX="331.0" layoutY="95.0" prefHeight="163.0" prefWidth="147.0" stylesheets="@../CSS/MediaPlayerCU.css" />

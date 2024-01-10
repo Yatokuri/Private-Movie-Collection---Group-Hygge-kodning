@@ -29,7 +29,7 @@ import java.util.ResourceBundle;
 
 public class MediaPlayerInfoViewController implements Initializable {
     @FXML
-    private TextField txtInputName, txtInputArtist, txtInputYear, txtInputCategories, txtInputFilepath, txtInputTime, txtInputDate, txtInputPersonal, txtInputIMDBRating;
+    private TextField txtInputName, txtInputArtist, txtInputYear, txtInputCategories, txtInputFilepath, txtInputTime, txtInputDate, txtInputPersonalRating, txtInputIMDBRating;
     @FXML
     private ImageView movieIcon;
     private MediaPlayerViewController mediaPlayerViewController;
@@ -60,7 +60,7 @@ public class MediaPlayerInfoViewController implements Initializable {
             throw new RuntimeException(e);
         }
         currentSelectedMovie = mediaPlayerViewController.getCurrentMovie();
-        addValidationListener(txtInputPersonal, isRateValid);
+        addValidationListener(txtInputPersonalRating, isRateValid);
         startupSetup();
     }
 
@@ -73,7 +73,7 @@ public class MediaPlayerInfoViewController implements Initializable {
             txtInputTime.setText(currentSelectedMovie.getMovieLengthHHMMSS());
             txtInputDate.setText(currentSelectedMovie.getLastWatched());
             txtInputIMDBRating.setText(String.valueOf(currentSelectedMovie.getMovieRating()));
-            txtInputPersonal.setText(String.valueOf(currentSelectedMovie.getPersonalRating()));
+            txtInputPersonalRating.setText(String.valueOf(currentSelectedMovie.getPersonalRating()));
 
             try {
                 List<Integer> categoryIds;
@@ -134,9 +134,9 @@ public class MediaPlayerInfoViewController implements Initializable {
 //*******************************BUTTONS***********************************************
 
     public void btnUpdateRate() throws Exception { //Use to add a new category
-        boolean isRateValid = validateModel.validateInput(txtInputPersonal, txtInputPersonal.getText());
+        boolean isRateValid = validateModel.validateInput(txtInputPersonalRating, txtInputPersonalRating.getText());
         if (isRateValid) {
-        currentSelectedMovie.setPersonalRating(Double.parseDouble((txtInputPersonal.getText())));
+        currentSelectedMovie.setPersonalRating(Double.parseDouble((txtInputPersonalRating.getText())));
         movieModel.updateMovie(currentSelectedMovie);
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setContentText("Are you ok with this?");

@@ -110,6 +110,7 @@ public class CategoryMovieDAO_DB {
 
             // Run the specified SQL statement
             stmt.executeUpdate();
+            category.setMovieCount(category.getMovieCount() + 1); //We add 1 to movie count because we add a new song
         }
         catch (SQLException ex)
         {
@@ -220,6 +221,7 @@ public class CategoryMovieDAO_DB {
                     stmt3.executeUpdate();
                 }
             }
+            category.setMovieCount(category.getMovieCount() - 1); //We remove 1 to movie count because we remove an old song
         }
 
         catch (SQLException ex)
@@ -254,6 +256,7 @@ public class CategoryMovieDAO_DB {
             ex.printStackTrace();
             throw new Exception("Could not delete category", ex);
         }
+        category.setMovieCount(0); //We change movie count to 0 cause all songs is removed here
     }
 
     public List<Integer>  getMoviesCategories(Movie movie) throws Exception { // Empties out the category by deleting all movies within without deleting the category itself

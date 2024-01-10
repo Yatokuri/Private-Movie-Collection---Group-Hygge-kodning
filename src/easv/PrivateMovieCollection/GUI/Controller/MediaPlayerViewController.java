@@ -1006,6 +1006,7 @@ public class MediaPlayerViewController implements Initializable {
             currentCategory = CategoryModel.getObservableCategories().getFirst();
         }
         categoryMovieModel.categoryMovies(currentCategory);
+        tblCategory.getSelectionModel().select(currentCategory);
         tblMoviesInCategory.setItems(categoryMovieModel.getObservableCategoriesMovie());
         tblCategory.setItems(CategoryModel.getObservableCategories());
         tblCategory.refresh();
@@ -1420,11 +1421,11 @@ public class MediaPlayerViewController implements Initializable {
         }
     }
     //******************************************BUTTONS*SLIDERS************************************************
-    public void createUpdateCategory(String buttonText) throws Exception { // Method for updating or creating categories
+    public boolean createUpdateCategory(String buttonText) throws Exception { // Method for updating or creating categories
         TextInputDialog dialog = new TextInputDialog("");
         if (currentCategory == null && buttonText.equals(btnUpdateCategory.getText())) { // Checks if a valid category was selected when trying to update
             displayErrorModel.displayErrorC("You forgot choose a category");
-            return;
+            return false;
         }
 
         if (buttonText.equals(btnCreateCategory.getText())) { // If you clicked create it will open a dialog box and ask you for a name
@@ -1459,6 +1460,7 @@ public class MediaPlayerViewController implements Initializable {
             }
         }
         refreshCategories();
+        return true;
     }
 
     public void btnCreateCategoryNow() throws Exception { // Functionality for context menu
