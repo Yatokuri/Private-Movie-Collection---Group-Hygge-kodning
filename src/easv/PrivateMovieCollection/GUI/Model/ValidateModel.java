@@ -66,11 +66,11 @@ public class ValidateModel {
         }
     }
 
-    public String btnChoose() {   // Method to choose valid files
+    public String btnChoose() {   // Method to choose valid
+        checkFirst = true;
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Movie Files", validFiles2);
         fileChooser.getExtensionFilters().add(extFilter);
-
         // Show the file chooser dialog
         File selectedFile = fileChooser.showOpenDialog(null);
 
@@ -93,7 +93,7 @@ public class ValidateModel {
         }
     }
 
-    public void updateTimeText(MediaPlayer newMovie, Consumer<String> onReadyCallback) { // Method to get a movie time in HH:MM:SS format
+   /* public void updateTimeText(MediaPlayer newMovie, Consumer<String> onReadyCallback) { // Method to get a movie time in HH:MM:SS format
         newMovie.setOnReady(() -> {
             long totalSeconds = (long) newMovie.getTotalDuration().toSeconds();
             String formattedTime = String.format("%02d:%02d:%02d " +  "-" + totalSeconds , totalSeconds / 3600, (totalSeconds % 3600) / 60, totalSeconds % 60);
@@ -102,6 +102,36 @@ public class ValidateModel {
                 onReadyCallback.accept(formattedTime); //We return the time in format HH:MM:SS and just in seconds
             }
         });
+    } */
+
+    public void updateTimeText(MediaPlayer newMovie, Consumer<String> onReadyCallback) {
+        updateMovieTime(newMovie, onReadyCallback, 3);
+    }
+
+    private boolean check = true;
+    private boolean checkFirst = false;
+
+    private int count;
+
+    private void updateMovieTime(MediaPlayer newMovie, Consumer<String> onReadyCallback, int remainingTries) {
+        try {
+            Thread.sleep(25);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+            newMovie.setOnReady(() -> {
+                long totalSeconds = (long) newMovie.getTotalDuration().toSeconds();
+                String formattedTime = String.format("%02d:%02d:%02d " + "-" + totalSeconds, totalSeconds / 3600, (totalSeconds % 3600) / 60, totalSeconds % 60);
+                // Check if the time is valid (you may need to modify this condition based on your requirements)
+                if (!formattedTime.equals("00:00:00 -0")) {
+                    // Execute the callback with the formatted time
+                    if (onReadyCallback != null) {
+                        onReadyCallback.accept(formattedTime);
+                    }
+                } else if (remainingTries > 0) { // Retry if the time is not valid and there are remaining tries
+                    updateMovieTime(newMovie, onReadyCallback, remainingTries - 1);
+                }
+            });
     }
 
     private static final String[] validFiles2 = generateValidFiles2(); //Convert validFiles where mp3 be to *.mp3 etc.

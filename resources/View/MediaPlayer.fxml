@@ -29,7 +29,7 @@
             </MediaView>
          </children>
       </HBox>
-      <HBox fx:id="hboxFilter" layoutX="10.0" layoutY="6.0" prefHeight="46.0" prefWidth="938.0" spacing="15.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="6.0">
+      <HBox fx:id="hBoxFilter" layoutX="10.0" layoutY="6.0" prefHeight="46.0" prefWidth="938.0" spacing="15.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="6.0">
          <children>
             <TextField fx:id="txtMovieSearch" prefHeight="25.0" prefWidth="200.0" promptText="Type search filter here" stylesheets="@../CSS/Main.css" />
             <MenuButton fx:id="btnCategoryFilter" mnemonicParsing="false" stylesheets="@../CSS/Main.css" text="Category Filter">
@@ -143,12 +143,12 @@
             </VBox>
          </children>
       </HBox>
-      <HBox fx:id="hboxMediaPlayer" alignment="CENTER" layoutX="-5.0" layoutY="551.0" prefHeight="100.0" prefWidth="948.0" AnchorPane.bottomAnchor="6.0" AnchorPane.leftAnchor="-5.0" AnchorPane.rightAnchor="5.0">
+      <HBox fx:id="hBoxMediaPlayer" alignment="CENTER" layoutX="-5.0" layoutY="551.0" prefHeight="100.0" prefWidth="948.0" AnchorPane.bottomAnchor="6.0" AnchorPane.leftAnchor="-5.0" AnchorPane.rightAnchor="5.0">
          <children>
             <HBox alignment="BOTTOM_LEFT" prefHeight="100.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
                <children>
                   <Button fx:id="btnSpeed" mnemonicParsing="false" onMousePressed="#btnSpeedMovie" onTouchPressed="#btnSpeedMovie" styleClass="buttonSpeed" stylesheets="@../CSS/Main.css" text="0,25x" />
-                  <Button fx:id="btnVideo" mnemonicParsing="false" onAction="#btnGoBack" prefWidth="90.0" stylesheets="@../CSS/Main.css" text="Go back" />
+                  <Button mnemonicParsing="false" onAction="#btnGoBack" prefWidth="90.0" stylesheets="@../CSS/Main.css" text="Go back" />
                </children>
             </HBox>
             <VBox alignment="CENTER" prefHeight="102.0" prefWidth="508.0">
@@ -163,7 +163,7 @@
                   </Label>
                   <HBox alignment="CENTER" prefHeight="49.0" prefWidth="508.0" spacing="6.0" VBox.vgrow="ALWAYS">
                      <children>
-                        <Button fx:id="btnShuffle" mnemonicParsing="false" onAction="#btnShuffleMovie" prefHeight="30.0" prefWidth="25.0" stylesheets="@../CSS/Main.css" HBox.hgrow="ALWAYS">
+                        <Button mnemonicParsing="false" onAction="#btnShuffleMovie" prefHeight="30.0" prefWidth="25.0" stylesheets="@../CSS/Main.css" HBox.hgrow="ALWAYS">
                            <graphic>
                               <ImageView fx:id="btnShuffleIcon" fitHeight="30.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -172,7 +172,7 @@
                               </ImageView>
                            </graphic>
                         </Button>
-                        <Button fx:id="btnBackward" mnemonicParsing="false" onAction="#btnBackwardMovie" prefHeight="30.0" prefWidth="25.0" stylesheets="@../CSS/Main.css" HBox.hgrow="ALWAYS">
+                        <Button mnemonicParsing="false" onAction="#btnBackwardMovie" prefHeight="30.0" prefWidth="25.0" stylesheets="@../CSS/Main.css" HBox.hgrow="ALWAYS">
                            <graphic>
                               <ImageView fitHeight="30.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -193,7 +193,7 @@
                               </ImageView>
                            </graphic>
                         </Button>
-                        <Button fx:id="btnForward" mnemonicParsing="false" onAction="#btnForwardMovie" prefHeight="30.0" prefWidth="25.0" stylesheets="@../CSS/Main.css" HBox.hgrow="ALWAYS">
+                        <Button mnemonicParsing="false" onAction="#btnForwardMovie" prefHeight="30.0" prefWidth="25.0" stylesheets="@../CSS/Main.css" HBox.hgrow="ALWAYS">
                            <graphic>
                               <ImageView fitHeight="30.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -202,7 +202,7 @@
                               </ImageView>
                            </graphic>
                         </Button>
-                        <Button fx:id="btnRepeat" mnemonicParsing="false" onAction="#btnRepeatMovie" prefHeight="30.0" prefWidth="25.0" stylesheets="@../CSS/Main.css" HBox.hgrow="ALWAYS">
+                        <Button mnemonicParsing="false" onAction="#btnRepeatMovie" prefHeight="30.0" prefWidth="25.0" stylesheets="@../CSS/Main.css" HBox.hgrow="ALWAYS">
                            <graphic>
                               <ImageView fx:id="btnRepeatIcon" fitHeight="30.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                  <image>

@@ -16,10 +16,14 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -28,6 +32,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class MediaPlayerInfoViewController implements Initializable {
+    @FXML
+    private AnchorPane anchorPane;
     @FXML
     private TextField txtInputName, txtInputArtist, txtInputYear, txtInputCategories, txtInputFilepath, txtInputTime, txtInputDate, txtInputPersonalRating, txtInputIMDBRating;
     @FXML
@@ -38,6 +44,7 @@ public class MediaPlayerInfoViewController implements Initializable {
     private final CategoryMovieModel categoryMovieModel;
     private final DisplayErrorModel displayErrorModel;
     private final ValidateModel validateModel = new ValidateModel();
+    private String posterPath;
     private static final Image mainIcon = new Image ("Icons/mainIcon.png");
     private final BooleanProperty isRateValid = new SimpleBooleanProperty(true);
     private static Movie currentSelectedMovie = null;
@@ -61,10 +68,14 @@ public class MediaPlayerInfoViewController implements Initializable {
         }
         currentSelectedMovie = mediaPlayerViewController.getCurrentMovie();
         addValidationListener(txtInputPersonalRating, isRateValid);
-        startupSetup();
+        try {
+            startupSetup();
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public void startupSetup() {
+    public void startupSetup() throws MalformedURLException {
         if (currentSelectedMovie != null) { //We set the movie text info in
             txtInputName.setText(currentSelectedMovie.getTitle());
             txtInputYear.setText(String.valueOf(currentSelectedMovie.getYear()));
@@ -74,7 +85,24 @@ public class MediaPlayerInfoViewController implements Initializable {
             txtInputDate.setText(currentSelectedMovie.getLastWatched());
             txtInputIMDBRating.setText(String.valueOf(currentSelectedMovie.getMovieRating()));
             txtInputPersonalRating.setText(String.valueOf(currentSelectedMovie.getPersonalRating()));
+            posterPath = currentSelectedMovie.getPosterPath();
+            if (posterPath != null && !posterPath.isEmpty()) {
+                //movieIcon.setImage(posterPath);
 
+                InputStream stream = null;
+                try {
+                    stream = new URL(posterPath).openStream();
+                    Image image = new Image(stream);
+                    stream.close();
+                    movieIcon.setImage(image);
+                    anchorPane.setStyle("-fx-background-color: linear-gradient(to bottom, #0ea815, #0cd21c)");
+
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+
+            }
             try {
                 List<Integer> categoryIds;
                 List<String> categoryNames = new ArrayList<>();
@@ -148,7 +176,13 @@ public class MediaPlayerInfoViewController implements Initializable {
     public void btnUpdateFile() throws Exception { //Open movie in update window
         mediaPlayerViewController.newUCWindow("Update");
         Stage updateStage = mediaPlayerViewController.getUpdateStage();
-        updateStage.setOnHidden(event -> startupSetup());
+        updateStage.setOnHidden(event -> {
+            try {
+                startupSetup();
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     public void btnPlayDirect() throws Exception{ // Play the movie in the computer default media player

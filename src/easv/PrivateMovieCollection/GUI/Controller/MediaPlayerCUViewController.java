@@ -26,6 +26,9 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -36,7 +39,10 @@ import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.ResourceBundle;
 
 public class MediaPlayerCUViewController implements Initializable {
 
@@ -67,7 +73,9 @@ public class MediaPlayerCUViewController implements Initializable {
     private List<Category> categoryNames = new ArrayList<>();
     private final List<Category> categoryNamesOld = new ArrayList<>();
 
-    private static String API_KEY;
+    private static String TMDBAPI_KEY, OMDBAPI_KEY;
+    private String posterPath, imdbId = "N/A";
+
     private static final String configFile = "config/config.settings";
 
     public static void setTypeCU(int typeCU) {MediaPlayerCUViewController.typeCU = typeCU;}
@@ -76,7 +84,8 @@ public class MediaPlayerCUViewController implements Initializable {
         try {
             Properties APIProperties = new Properties();
             APIProperties.load(new FileInputStream((configFile)));
-            API_KEY = (APIProperties.getProperty("API"));
+            TMDBAPI_KEY = (APIProperties.getProperty("TMDBAPI"));
+            OMDBAPI_KEY = (APIProperties.getProperty("OMDBAPI"));
             movieModel = new MovieModel();
             categoryModel = new CategoryModel();
             categoryMovieModel = new CategoryMovieModel();
@@ -100,6 +109,7 @@ public class MediaPlayerCUViewController implements Initializable {
             throw new RuntimeException(e);
         }
         currentSelectedMovie = mediaPlayerViewController.getCurrentMovie();
+
         // Add validation listeners for all inputs & starts context system
         addValidationListener(txtInputName, isNameValid);
         addValidationListener(txtInputDirector, isArtistValid);
@@ -108,8 +118,6 @@ public class MediaPlayerCUViewController implements Initializable {
         addValidationListener(txtInputTime, isTimeValid);
         addValidationListener(txtInputPersonalRating, isMyRateValid);
         addValidationListener(txtInputIMDBRating, isIMDBRateValid);
-
-        //contextSystem();
 
         // Add a listener to the filepath input to make sure its valid and update time automatic
         txtInputFilepath.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -122,37 +130,23 @@ public class MediaPlayerCUViewController implements Initializable {
     }
 
 
-    @FXML
-    private void btnAPI()   {
-        if (!txtInputAPI.getText().isEmpty() && txtInputAPI.getText().contains("www.themoviedb.org"))    {
-            findGenreForFilm(txtInputAPI.getText());
-        }
-    }
+
 
     private void findGenreForFilm(String filmTitle) {
         try {
-            /*
-            OkHttpClient client = new OkHttpClient(); //We make a request to API
-            Request request = new Request.Builder()
-                    .url("https://www.omdbapi.com/?t=" + filmTitle + "&apikey=" + API_KEY)
-                    .build();
 
-            Response response = client.newCall(request).execute(); //We got answer
-            assert response.body() != null;
-            String responseData = response.body().string();
-*/
             filmTitle = filmTitle.substring(filmTitle.indexOf("org/") + 4, filmTitle.indexOf("-", filmTitle.indexOf("org/") + 4));
 
             categoryNames.clear();
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.themoviedb.org/3/" + filmTitle + "?api_key=" + API_KEY + "&append_to_response=external_id"))
+                    .uri(URI.create("https://api.themoviedb.org/3/" + filmTitle + "?api_key=" + TMDBAPI_KEY + "&append_to_response=external_id"))
                     .header("accept", "application/json")
                     .method("GET", HttpRequest.BodyPublishers.noBody())
                     .build();
             HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
             HttpRequest requestCrew = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.themoviedb.org/3/" + filmTitle + "/credits?api_key=" + API_KEY))
+                    .uri(URI.create("https://api.themoviedb.org/3/" + filmTitle + "/credits?api_key=" + TMDBAPI_KEY))
                     .header("accept", "application/json")
                     .method("GET", HttpRequest.BodyPublishers.noBody())
                     .build();
@@ -160,14 +154,8 @@ public class MediaPlayerCUViewController implements Initializable {
 
             JSONObject jsonCrew = new JSONObject(responseCrew.body());
             JSONObject json = new JSONObject(response.body());
-            /*
-            System.out.println(json);
-            System.out.println(jsonCrew);
-             */
 
-            String titleString = "N/A";
-            String imdbId = "N/A";
-            String posterPath = "N/A";
+            String titleString= "N/A";
             String yearString = "N/A";
             String directorName = "N/A";
 
@@ -192,15 +180,13 @@ public class MediaPlayerCUViewController implements Initializable {
                         break;  // Break the loop once the director is found
                     }
                 }
-
                 updateGenreFromAPI(genresArray);
-
             }
 
             if (json.has("genres") && json.has("original_name")) { //We look for Genre in the json cause that what we need know in comma separated string
                 //Movie
                 titleString = json.getString("original_name");
-                //imdbId = json.getString("imdb_id");
+                imdbId = json.getString("imdb_id");
                 posterPath = "https://image.tmdb.org/t/p/original/" +json.getString("poster_path");
                 yearString = json.getString("first_air_date");
                 directorName = "N/A";
@@ -214,27 +200,35 @@ public class MediaPlayerCUViewController implements Initializable {
                     // Check if the crew member has the job title "Director or Producer"
                     if ("Director".equals(crewMember.getString("job")) || "Producer".equals(crewMember.getString("job"))) {
                         directorName = crewMember.getString("name");
-                        System.out.println("Director: " + directorName);
+                        //System.out.println("Director: " + directorName); // Test to check if director searcher works
                         break;  // Break the loop once the director is found
                     }
                 }
-
                 updateGenreFromAPI(genres1Array);
-
             }
+
+            OkHttpClient client = new OkHttpClient(); //We make a request to API
+            Request requestIMDBRating = new Request.Builder()
+                    .url("https://www.omdbapi.com/?i=" + imdbId + "&apikey=" + OMDBAPI_KEY)
+                    .build();
+            String responseData;
+            try (Response responseIMDBRating = client.newCall(requestIMDBRating).execute()) {
+                assert responseIMDBRating.body() != null;
+                responseData = responseIMDBRating.body().string();
+            } //We got answer
+            JSONObject jsonIMDBRating = new JSONObject(responseData);
+            String imdbRating = jsonIMDBRating.getString("imdbRating");
 
             if (titleString.equals("N/A"))    {
                 System.out.println("Error");
                 return;
             }
-
             System.out.println("\nMovie Information:\n" + "Title: " + titleString + " Genre(s): " + categoryNames + "Director" + directorName + " IMDBId: " + imdbId + " Poster Path:" + posterPath + ":");
             txtInputName.setText(titleString);
             txtInputYear.setText(yearString);
             txtInputCategories.setText(String.valueOf(categoryNames));
             txtInputDirector.setText(directorName);
-
-            //txtInputIMDBRating.setText(String.valueOf(currentSelectedMovie.getMovieRating()));
+            txtInputIMDBRating.setText(imdbRating);
             updateListviewSelected();
 
         } catch (Exception e) {
@@ -249,7 +243,6 @@ public class MediaPlayerCUViewController implements Initializable {
             Category p = new Category(-1, genre, 0);
             categoryNames.add(p);
             if (categoryModel.createNewCategory(p)) {
-                System.out.println("Sejt du skal brugte noget nyt " + p); //If user for some reason don't need these remove them
                 lstCategory.getItems().add(p);
             }
         }
@@ -264,7 +257,7 @@ public class MediaPlayerCUViewController implements Initializable {
                     .filter(category -> category.getCategoryName().equals(c.getCategoryName()))
                     .findFirst().ifPresent(correspondingCategory -> lstCategory.getSelectionModel().select(correspondingCategory));
         }
-        categorySystem();
+      lstCategory.getItems().stream().close();
     }
 
     public void startupSetup() {
@@ -274,7 +267,7 @@ public class MediaPlayerCUViewController implements Initializable {
 
         if (typeCU == 1) { // If TypeCU is 1 we create Movie
             btnSave.setText("Create");
-            txtInputPersonalRating.setText(String.valueOf("0"));
+            txtInputPersonalRating.setText("0");
         }
         if (typeCU == 2 & currentSelectedMovie != null) { // If TypeCU is 2 we update Movie
             btnSave.setText("Update");
@@ -285,6 +278,8 @@ public class MediaPlayerCUViewController implements Initializable {
             txtInputFilepath.setText(currentSelectedMovie.getMoviePath());
             txtInputIMDBRating.setText(String.valueOf(currentSelectedMovie.getMovieRating()));
             txtInputPersonalRating.setText(String.valueOf(currentSelectedMovie.getPersonalRating()));
+            imdbId = currentSelectedMovie.getImdbId();
+            posterPath = currentSelectedMovie.getPosterPath();
 
             try { //Duplicate from another Controller?
                 List<Integer> categoryIds = categoryMovieModel.getMovieCatList(currentSelectedMovie);
@@ -351,36 +346,6 @@ public class MediaPlayerCUViewController implements Initializable {
             currentMovieLength = Long.parseLong(parts[1]);
         });
     }
-//*******************************************CONTEXT*MENU**************************************************
-    /*
-    private void contextSystem() { //Here we create the context menu for the category combo box
-        ContextMenu contextMenu = new ContextMenu();
-        MenuItem createCategory = new MenuItem("Create Category");
-        MenuItem deleteCategory = new MenuItem("Delete Category");
-        contextMenu.getItems().addAll(deleteCategory,createCategory);
-        comCategory.setContextMenu(contextMenu);
-
-        createCategory.setOnAction((event) -> { // Opens the create category dialog box
-            try {
-                btnMoreCategory();
-                contextMenu.hide();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        deleteCategory.setOnAction((event) -> { // deletes the selected category and sends a delete request to the database
-            try {
-                categoryModel.deleteCategory(comCategory.getSelectionModel().getSelectedItem());
-                comCategory.getItems().remove(comCategory.getSelectionModel().getSelectedItem());
-                contextMenu.hide();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
-     */
-
     //*******************************************KEYBOARD**************************************************
     @FXML
     private void keyboardKeyPressed(KeyEvent event) throws Exception { // Adds keyboard functionality
@@ -406,15 +371,13 @@ public class MediaPlayerCUViewController implements Initializable {
                 btnSave();
             }
         }
-
     }
-    //*******************************BUTTONS***********************************************
-    public void btnChooseFile() { // Use to choose file - We pass the info to ValidateModel class
-        txtInputFilepath.setText(validateModel.btnChoose());  //
-        if(!txtInputFilepath.getText().isEmpty())
-            updateTimeText();
-    }
-
+ //*******************************BUTTONS***********************************************
+     public void btnChooseFile() { // Use to choose file - We pass the info to ValidateModel class
+         txtInputFilepath.setText(validateModel.btnChoose());  //
+         if(!txtInputFilepath.getText().isEmpty())
+             updateTimeText();
+     }
 
     public void btnMoreCategory() throws Exception { //Use to add a new category
         if (mediaPlayerViewController.createUpdateCategory("Create Category"))  {
@@ -423,7 +386,7 @@ public class MediaPlayerCUViewController implements Initializable {
             categoryNames.add(lstCategory.getItems().getLast()); //Update stuff
             lstCategory.getSelectionModel().selectLast();
             txtInputCategories.setText(String.valueOf(categoryNames));
-        };
+        }
     }
     public void btnSave() throws Exception { // Validate all inputs before saving
         boolean isNameValid = validateModel.validateInput(txtInputName, txtInputName.getText());
@@ -443,8 +406,14 @@ public class MediaPlayerCUViewController implements Initializable {
         }
     }
 
+    @FXML
+    private void btnAPI()   {
+        if (!txtInputAPI.getText().isEmpty() && txtInputAPI.getText().contains("www.themoviedb.org"))    {
+            findGenreForFilm(txtInputAPI.getText());
+        }
+    }
 
-    private void createNewMovie() { //Here the movie gets created
+    private void createNewMovie() { // Here the movie gets created
         int year = Integer.parseInt(txtInputYear.getText());
         String title = txtInputName.getText();
         String director = txtInputDirector.getText();
@@ -453,8 +422,14 @@ public class MediaPlayerCUViewController implements Initializable {
         double movieTime = currentMovieLength;
         String category = String.valueOf(txtInputCategories.getText());
         double personalRating = 0;
+        String moviePosterPath;
+        String movieImdbId;
+        if (posterPath != null && !posterPath.isEmpty()) moviePosterPath = posterPath;
+        else moviePosterPath = "";
+        if (imdbId != null && !imdbId.isEmpty()) movieImdbId = imdbId;
+        else movieImdbId = "";
         // Inputs the values from above into a new movie and tries to send it up the layers into the DB, table view and sound map
-        Movie movie = new Movie(-1, year, title, director, moviePath, movieRating, movieTime, personalRating, null, category);
+        Movie movie = new Movie(-1, year, title, director, moviePath, movieRating, movieTime, personalRating, null, category, moviePosterPath, movieImdbId);
 
         try {
             Movie newCreatedMovie = movieModel.createNewMovie(movie);
@@ -487,6 +462,12 @@ public class MediaPlayerCUViewController implements Initializable {
             currentSelectedMovie.setMovieRating(Double.valueOf(txtInputIMDBRating.getText()));
             currentSelectedMovie.setPersonalRating(Double.parseDouble(txtInputPersonalRating.getText()));
             currentSelectedMovie.setCategory(txtInputCategories.getText());
+            currentSelectedMovie.setImdbId(imdbId);
+            currentSelectedMovie.setPosterPath(posterPath);
+
+            var selectedItems = lstCategory.getSelectionModel().getSelectedItems();
+            categoryNames.clear();
+            categoryNames.addAll(selectedItems);
 
             if (categoryNames != null) {
                 for (Category c : categoryNamesOld) {
@@ -496,7 +477,6 @@ public class MediaPlayerCUViewController implements Initializable {
                     categoryMovieModel.addMovieToCategoryBypass(currentSelectedMovie, c);
                 }
             }
-
             // Updates the movie data and sends it up the layers to the DAL layer and updates the movie path in the sound map in case it got changed
             try {
                 movieModel.updateMovie(currentSelectedMovie);
@@ -515,7 +495,7 @@ public class MediaPlayerCUViewController implements Initializable {
         Event.fireEvent(parent, new WindowEvent(parent, WindowEvent.WINDOW_CLOSE_REQUEST));
     }
 
-    //*******************************STYLING***********************************************
+//*******************************STYLING***********************************************
     private void setBorderStyle(TextField textField, boolean isValid) { //We get the styling from the CSS file
         if (isValid) {
             textField.pseudoClassStateChanged(PseudoClass.getPseudoClass("Invalid"), false);  // Valid style

@@ -55,7 +55,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
     public Movie createMovie(Movie movie) throws Exception { // creates a movie and adds it to the database
 
         // SQL command
-        String sql = "INSERT INTO dbo.Movies (MovieName, MovieDirector, MovieYear, MovieFilepath, movieLength, movieRating, Personal, movieLastViewed, MovieCategories) VALUES (?,?,?,?,?,?,?,?,?);";
+        String sql = "INSERT INTO dbo.Movies (MovieName, MovieDirector, MovieYear, MovieFilepath, movieLength, movieRating, moviePersonalRating, movieLastViewed, MovieCategories, MoviePosterPath, MovieIMDBId) VALUES (?,?,?,?,?,?,?,?,?,?,?);";
 
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
@@ -70,6 +70,8 @@ public class MovieDAO_DB implements IMovieDataAccess {
             stmt.setDouble(7, movie.getPersonalRating());
             stmt.setString(8, movie.getLastWatched());
             stmt.setString(9, movie.getCategory());
+            stmt.setString(10, movie.getPosterPath());
+            stmt.setString(11, movie.getImdbId());
             // Run the specified SQL statement
             stmt.executeUpdate();
 
@@ -83,7 +85,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
 
             // Create Movie object and send up the layers
 
-            Movie newMovie = new Movie(id, movie.getYear(), movie.getTitle(), movie.getDirector(), movie.getMoviePath(), movie.getMovieRating(), movie.getMovieLength(), movie.getPersonalRating(), movie.getLastWatched(), movie.getCategory());
+            Movie newMovie = new Movie(id, movie.getYear(), movie.getTitle(), movie.getDirector(), movie.getMoviePath(), movie.getMovieRating(), movie.getMovieLength(), movie.getPersonalRating(), movie.getLastWatched(), movie.getCategory(), movie.getPosterPath(), movie.getImdbId());
             allMovies.add(newMovie);
             return newMovie;
         }
@@ -99,7 +101,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
     public void updateMovie(Movie movie) throws Exception { // updates an existing movie in the database with new data
 
         // SQL command
-        String sql = "UPDATE dbo.Movies SET MovieName = ?, MovieDirector = ?, MovieYear = ?, MovieFilepath = ?, MovieLength = ?, MovieRating = ?, Personal = ?, MovieLastViewed = ?, MovieCategories = ? WHERE MovieID = ?";
+        String sql = "UPDATE dbo.Movies SET MovieName = ?, MovieDirector = ?, MovieYear = ?, MovieFilepath = ?, MovieLength = ?, MovieRating = ?, MoviePersonalRating = ?, MovieLastViewed = ?, MovieCategories = ?, MoviePosterPath = ?, MovieIMDBId = ? WHERE MovieID = ?";
 
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql))
@@ -114,7 +116,9 @@ public class MovieDAO_DB implements IMovieDataAccess {
             stmt.setBigDecimal(7, BigDecimal.valueOf(movie.getPersonalRating()));
             stmt.setString(8, movie.getLastWatched());
             stmt.setString(9, movie.getCategory());
-            stmt.setInt(10, movie.getId());
+            stmt.setString(10, movie.getPosterPath());
+            stmt.setString(11, movie.getImdbId());
+            stmt.setInt(12, movie.getId());
             // Run the specified SQL statement
             stmt.executeUpdate();
         }
@@ -157,7 +161,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
         try (Connection conn = databaseConnector.getConnection();
              Statement stmt = conn.createStatement())
         {
-            String sql = "SELECT * FROM dbo.Movies WHERE Personal < 6\n" +
+            String sql = "SELECT * FROM dbo.Movies WHERE MoviePersonalRating < 6\n" +
                     "AND MovieLastViewed < DATEADD(YEAR,-2,CAST(GETDATE() AS DATE));";
 
             ResultSet rs = stmt.executeQuery(sql);
@@ -221,9 +225,11 @@ public class MovieDAO_DB implements IMovieDataAccess {
         String moviePath = rs.getString("MovieFilepath");
         double imdbRating = rs.getDouble("MovieRating");
         double movieLength = rs.getDouble("MovieLength");
-        double personalRating = rs.getDouble("Personal");
+        double personalRating = rs.getDouble("MoviePersonalRating");
         String lastWatched = rs.getString("MovieLastViewed");
         String category = rs.getString("MovieCategories");
-        return new Movie(id, year, movieName, director, moviePath, imdbRating, movieLength, personalRating, lastWatched, category);
+        String moviePosterPath = rs.getString("MoviePosterPath");
+        String movieIMDBId = rs.getString("MovieIMDBId");
+        return new Movie(id, year, movieName, director, moviePath, imdbRating, movieLength, personalRating, lastWatched, category, moviePosterPath, movieIMDBId);
     }
 }

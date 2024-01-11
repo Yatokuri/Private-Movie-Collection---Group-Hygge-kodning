@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane fx:id="anchorPane" onKeyPressed="#keyboardKeyPressed" prefHeight="399.0" prefWidth="824.0" stylesheets="@../CSS/MediaPlayerCU.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.PrivateMovieCollection.GUI.Controller.MediaPlayerInfoViewController">
+<AnchorPane fx:id="anchorPane" onKeyPressed="#keyboardKeyPressed" prefHeight="399.0" prefWidth="824.0" stylesheets="@../CSS/MediaPlayerCU.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.PrivateMovieCollection.GUI.Controller.MediaPlayerInfoViewController">
     <children>
         <GridPane prefHeight="346.0" prefWidth="525.0">
             <columnConstraints>
@@ -54,7 +54,7 @@
                 <TextField fx:id="txtInputIMDBRating" editable="false" promptText="Missing" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" GridPane.rowIndex="7" />
                 <Label stylesheets="@../CSS/MediaPlayerCU.css" text="Personal" GridPane.columnIndex="1" GridPane.rowIndex="8" />
                 <TextField fx:id="txtInputPersonalRating" promptText="Missing" stylesheets="@../CSS/MediaPlayerCU.css" GridPane.columnIndex="2" GridPane.rowIndex="8" />
-                <Button mnemonicParsing="false" onAction="#btnUpdateRate" styleClass="buttonCU" stylesheets="@../CSS/MediaPlayerCU.css" text="Update" GridPane.columnIndex="3" GridPane.rowIndex="8">
+                <Button mnemonicParsing="false" onAction="#btnUpdateRate" prefHeight="25.0" prefWidth="49.0" styleClass="buttonCU" stylesheets="@../CSS/MediaPlayerCU.css" text="Rate" GridPane.columnIndex="3" GridPane.rowIndex="8">
                     <GridPane.margin>
                         <Insets left="10.0" />
                     </GridPane.margin>
@@ -74,7 +74,7 @@
                 <Button fx:id="btnPlayDirect" mnemonicParsing="false" onAction="#btnPlayDirect" prefHeight="25.0" prefWidth="94.0" styleClass="buttonCU" stylesheets="@../CSS/MediaPlayerCU.css" text="Play Direct" />
             </children>
         </HBox>
-        <ImageView fx:id="movieIcon" fitHeight="220.0" fitWidth="252.0" layoutX="539.0" layoutY="90.0" pickOnBounds="true" preserveRatio="true">
+        <ImageView fx:id="movieIcon" fitHeight="400.0" fitWidth="321.0" layoutX="503.0" layoutY="-2.0" pickOnBounds="true" smooth="false">
             <image>
                 <Image url="@../Icons/mainIcon.png" />
             </image>

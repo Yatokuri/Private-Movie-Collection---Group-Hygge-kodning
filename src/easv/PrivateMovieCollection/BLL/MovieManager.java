@@ -16,11 +16,9 @@ import java.util.List;
 public class MovieManager {
 
     private final IMovieDataAccess movieDao_DB;
-    private final CategoryManager categoryManager;
 
 
     public MovieManager() throws Exception {
-        categoryManager = new CategoryManager();
         movieDao_DB = new MovieDAO_DB();
     }
 

@@ -49,7 +49,7 @@ public class MediaPlayerViewController implements Initializable {
     @FXML
     public MenuButton btnCategoryFilter, btnMinimumIMDB;
     @FXML
-    private HBox vboxTblBtn, mediaViewBox, hboxMediaPlayer, hboxFilter;
+    private HBox vboxTblBtn, mediaViewBox, hBoxMediaPlayer, hBoxFilter;
     @FXML
     private VBox tblMoviesInCategoryVBOX;
     @FXML
@@ -59,7 +59,9 @@ public class MediaPlayerViewController implements Initializable {
     @FXML
     private TableView<Movie> tblMoviesInCategory, tblMovies;
     @FXML
-    private TableColumn<Movie, String> colTitleInCategory, colArtistInCategory, colName, colCategoryName, colIMDBRating, colPersonal;
+    private TableColumn<Movie, String> colTitleInCategory, colArtistInCategory, colName, colIMDBRating, colPersonal;
+    @FXML
+    private TableColumn<Category, String> colCategoryName;
     @FXML
     private TableColumn<Movie, Integer> colYear, colMovieCount;
     @FXML
@@ -67,7 +69,7 @@ public class MediaPlayerViewController implements Initializable {
     @FXML
     private ImageView btnPlayIcon, btnRepeatIcon, btnShuffleIcon;
     @FXML
-    private Button btnCreateCategory, btnUpdateCategory, btnPlay, btnRepeat, btnShuffle, btnVideo, btnSpeed, btnFilterIMDBArrow;
+    private Button btnCreateCategory, btnUpdateCategory, btnPlay, btnSpeed, btnFilterIMDBArrow;
     @FXML
     private TextField txtMovieSearch;
     @FXML
@@ -167,6 +169,8 @@ public class MediaPlayerViewController implements Initializable {
         tblMovies.setItems(MovieModel.getObservableMovies());
         tblCategory.setItems(CategoryModel.getObservableCategories());
 
+        colCategoryName.setSortType(TableColumn.SortType.ASCENDING);
+        tblCategory.getSortOrder().add(colCategoryName);
 
         // Set default volume to 10% (↓) and updates movie progress
         sliderProgressVolume.setValue(0.1F);
@@ -198,7 +202,7 @@ public class MediaPlayerViewController implements Initializable {
                 throw new RuntimeException(e);
             }
         }
-        hboxMediaPlayer.setVisible(false);
+        hBoxMediaPlayer.setVisible(false);
         AnchorPane.setBottomAnchor(vboxTblBtn, 5.0);
     }
 
@@ -283,7 +287,7 @@ public class MediaPlayerViewController implements Initializable {
         tblMovies.setItems(movieModel.filterList(MovieModel.getObservableMovies(), txtMovieSearch.getText().toLowerCase()));
     };
     public static ArrayList<String> getCategoryFilter(){
-        ArrayList<String> categoryFilterString = new ArrayList<String>();
+        ArrayList<String> categoryFilterString = new ArrayList<>();
         for (Integer i: categoryFilter)
             categoryFilterString.add(String.valueOf(i));
         return categoryFilterString;
@@ -567,6 +571,13 @@ public class MediaPlayerViewController implements Initializable {
         tblMovies.setOnMouseClicked(event -> {
             if (event.getClickCount() == 1 && event.getButton() == MouseButton.PRIMARY)
                 tblMoviesInCategory.getSelectionModel().clearSelection(); // Clears selection from movie in the category to stop delete from interacting weirdly
+            if (event.getClickCount() == 3 && event.getButton() == MouseButton.PRIMARY) { // Check for double-click
+
+                Movie selectedMovie = tblMovies.getSelectionModel().getSelectedItem();
+                sliderProgressMovie.setValue(0);
+                isVideoPaused = false;
+                PlayMovie(selectedMovie);
+            }
             if (event.getClickCount() == 2 && event.getButton() == MouseButton.PRIMARY) { // Check for double-click
                 currentMovieList = MovieModel.getObservableMovies();
                 currentIndex = currentMovieList.indexOf(tblMovies.getSelectionModel().getSelectedItem());
@@ -581,12 +592,6 @@ public class MediaPlayerViewController implements Initializable {
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-
-                    /*
-                    sliderProgressMovie.setValue(0);
-                    isVideoPaused = false;
-                    PlayMovie(selectedMovie);
-                     */
                 }
             }
         });
@@ -758,14 +763,13 @@ public class MediaPlayerViewController implements Initializable {
         onEndMovieBtnClick();
         if (repeatMode != -1) { // If enabled, the shuffle mode will play a random movie from the selected table view, not including the category table view
             handleMovieSwitch(currentIndex + 1); //Moves the user to the next movie in the table view index
-            return;
         }
     }
 
     private void onEndMovieBtnClick() {
-        hboxMediaPlayer.setVisible(false);
+        hBoxMediaPlayer.setVisible(false);
         vboxTblBtn.setVisible(true);
-        hboxFilter.setVisible(true);
+        hBoxFilter.setVisible(true);
         mediaViewBox.setVisible(false);
         mediaView.setMediaPlayer(null);
         anchorPane.setStyle("");
@@ -775,8 +779,8 @@ public class MediaPlayerViewController implements Initializable {
 
     private void onStartMovieBtnClick() {
         vboxTblBtn.setVisible(false);
-        hboxMediaPlayer.setVisible(true);
-        hboxFilter.setVisible(false);
+        hBoxMediaPlayer.setVisible(true);
+        hBoxFilter.setVisible(false);
         AnchorPane.setBottomAnchor(vboxTblBtn, 117.0);
         mediaView.fitWidthProperty().bind(mediaViewBox.widthProperty());
         mediaView.fitHeightProperty().bind(mediaViewBox.heightProperty());
@@ -1460,6 +1464,9 @@ public class MediaPlayerViewController implements Initializable {
             }
         }
         refreshCategories();
+        tblCategory.getSortOrder().clear();
+        colCategoryName.setSortType(TableColumn.SortType.ASCENDING);
+        tblCategory.getSortOrder().add(colCategoryName);
         return true;
     }
 
