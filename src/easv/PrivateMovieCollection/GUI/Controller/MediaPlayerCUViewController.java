@@ -120,12 +120,6 @@ public class MediaPlayerCUViewController implements Initializable {
         addValidationListener(txtInputIMDBRating, isIMDBRateValid);
 
         // Add a listener to the filepath input to make sure its valid and update time automatic
-        txtInputFilepath.textProperty().addListener((observable, oldValue, newValue) -> {
-            txtInputTime.setText("00:00:00"); //Also mean not valid file
-            if (validateModel.isValidMediaPath(newValue)) {
-                updateTimeText();
-            }
-        });
         startupSetup();
     }
 
@@ -302,6 +296,14 @@ public class MediaPlayerCUViewController implements Initializable {
                 }
                 txtInputCategories.setText(String.valueOf(categoryNamesTemp));
                 categoryNames = new ArrayList<>(categoryNamesOld); //We let it copy a clone, so they don't pointing to the same underlying list.
+
+                txtInputFilepath.textProperty().addListener((observable, oldValue, newValue) -> {
+                    txtInputTime.setText("00:00:00"); //Also mean not valid file
+                    if (validateModel.isValidMediaPath(newValue)) {
+                        updateTimeText();
+                    }
+                });
+
 
             } catch (Exception e) {
                 throw new RuntimeException(e);

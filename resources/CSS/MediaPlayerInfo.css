@@ -1,0 +1,34 @@
+
+#anchorPane {
+    -fx-background-color: linear-gradient(to bottom, #6f787e, #60727c); /* Adjust colors as needed */
+}
+.button {
+    -fx-background-color: linear-gradient(to bottom, #22813d, #22813d); /* Adjust colors as needed */
+    -fx-border-color: #001618;
+    -fx-text-fill: white;
+    -fx-border-radius: 15px 15px 15px 15px;
+    -fx-background-radius: 15px 15px 15px 15px;
+    -fx-border-insets: -1;
+}
+
+.button:hover{
+    -fx-background-color: linear-gradient(to bottom, #47ff00, #02ea06); /* Adjust colors as needed */
+    -fx-background-radius: 15px 15px 15px 15px;
+}
+.BoxStyleClass {
+    -fx-background-color: #1f211f;
+}
+.label {
+    -fx-text-fill: white;
+}
+.text-field{
+    -fx-background-color: grey;
+    -fx-text-fill: white;
+}
+
+
+.color-transition-star {
+    -fx-background-color: linear-gradient(to right, yellow, #01e7ba);
+    -fx-background-blend-mode: multiply;
+    -fx-shape: "M 50 0 L 100 100 L 0 100 Z"; /* Triangle shape, adjust as needed */
+}

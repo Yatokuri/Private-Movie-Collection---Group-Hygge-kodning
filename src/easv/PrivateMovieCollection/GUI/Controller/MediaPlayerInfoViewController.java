@@ -8,9 +8,11 @@ import easv.PrivateMovieCollection.GUI.Model.*;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.css.PseudoClass;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -18,6 +20,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.awt.*;
 import java.io.File;
@@ -32,10 +35,13 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class MediaPlayerInfoViewController implements Initializable {
+    public ImageView starIcon;
     @FXML
     private AnchorPane anchorPane;
     @FXML
-    private TextField txtInputName, txtInputArtist, txtInputYear, txtInputCategories, txtInputFilepath, txtInputTime, txtInputDate, txtInputPersonalRating, txtInputIMDBRating;
+    private TextField txtInputPersonalRating;
+    @FXML
+    private Label lblInputName, lblInputDirector, lblInputYear, lblInputCategories, lblInputTime, lblInputDate, lblInputIMDBRating;
     @FXML
     private ImageView movieIcon;
     private MediaPlayerViewController mediaPlayerViewController;
@@ -46,6 +52,7 @@ public class MediaPlayerInfoViewController implements Initializable {
     private final ValidateModel validateModel = new ValidateModel();
     private String posterPath;
     private static final Image mainIcon = new Image ("Icons/mainIcon.png");
+    private static final Image starRatingIcon = new Image ("Icons/star.png");
     private final BooleanProperty isRateValid = new SimpleBooleanProperty(true);
     private static Movie currentSelectedMovie = null;
 
@@ -67,7 +74,7 @@ public class MediaPlayerInfoViewController implements Initializable {
             throw new RuntimeException(e);
         }
         currentSelectedMovie = mediaPlayerViewController.getCurrentMovie();
-        addValidationListener(txtInputPersonalRating, isRateValid);
+        //addValidationListener(txtInputPersonalRating, isRateValid);
         try {
             startupSetup();
         } catch (MalformedURLException e) {
@@ -76,15 +83,19 @@ public class MediaPlayerInfoViewController implements Initializable {
     }
 
     public void startupSetup() throws MalformedURLException {
+        starIcon.setImage(starRatingIcon);
         if (currentSelectedMovie != null) { //We set the movie text info in
-            txtInputName.setText(currentSelectedMovie.getTitle());
-            txtInputYear.setText(String.valueOf(currentSelectedMovie.getYear()));
-            txtInputArtist.setText(currentSelectedMovie.getDirector());
-            txtInputFilepath.setText(currentSelectedMovie.getMoviePath());
-            txtInputTime.setText(currentSelectedMovie.getMovieLengthHHMMSS());
-            txtInputDate.setText(currentSelectedMovie.getLastWatched());
-            txtInputIMDBRating.setText(String.valueOf(currentSelectedMovie.getMovieRating()));
+            lblInputName.setText(currentSelectedMovie.getTitle());
+            lblInputDirector.setText("Director: " + currentSelectedMovie.getDirector());
+            lblInputYear.setText("(" + (currentSelectedMovie.getYear()) + ")");
+            lblInputTime.setText(currentSelectedMovie.getMovieLengthHHMMSS());
+            if (currentSelectedMovie.getLastWatched() == null)
+                lblInputDate.setText("Last seen: Never");
+            else {
+                lblInputDate.setText("Last seen: " + currentSelectedMovie.getLastWatched());}
+            lblInputIMDBRating.setText((currentSelectedMovie.getMovieRating()) + "/10");
             txtInputPersonalRating.setText(String.valueOf(currentSelectedMovie.getPersonalRating()));
+
             posterPath = currentSelectedMovie.getPosterPath();
             if (posterPath != null && !posterPath.isEmpty()) {
                 //movieIcon.setImage(posterPath);
@@ -95,13 +106,12 @@ public class MediaPlayerInfoViewController implements Initializable {
                     Image image = new Image(stream);
                     stream.close();
                     movieIcon.setImage(image);
-                    anchorPane.setStyle("-fx-background-color: linear-gradient(to bottom, #0ea815, #0cd21c)");
+                    //movieIcon.setPreserveRatio(true);
+                    // /anchorPane.setStyle("-fx-background-color: linear-gradient(to bottom, #0ea815, #0cd21c)");
 
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-
-
             }
             try {
                 List<Integer> categoryIds;
@@ -112,15 +122,13 @@ public class MediaPlayerInfoViewController implements Initializable {
                 }
 
                 if (categoryNames.isEmpty())    {
-                    txtInputCategories.setPromptText("Missing");
+                    lblInputCategories.setText("Missing");
                     return;
                 }
-                txtInputCategories.setText(String.valueOf(categoryNames));
-
+                lblInputCategories.setText(String.valueOf(categoryNames));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-
         }
     }
 
@@ -191,7 +199,7 @@ public class MediaPlayerInfoViewController implements Initializable {
         LocalDateTime now = LocalDateTime.now();
         currentSelectedMovie.setLastWatched(dtf.format(now));
         movieModel.updateMovie(currentSelectedMovie);
-        Stage parent = (Stage) txtInputYear.getScene().getWindow();
+        Stage parent = (Stage) lblInputYear.getScene().getWindow();
         parent.close();
     }
     public void btnPlay() throws Exception { // Play the movie in the computer default media player
@@ -202,7 +210,7 @@ public class MediaPlayerInfoViewController implements Initializable {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
             LocalDateTime now = LocalDateTime.now();
             currentSelectedMovie.setLastWatched(dtf.format(now));
-            txtInputDate.setText(dtf.format(now));
+            lblInputDate.setText(dtf.format(now));
             movieModel.updateMovie(currentSelectedMovie);
         }
         else {
@@ -210,9 +218,10 @@ public class MediaPlayerInfoViewController implements Initializable {
         }
     }
 
-    public void btnCloseWindow() { //Close the window
-        Stage parent = (Stage) txtInputYear.getScene().getWindow();
-        parent.close();
+    public void btnCloseWindow() throws Exception{ //Close the window
+        Stage parent = (Stage) lblInputYear.getScene().getWindow();
+        btnUpdateRate();
+        Event.fireEvent(parent, new WindowEvent(parent, WindowEvent.WINDOW_CLOSE_REQUEST));
     }
 
 //*******************************STYLING***********************************************

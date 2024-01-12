@@ -588,7 +588,7 @@ public class MediaPlayerViewController implements Initializable {
                     try {
                         currentMovie = selectedMovie;
                         MediaPlayerCUViewController.setTypeCU(2);
-                        newInfoWindow(selectedMovie.getTitle());
+                        newInfoWindow(selectedMovie.getTitle() + " Information");
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -612,7 +612,8 @@ public class MediaPlayerViewController implements Initializable {
                     try {
                         currentMovie = selectedMovie;
                         MediaPlayerCUViewController.setTypeCU(2);
-                        newInfoWindow(selectedMovie.getTitle());
+                        newInfoWindow(selectedMovie.getTitle() + " Information");
+
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -955,7 +956,6 @@ public class MediaPlayerViewController implements Initializable {
         // Add event handler to handle the close request, so it update correct
         stage.setOnCloseRequest(event -> {
             try {
-                System.out.println("Refresh");
                 refreshMovieList();
                 refreshCategories();
             } catch (Exception e) {
@@ -974,6 +974,13 @@ public class MediaPlayerViewController implements Initializable {
         stage.setScene(new Scene(root));
         stage.setResizable(false);
         stage.initModality(Modality.APPLICATION_MODAL); //Lock the first window until second is close
+        stage.setOnCloseRequest(event -> {
+            try {
+                refreshMovieList();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
         stage.show();
     }
 
