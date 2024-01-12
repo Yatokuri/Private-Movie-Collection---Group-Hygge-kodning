@@ -28,7 +28,7 @@
 
 
 .color-transition-star {
-    -fx-background-color: linear-gradient(to right, yellow, #01e7ba);
-    -fx-background-blend-mode: multiply;
-    -fx-shape: "M 50 0 L 100 100 L 0 100 Z"; /* Triangle shape, adjust as needed */
+    /*   -fx-background-color: linear-gradient(to right, yellow, #01e7ba);
+       -fx-background-blend-mode: multiply;
+       -fx-shape: "M 50 0 L 100 100 L 0 100 Z"; /* Triangle shape, adjust as needed */
 }

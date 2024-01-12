@@ -19,6 +19,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -35,7 +37,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class MediaPlayerInfoViewController implements Initializable {
-    public ImageView starIcon;
+    @FXML
+    private SVGPath starSVGPath;
     @FXML
     private AnchorPane anchorPane;
     @FXML
@@ -52,7 +55,8 @@ public class MediaPlayerInfoViewController implements Initializable {
     private final ValidateModel validateModel = new ValidateModel();
     private String posterPath;
     private static final Image mainIcon = new Image ("Icons/mainIcon.png");
-    private static final Image starRatingIcon = new Image ("Icons/star.png");
+    private static final  String svgPathData = "M12 17.27l4.15 2.51c.76.46 1.69-.22 1.49-1.08l-1.1-4.72 3.67-3.18c.67-.58.31-1.68-.57-1.75l-4.83-.41" +
+            "-1.89-4.46c-.34-.81-1.5-.81-1.84 0L9.19 8.63l-4.83.41c-.88.07-1.24 1.17-.57 1.75l3.67 3.18-1.1 4.72c-.2.86.73 1.54 1.49 1.08l4.15-2.5z";
     private final BooleanProperty isRateValid = new SimpleBooleanProperty(true);
     private static Movie currentSelectedMovie = null;
 
@@ -83,7 +87,7 @@ public class MediaPlayerInfoViewController implements Initializable {
     }
 
     public void startupSetup() throws MalformedURLException {
-        starIcon.setImage(starRatingIcon);
+        starSVGPath.setContent(svgPathData);
         if (currentSelectedMovie != null) { //We set the movie text info in
             lblInputName.setText(currentSelectedMovie.getTitle());
             lblInputDirector.setText("Director: " + currentSelectedMovie.getDirector());
@@ -95,6 +99,7 @@ public class MediaPlayerInfoViewController implements Initializable {
                 lblInputDate.setText("Last seen: " + currentSelectedMovie.getLastWatched());}
             lblInputIMDBRating.setText((currentSelectedMovie.getMovieRating()) + "/10");
             txtInputPersonalRating.setText(String.valueOf(currentSelectedMovie.getPersonalRating()));
+            setRating(currentSelectedMovie.getMovieRating(), starSVGPath); //We update the star color
 
             posterPath = currentSelectedMovie.getPosterPath();
             if (posterPath != null && !posterPath.isEmpty()) {
@@ -130,6 +135,16 @@ public class MediaPlayerInfoViewController implements Initializable {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public void setRating(double rating, SVGPath starSVGPath) {
+        // Ensure the rating is valid and set the percentage
+        double percentage = Math.max(0.0, Math.min(10.0, rating))/10.0;
+        // Update the gradient based on the percentage
+        LinearGradient gradient = new LinearGradient(0, 0, 1, 0, true, null,
+                new javafx.scene.paint.Stop(percentage, javafx.scene.paint.Color.YELLOW),
+                new javafx.scene.paint.Stop(percentage, javafx.scene.paint.Color.WHITE));
+        starSVGPath.setFill(gradient);
     }
 
     private void addValidationListener(TextField textField, BooleanProperty validationProperty) { //Detect change and validate it

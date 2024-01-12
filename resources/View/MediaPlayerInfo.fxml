@@ -9,9 +9,10 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.SVGPath?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="anchorPane" onKeyPressed="#keyboardKeyPressed" prefHeight="399.0" prefWidth="824.0" stylesheets="@../CSS/MediaPlayerInfo.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.PrivateMovieCollection.GUI.Controller.MediaPlayerInfoViewController">
+<AnchorPane fx:id="anchorPane" onKeyPressed="#keyboardKeyPressed" prefHeight="399.0" prefWidth="824.0" stylesheets="@../CSS/MediaPlayerInfo.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.PrivateMovieCollection.GUI.Controller.MediaPlayerInfoViewController">
     <children>
         <HBox alignment="CENTER" layoutX="230.0" layoutY="363.0" prefHeight="26.0" prefWidth="416.0" spacing="30.0" stylesheets="@../CSS/MediaPlayerInfo.css">
             <children>
@@ -72,14 +73,11 @@
       </HBox>
       <HBox layoutX="695.0" prefHeight="58.0" prefWidth="142.0" styleClass="BoxStyleClass" stylesheets="@../CSS/MediaPlayerInfo.css">
          <children>
-            <ImageView fx:id="starIcon" fitHeight="28.0" fitWidth="38.0" pickOnBounds="true" preserveRatio="true" styleClass="color-transition-star">
-                <image>
-                    <Image url="@../Icons/star.png" />
-                </image>
-               <HBox.margin>
-                  <Insets top="15.0" />
-               </HBox.margin>
-            </ImageView>
+             <SVGPath fx:id="starSVGPath" content="M12 17.27l4.15 2.51c.76.46 1.69-.22 1.49-1.08l-1.1-4.72 3.67-3.18c.67-.58.31-1.68-.57-1.75l-4.83-.41-1.89-4.46c-.34-.81-1.5-.81-1.84 0L9.19 8.63l-4.83.41c-.88.07-1.24 1.17-.57 1.75l3.67 3.18-1.1 4.72c-.2.86.73 1.54 1.49 1.08l4.15-2.5z" scaleX="2.0" scaleY="2.0" scaleZ="2.0">
+                 <HBox.margin>
+                     <Insets left="4.0" right="15.0" top="20.0" />
+                 </HBox.margin>
+             </SVGPath>
             <Label fx:id="lblInputIMDBRating" alignment="CENTER" prefHeight="58.0" prefWidth="138.0" stylesheets="@../CSS/MediaPlayerInfo.css" text="IMDB">
                <font>
                   <Font size="30.0" />
@@ -109,7 +107,7 @@
       </HBox>
       <VBox layoutX="720.0" layoutY="55.0" prefHeight="73.6" prefWidth="117.0" styleClass="BoxStyleClass" stylesheets="@../CSS/MediaPlayerInfo.css">
          <children>
-            <Label prefWidth="106.0" stylesheets="@../CSS/MediaPlayerInfo.css" text="Personal Rating:">
+            <Label prefWidth="116.0" stylesheets="@../CSS/MediaPlayerInfo.css" text="Personal Rating:">
                <font>
                   <Font size="15.0" />
                </font>
