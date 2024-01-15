@@ -3,7 +3,6 @@
  **/
 package easv.PrivateMovieCollection.DAL;
 
-import easv.PrivateMovieCollection.BE.Category;
 import easv.PrivateMovieCollection.BE.Movie;
 
 import java.util.List;
@@ -17,7 +16,6 @@ public interface IMovieDataAccess {
     void updateMovie(Movie movie) throws Exception;
 
     void deleteMovie(Movie movie) throws Exception;
-
 
     List<Movie> getAllMoviesOld() throws Exception;
 

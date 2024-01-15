@@ -27,17 +27,14 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class MediaPlayerPopUpViewController implements Initializable {
-
     @FXML
-    public TableView<Movie> tblMoviesOld;
+    private TableView<Movie> tblMoviesOld;
     @FXML
-    public TableColumn<Movie, Double> colPersonalOld;
+    private TableColumn<Movie, Double> colPersonalOld;
     @FXML
-    public TableColumn<Movie, String> colNameOld;
+    private TableColumn<Movie, String> colNameOld;
     @FXML
-    public TableColumn<Movie, Date> colLastViewedOld;
-    @FXML
-    public Button btnDelete;
+    private TableColumn<Movie, Date> colLastViewedOld;
     @FXML
     private Text txtPopUp;
     private MediaPlayerViewController mediaPlayerViewController;
@@ -75,17 +72,15 @@ public class MediaPlayerPopUpViewController implements Initializable {
         colPersonalOld.setCellValueFactory(new PropertyValueFactory<>("personalRating"));
     }
 
-    public void startupSetup() {
+    public void startupSetup() { //Here we set up the text if there only is one movie
         tblMoviesOld.setItems(MovieModel.getObservableMoviesOld());
-
         if (tblMoviesOld.getItems().size() == 1)    {
             txtPopUp.setText("This movie has a personal rating under 6, and hasn't been watched in 2 years!");
         }
     }
 
 //*******************************************CONTEXT*MENU**************************************************
-
-    private void contextSystem() { //Here we create the context menu for the category combo box
+    private void contextSystem() { // Here we create the context menu that allows you to delete movies
         ContextMenu contextMenu = new ContextMenu();
         MenuItem deleteAllMovies = new MenuItem("Delete  all movies");
         MenuItem deleteMovie = new MenuItem("Delete movie");
@@ -143,10 +138,8 @@ public class MediaPlayerPopUpViewController implements Initializable {
         }
     }
 //*******************************BUTTONS***********************************************
-
-    public void btnDelete() throws Exception {
+    public void btnDelete() throws Exception { // Method for deleting a single movie
         Movie currentSelectedMovie = tblMoviesOld.getSelectionModel().getSelectedItem();
-
         try {
             for (Category c : CategoryModel.getObservableCategories()) { // This will check through each category and delete the movie from there since the movieId is a key in the DB
                 categoryMovieModel.deleteMovieFromCategory(currentSelectedMovie, c);
@@ -166,7 +159,7 @@ public class MediaPlayerPopUpViewController implements Initializable {
         }
     }
 
-    public void btnDeleteAll() throws Exception {
+    public void btnDeleteAll() throws Exception { // Deletes all movies in the window
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setContentText("Are you ok with this?");
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
@@ -193,10 +186,6 @@ public class MediaPlayerPopUpViewController implements Initializable {
             mediaPlayerViewController.refreshMovieList();
             btnCloseWindow();
         }
-    }
-
-    public void btnCancel() {
-        btnCloseWindow();
     }
 
     public void btnCloseWindow() { //Close the window

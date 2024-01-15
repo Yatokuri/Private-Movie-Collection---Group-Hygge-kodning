@@ -55,7 +55,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
     public Movie createMovie(Movie movie) throws Exception { // creates a movie and adds it to the database
 
         // SQL command
-        String sql = "INSERT INTO dbo.Movies (MovieName, MovieDirector, MovieYear, MovieFilepath, movieLength, movieRating, moviePersonalRating, movieLastViewed, MovieCategories, MoviePosterPath, MovieIMDBId) VALUES (?,?,?,?,?,?,?,?,?,?,?);";
+        String sql = "INSERT INTO dbo.Movies (MovieName, MovieDirector, MovieYear, MovieFilepath, movieLength, movieRating, moviePersonalRating, movieLastViewed, MovieCategories, MoviePosterPath, MovieIMDBId, MovieDescription) VALUES (?,?,?,?,?,?,?,?,?,?,?,?);";
 
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
@@ -72,6 +72,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
             stmt.setString(9, movie.getCategory());
             stmt.setString(10, movie.getPosterPath());
             stmt.setString(11, movie.getImdbId());
+            stmt.setString(12, movie.getMovieDescription());
             // Run the specified SQL statement
             stmt.executeUpdate();
 
@@ -85,7 +86,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
 
             // Create Movie object and send up the layers
 
-            Movie newMovie = new Movie(id, movie.getYear(), movie.getTitle(), movie.getDirector(), movie.getMoviePath(), movie.getMovieRating(), movie.getMovieLength(), movie.getPersonalRating(), movie.getLastWatched(), movie.getCategory(), movie.getPosterPath(), movie.getImdbId());
+            Movie newMovie = new Movie(id, movie.getYear(), movie.getTitle(), movie.getDirector(), movie.getMoviePath(), movie.getMovieRating(), movie.getMovieLength(), movie.getPersonalRating(), movie.getLastWatched(), movie.getCategory(), movie.getPosterPath(), movie.getImdbId(), movie.getMovieDescription());
             allMovies.add(newMovie);
             return newMovie;
         }
@@ -101,7 +102,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
     public void updateMovie(Movie movie) throws Exception { // updates an existing movie in the database with new data
 
         // SQL command
-        String sql = "UPDATE dbo.Movies SET MovieName = ?, MovieDirector = ?, MovieYear = ?, MovieFilepath = ?, MovieLength = ?, MovieRating = ?, MoviePersonalRating = ?, MovieLastViewed = ?, MovieCategories = ?, MoviePosterPath = ?, MovieIMDBId = ? WHERE MovieID = ?";
+        String sql = "UPDATE dbo.Movies SET MovieName = ?, MovieDirector = ?, MovieYear = ?, MovieFilepath = ?, MovieLength = ?, MovieRating = ?, MoviePersonalRating = ?, MovieLastViewed = ?, MovieCategories = ?, MoviePosterPath = ?, MovieIMDBId = ?, MovieDescription = ? WHERE MovieID = ?";
 
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql))
@@ -118,7 +119,8 @@ public class MovieDAO_DB implements IMovieDataAccess {
             stmt.setString(9, movie.getCategory());
             stmt.setString(10, movie.getPosterPath());
             stmt.setString(11, movie.getImdbId());
-            stmt.setInt(12, movie.getId());
+            stmt.setString(12, movie.getMovieDescription());
+            stmt.setInt(13, movie.getId());
             // Run the specified SQL statement
             stmt.executeUpdate();
         }
@@ -184,7 +186,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
     public List<Movie> getAllMoviesFilter(List<String> categoriesFilter, Double IMDBFilter, String Way) throws Exception { // Queries the database for all movies to insert them in an arraylist
         allMoviesFilter.clear(); // Clear existing data
         String WayValue;
-        if (Way.equals("D")) //Determine we want filter up or down
+        if (Way.equals("D")) //Determine we want filter Greater than or Less than
             WayValue = "<";
         else
             WayValue = ">";
@@ -192,11 +194,13 @@ public class MovieDAO_DB implements IMovieDataAccess {
         try (Connection conn = databaseConnector.getConnection();
              Statement stmt = conn.createStatement())
         {
+            // Search for when both a Category filter has been chosen and a potential IMDBFilter has been chosen
             String sql = "SELECT M.* FROM Movies M WHERE M.MovieId IN (SELECT CM.MovieId FROM CategoryMovies CM" +
                     " JOIN Category C ON CM.CategoryId = C.CategoryId WHERE C.CategoryId IN (" + String.join(",", categoriesFilter) + ")" +
                     " GROUP BY CM.MovieId HAVING COUNT(DISTINCT C.CategoryName) = "+ categoriesFilter.size() + ")" +
                     "AND M.MovieRating "+WayValue+"= " + IMDBFilter;
 
+            // Search for when only IMDB has been selected as a search querry
             String sqlIMDBOnly = "SELECT * FROM Movies M WHERE M.MovieRating "+WayValue+"="+ IMDBFilter;
             ResultSet rs;
             if (categoriesFilter.isEmpty()) {rs = stmt.executeQuery(sqlIMDBOnly);}
@@ -218,6 +222,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
     }
 
     private Movie generateMovie (ResultSet rs) throws Exception    {
+        // Use the given resultset in method to create a movie based on extracted data - Method is used in the other parts of CRUD and has been extracted from there
         int id = rs.getInt("MovieId");
         String movieName = rs.getString("MovieName");
         String director = rs.getString("MovieDirector");
@@ -230,6 +235,7 @@ public class MovieDAO_DB implements IMovieDataAccess {
         String category = rs.getString("MovieCategories");
         String moviePosterPath = rs.getString("MoviePosterPath");
         String movieIMDBId = rs.getString("MovieIMDBId");
-        return new Movie(id, year, movieName, director, moviePath, imdbRating, movieLength, personalRating, lastWatched, category, moviePosterPath, movieIMDBId);
+        String movieDescription = rs.getString("MovieDescription");
+        return new Movie(id, year, movieName, director, moviePath, imdbRating, movieLength, personalRating, lastWatched, category, moviePosterPath, movieIMDBId, movieDescription);
     }
 }

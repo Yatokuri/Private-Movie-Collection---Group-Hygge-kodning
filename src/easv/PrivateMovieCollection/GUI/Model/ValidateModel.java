@@ -67,7 +67,6 @@ public class ValidateModel {
     }
 
     public String btnChoose() {   // Method to choose valid
-        checkFirst = true;
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Movie Files", validFiles2);
         fileChooser.getExtensionFilters().add(extFilter);
@@ -93,29 +92,12 @@ public class ValidateModel {
         }
     }
 
-   /* public void updateTimeText(MediaPlayer newMovie, Consumer<String> onReadyCallback) { // Method to get a movie time in HH:MM:SS format
-        newMovie.setOnReady(() -> {
-            long totalSeconds = (long) newMovie.getTotalDuration().toSeconds();
-            String formattedTime = String.format("%02d:%02d:%02d " +  "-" + totalSeconds , totalSeconds / 3600, (totalSeconds % 3600) / 60, totalSeconds % 60);
-            // Execute the callback with the formatted time
-            if (onReadyCallback != null) {
-                onReadyCallback.accept(formattedTime); //We return the time in format HH:MM:SS and just in seconds
-            }
-        });
-    } */
-
     public void updateTimeText(MediaPlayer newMovie, Consumer<String> onReadyCallback) {
         updateMovieTime(newMovie, onReadyCallback, 3);
     }
-
-    private boolean check = true;
-    private boolean checkFirst = false;
-
-    private int count;
-
     private void updateMovieTime(MediaPlayer newMovie, Consumer<String> onReadyCallback, int remainingTries) {
         try {
-            Thread.sleep(25);
+            Thread.sleep(50);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

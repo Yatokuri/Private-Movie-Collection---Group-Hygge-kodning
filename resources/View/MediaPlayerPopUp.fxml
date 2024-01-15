@@ -40,7 +40,7 @@
                                         <Font size="11.0" />
                                     </font>
                                 </Button>
-                                <Button mnemonicParsing="false" onAction="#btnCancel" prefWidth="60.0" stylesheets="@../CSS/Main.css" text="Cancel">
+                                <Button mnemonicParsing="false" onAction="#btnCloseWindow" prefWidth="60.0" stylesheets="@../CSS/Main.css" text="Cancel">
                                     <font>
                                         <Font size="11.0" />
                                     </font>

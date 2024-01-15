@@ -5,9 +5,6 @@ package easv.PrivateMovieCollection.GUI.Controller;
 
 import easv.PrivateMovieCollection.BE.Movie;
 import easv.PrivateMovieCollection.GUI.Model.*;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.css.PseudoClass;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -18,7 +15,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
@@ -30,8 +26,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -40,11 +40,9 @@ public class MediaPlayerInfoViewController implements Initializable {
     @FXML
     private SVGPath starSVGPath;
     @FXML
-    private AnchorPane anchorPane;
-    @FXML
     private TextField txtInputPersonalRating;
     @FXML
-    private Label lblInputName, lblInputDirector, lblInputYear, lblInputCategories, lblInputTime, lblInputDate, lblInputIMDBRating;
+    private Label lblInputName, lblInputDirector, lblInputYear, lblInputCategories, lblInputTime, lblInputDate, lblInputIMDBRating, lblInputDesc;
     @FXML
     private ImageView movieIcon;
     private MediaPlayerViewController mediaPlayerViewController;
@@ -53,11 +51,9 @@ public class MediaPlayerInfoViewController implements Initializable {
     private final CategoryMovieModel categoryMovieModel;
     private final DisplayErrorModel displayErrorModel;
     private final ValidateModel validateModel = new ValidateModel();
-    private String posterPath;
     private static final Image mainIcon = new Image ("Icons/mainIcon.png");
     private static final  String svgPathData = "M12 17.27l4.15 2.51c.76.46 1.69-.22 1.49-1.08l-1.1-4.72 3.67-3.18c.67-.58.31-1.68-.57-1.75l-4.83-.41" +
             "-1.89-4.46c-.34-.81-1.5-.81-1.84 0L9.19 8.63l-4.83.41c-.88.07-1.24 1.17-.57 1.75l3.67 3.18-1.1 4.72c-.2.86.73 1.54 1.49 1.08l4.15-2.5z";
-    private final BooleanProperty isRateValid = new SimpleBooleanProperty(true);
     private static Movie currentSelectedMovie = null;
 
     public MediaPlayerInfoViewController() {
@@ -78,7 +74,6 @@ public class MediaPlayerInfoViewController implements Initializable {
             throw new RuntimeException(e);
         }
         currentSelectedMovie = mediaPlayerViewController.getCurrentMovie();
-        //addValidationListener(txtInputPersonalRating, isRateValid);
         try {
             startupSetup();
         } catch (MalformedURLException e) {
@@ -87,6 +82,7 @@ public class MediaPlayerInfoViewController implements Initializable {
     }
 
     public void startupSetup() throws MalformedURLException {
+        String posterPath;
         starSVGPath.setContent(svgPathData);
         if (currentSelectedMovie != null) { //We set the movie text info in
             lblInputName.setText(currentSelectedMovie.getTitle());
@@ -96,24 +92,25 @@ public class MediaPlayerInfoViewController implements Initializable {
             if (currentSelectedMovie.getLastWatched() == null)
                 lblInputDate.setText("Last seen: Never");
             else {
-                lblInputDate.setText("Last seen: " + currentSelectedMovie.getLastWatched());}
+                SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+                lblInputDate.setText("Last seen: " + sdf.format(Timestamp.valueOf(currentSelectedMovie.getLastWatched())));
+            }
+            if (currentSelectedMovie.getMovieDescription() == null)
+                lblInputDesc.setText("N/A");
+            else {
+                lblInputDesc.setText(currentSelectedMovie.getMovieDescription());}
             lblInputIMDBRating.setText((currentSelectedMovie.getMovieRating()) + "/10");
             txtInputPersonalRating.setText(String.valueOf(currentSelectedMovie.getPersonalRating()));
-            setRating(currentSelectedMovie.getMovieRating(), starSVGPath); //We update the star color
+            setRatingStarGUI(currentSelectedMovie.getMovieRating(), starSVGPath); //We update the star color
 
             posterPath = currentSelectedMovie.getPosterPath();
             if (posterPath != null && !posterPath.isEmpty()) {
-                //movieIcon.setImage(posterPath);
-
-                InputStream stream = null;
+                InputStream stream;
                 try {
                     stream = new URL(posterPath).openStream();
                     Image image = new Image(stream);
                     stream.close();
                     movieIcon.setImage(image);
-                    //movieIcon.setPreserveRatio(true);
-                    // /anchorPane.setStyle("-fx-background-color: linear-gradient(to bottom, #0ea815, #0cd21c)");
-
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -125,9 +122,8 @@ public class MediaPlayerInfoViewController implements Initializable {
                 for (Integer categoryId: categoryIds )  {
                     categoryNames.add(categoryModel.getCategoryById(categoryId).getCategoryName());
                 }
-
                 if (categoryNames.isEmpty())    {
-                    lblInputCategories.setText("Missing");
+                    lblInputCategories.setText("N/A");
                     return;
                 }
                 lblInputCategories.setText(String.valueOf(categoryNames));
@@ -137,7 +133,7 @@ public class MediaPlayerInfoViewController implements Initializable {
         }
     }
 
-    public void setRating(double rating, SVGPath starSVGPath) {
+    public void setRatingStarGUI(double rating, SVGPath starSVGPath) {
         // Ensure the rating is valid and set the percentage
         double percentage = Math.max(0.0, Math.min(10.0, rating))/10.0;
         // Update the gradient based on the percentage
@@ -146,15 +142,6 @@ public class MediaPlayerInfoViewController implements Initializable {
                 new javafx.scene.paint.Stop(percentage, javafx.scene.paint.Color.WHITE));
         starSVGPath.setFill(gradient);
     }
-
-    private void addValidationListener(TextField textField, BooleanProperty validationProperty) { //Detect change and validate it
-        textField.textProperty().addListener((observable, oldValue, newValue) -> {
-            boolean isValid = validateModel.validateInput(textField, newValue);
-            validationProperty.set(isValid);
-            setBorderStyle(textField, isValid);
-        });
-    }
-
 //*******************************************KEYBOARD**************************************************
     @FXML
     private void keyboardKeyPressed(KeyEvent event) throws Exception { // Adds keyboard functionality
@@ -168,26 +155,27 @@ public class MediaPlayerInfoViewController implements Initializable {
                 btnUpdateRate();
             }
         }
-
         if (event.isControlDown()) {
             if (keyCode == KeyCode.U) { // Open selected Movie in update window
                 btnUpdateFile();
             }
         }
-
         if (event.isControlDown()) {
             if (keyCode == KeyCode.P) { // attempts to play the movie in user standard program
                 btnPlay();
             }
         }
-
+        if (event.isControlDown()) {
+            if (keyCode == KeyCode.D) { // attempts to play the movie in user standard program
+                btnPlayDirect();
+            }
+        }
     }
 //*******************************BUTTONS***********************************************
-
     public void btnUpdateRate() throws Exception { //Use to add a new category
-        boolean isRateValid = validateModel.validateInput(txtInputPersonalRating, txtInputPersonalRating.getText());
+        boolean isRateValid = validateModel.validateInput(txtInputPersonalRating,  txtInputPersonalRating.getText().replaceAll(",", "."));
         if (isRateValid) {
-        currentSelectedMovie.setPersonalRating(Double.parseDouble((txtInputPersonalRating.getText())));
+        currentSelectedMovie.setPersonalRating(Double.parseDouble((txtInputPersonalRating.getText().replaceAll(",", "."))));
         movieModel.updateMovie(currentSelectedMovie);
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setContentText("Are you ok with this?");
@@ -209,24 +197,28 @@ public class MediaPlayerInfoViewController implements Initializable {
     }
 
     public void btnPlayDirect() throws Exception{ // Play the movie in the computer default media player
-        mediaPlayerViewController.PlayMovie(currentSelectedMovie);
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-        LocalDateTime now = LocalDateTime.now();
-        currentSelectedMovie.setLastWatched(dtf.format(now));
-        movieModel.updateMovie(currentSelectedMovie);
-        Stage parent = (Stage) lblInputYear.getScene().getWindow();
-        parent.close();
+        File videoFile = new File(currentSelectedMovie.getMoviePath());
+        if (videoFile.exists()) {
+            mediaPlayerViewController.PlayMovie(currentSelectedMovie);
+            LocalDateTime truncatedDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+            currentSelectedMovie.setLastWatched(String.valueOf(truncatedDateTime));
+            movieModel.updateMovie(currentSelectedMovie);
+            btnCloseWindow();
+        }
+        else {
+            displayErrorModel.displayErrorC("Movie could not be found\n(It might have been moved to a different location)");
+        }
     }
     public void btnPlay() throws Exception { // Play the movie in the computer default media player
         File videoFile = new File(currentSelectedMovie.getMoviePath());
         if (videoFile.exists()) {
             Desktop desktop = Desktop.getDesktop();
             desktop.open(videoFile);
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-            LocalDateTime now = LocalDateTime.now();
-            currentSelectedMovie.setLastWatched(dtf.format(now));
-            lblInputDate.setText(dtf.format(now));
+            LocalDateTime truncatedDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+            currentSelectedMovie.setLastWatched(String.valueOf(truncatedDateTime));
             movieModel.updateMovie(currentSelectedMovie);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+            lblInputDate.setText("Last seen : " + truncatedDateTime.format(formatter));
         }
         else {
             displayErrorModel.displayErrorC("Movie could not be found\n(It might have been moved to a different location)");
@@ -237,16 +229,5 @@ public class MediaPlayerInfoViewController implements Initializable {
         Stage parent = (Stage) lblInputYear.getScene().getWindow();
         btnUpdateRate();
         Event.fireEvent(parent, new WindowEvent(parent, WindowEvent.WINDOW_CLOSE_REQUEST));
-    }
-
-//*******************************STYLING***********************************************
-    private void setBorderStyle(TextField textField, boolean isValid) { //We get the styling from the CSS file
-        if (isValid) {
-            textField.pseudoClassStateChanged(PseudoClass.getPseudoClass("Invalid"), false);  // Valid style
-            textField.pseudoClassStateChanged(PseudoClass.getPseudoClass("Valid"), true);  // Valid style
-        } else {
-            textField.pseudoClassStateChanged(PseudoClass.getPseudoClass("Valid"), false);  // Valid style
-            textField.pseudoClassStateChanged(PseudoClass.getPseudoClass("Invalid"), true);  // Valid style
-        }
     }
 }

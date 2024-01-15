@@ -14,106 +14,108 @@
 
 <AnchorPane fx:id="anchorPane" onKeyPressed="#keyboardKeyPressed" prefHeight="399.0" prefWidth="824.0" stylesheets="@../CSS/MediaPlayerInfo.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.PrivateMovieCollection.GUI.Controller.MediaPlayerInfoViewController">
     <children>
-        <HBox alignment="CENTER" layoutX="230.0" layoutY="363.0" prefHeight="26.0" prefWidth="416.0" spacing="30.0" stylesheets="@../CSS/MediaPlayerInfo.css">
-            <children>
-                <Button mnemonicParsing="false" onAction="#btnCloseWindow" prefWidth="60.0" styleClass="buttonCU" stylesheets="@../CSS/MediaPlayerCU.css" text="Back">
-                    <HBox.margin>
-                        <Insets />
-                    </HBox.margin>
-                </Button>
-                <Button mnemonicParsing="false" onAction="#btnUpdateFile" prefWidth="60.0" styleClass="buttonCU" stylesheets="@../CSS/MediaPlayerCU.css" text="Update" />
-                <Button fx:id="btnPlay" mnemonicParsing="false" onAction="#btnPlay" prefWidth="60.0" styleClass="buttonCU" stylesheets="@../CSS/MediaPlayerCU.css" text="Play" />
-                <Button fx:id="btnPlayDirect" mnemonicParsing="false" onAction="#btnPlayDirect" prefHeight="25.0" prefWidth="94.0" styleClass="buttonCU" stylesheets="@../CSS/MediaPlayerCU.css" text="Play Direct" />
-            </children>
-        </HBox>
-        <ImageView fx:id="movieIcon" fitHeight="269.0" fitWidth="237.0" layoutX="-2.0" layoutY="130.0" pickOnBounds="true" smooth="false">
+        <HBox alignment="CENTER" layoutX="384.0" layoutY="310.0" prefHeight="26.0" prefWidth="191.0" spacing="30.0" stylesheets="@../CSS/MediaPlayerInfo.css" />
+        <ImageView fx:id="movieIcon" fitHeight="270.0" fitWidth="234.0" layoutX="-2.0" layoutY="129.0" pickOnBounds="true" smooth="false">
             <image>
                 <Image url="@../Icons/mainIcon.png" />
             </image>
         </ImageView>
-      <HBox prefHeight="58.0" prefWidth="696.0" styleClass="BoxStyleClass" stylesheets="@../CSS/MediaPlayerInfo.css">
-         <children>
-            <Label fx:id="lblInputName" stylesheets="@../CSS/MediaPlayerInfo.css" text="Title" HBox.hgrow="ALWAYS">
-               <padding>
-                  <Insets left="10.0" />
-               </padding>
-               <font>
-                  <Font size="40.0" />
-               </font>
-            </Label>
-            <Label fx:id="lblInputYear" stylesheets="@../CSS/MediaPlayerInfo.css" text="Year" HBox.hgrow="ALWAYS">
-               <font>
-                  <Font size="40.0" />
-               </font>
-               <padding>
-                  <Insets left="10.0" />
-               </padding>
-            </Label>
-         </children>
-      </HBox>
-      <HBox layoutY="58.0" prefHeight="40.0" prefWidth="723.0" styleClass="BoxStyleClass" stylesheets="@../CSS/MediaPlayerInfo.css">
-         <children>
-            <Label fx:id="lblInputTime" stylesheets="@../CSS/MediaPlayerInfo.css" text="Time">
-               <font>
-                  <Font size="20.0" />
-               </font>
-               <padding>
-                  <Insets left="25.0" />
-               </padding>
-            </Label>
-            <Label fx:id="lblInputCategories" stylesheets="@../CSS/MediaPlayerInfo.css" text="Categories">
-               <font>
-                  <Font size="20.0" />
-               </font>
-               <padding>
-                  <Insets left="20.0" />
-               </padding>
-            </Label>
-         </children>
-      </HBox>
-      <HBox layoutX="695.0" prefHeight="58.0" prefWidth="142.0" styleClass="BoxStyleClass" stylesheets="@../CSS/MediaPlayerInfo.css">
-         <children>
-             <SVGPath fx:id="starSVGPath" content="M12 17.27l4.15 2.51c.76.46 1.69-.22 1.49-1.08l-1.1-4.72 3.67-3.18c.67-.58.31-1.68-.57-1.75l-4.83-.41-1.89-4.46c-.34-.81-1.5-.81-1.84 0L9.19 8.63l-4.83.41c-.88.07-1.24 1.17-.57 1.75l3.67 3.18-1.1 4.72c-.2.86.73 1.54 1.49 1.08l4.15-2.5z" scaleX="2.0" scaleY="2.0" scaleZ="2.0">
-                 <HBox.margin>
-                     <Insets left="4.0" right="15.0" top="20.0" />
-                 </HBox.margin>
-             </SVGPath>
-            <Label fx:id="lblInputIMDBRating" alignment="CENTER" prefHeight="58.0" prefWidth="138.0" stylesheets="@../CSS/MediaPlayerInfo.css" text="IMDB">
-               <font>
-                  <Font size="30.0" />
-               </font>
-            </Label>
-         </children>
-      </HBox>
-      <HBox layoutX="-1.0" layoutY="89.0" prefHeight="40.0" prefWidth="723.0" styleClass="BoxStyleClass" stylesheets="@../CSS/MediaPlayerInfo.css">
-         <children>
-            <Label fx:id="lblInputDirector" stylesheets="@../CSS/MediaPlayerInfo.css" text="Director">
-               <font>
-                  <Font size="20.0" />
-               </font>
-               <padding>
-                  <Insets left="25.0" />
-               </padding>
-            </Label>
-            <Label fx:id="lblInputDate" stylesheets="@../CSS/MediaPlayerInfo.css" text="Date" HBox.hgrow="ALWAYS">
-               <font>
-                  <Font size="20.0" />
-               </font>
-               <padding>
-                  <Insets left="20.0" />
-               </padding>
-            </Label>
-         </children>
-      </HBox>
-      <VBox layoutX="720.0" layoutY="55.0" prefHeight="73.6" prefWidth="117.0" styleClass="BoxStyleClass" stylesheets="@../CSS/MediaPlayerInfo.css">
-         <children>
-            <Label prefWidth="116.0" stylesheets="@../CSS/MediaPlayerInfo.css" text="Personal Rating:">
-               <font>
-                  <Font size="15.0" />
-               </font>
-            </Label>
-            <TextField fx:id="txtInputPersonalRating" onMouseExited="#btnUpdateRate" prefHeight="27.0" prefWidth="94.0" stylesheets="@../CSS/MediaPlayerInfo.css" />
-         </children>
-      </VBox>
+        <HBox prefHeight="58.0" prefWidth="696.0" styleClass="BoxStyleClass" stylesheets="@../CSS/MediaPlayerInfo.css">
+            <children>
+                <Label fx:id="lblInputName" stylesheets="@../CSS/MediaPlayerInfo.css" text="Title" HBox.hgrow="ALWAYS">
+                    <padding>
+                        <Insets left="10.0" />
+                    </padding>
+                    <font>
+                        <Font size="40.0" />
+                    </font>
+                </Label>
+                <Label fx:id="lblInputYear" stylesheets="@../CSS/MediaPlayerInfo.css" text="Year" HBox.hgrow="ALWAYS">
+                    <font>
+                        <Font size="40.0" />
+                    </font>
+                    <padding>
+                        <Insets left="10.0" />
+                    </padding>
+                </Label>
+            </children>
+        </HBox>
+        <HBox layoutY="58.0" prefHeight="40.0" prefWidth="723.0" styleClass="BoxStyleClass" stylesheets="@../CSS/MediaPlayerInfo.css">
+            <children>
+                <HBox>
+                    <children>
+                        <Label fx:id="lblInputTime" stylesheets="@../CSS/MediaPlayerInfo.css" text="Time:">
+                            <font>
+                                <Font size="20.0" />
+                            </font>
+                            <padding>
+                                <Insets left="25.0" />
+                            </padding>
+                        </Label>
+                    </children>
+                </HBox>
+                <Label fx:id="lblInputCategories" prefWidth="608.0" stylesheets="@../CSS/MediaPlayerInfo.css" text="Categories:">
+                    <font>
+                        <Font size="20.0" />
+                    </font>
+                    <padding>
+                        <Insets left="10.0" />
+                    </padding>
+                </Label>
+            </children>
+        </HBox>
+        <HBox layoutX="695.0" prefHeight="58.0" prefWidth="142.0" styleClass="BoxStyleClass" stylesheets="@../CSS/MediaPlayerInfo.css">
+            <children>
+                <SVGPath fx:id="starSVGPath" content="M12 17.27l4.15 2.51c.76.46 1.69-.22 1.49-1.08l-1.1-4.72 3.67-3.18c.67-.58.31-1.68-.57-1.75l-4.83-.41-1.89-4.46c-.34-.81-1.5-.81-1.84 0L9.19 8.63l-4.83.41c-.88.07-1.24 1.17-.57 1.75l3.67 3.18-1.1 4.72c-.2.86.73 1.54 1.49 1.08l4.15-2.5z" scaleX="2.0" scaleY="2.0" scaleZ="2.0">
+                    <HBox.margin>
+                        <Insets left="4.0" right="15.0" top="20.0" />
+                    </HBox.margin>
+                </SVGPath>
+                <Label fx:id="lblInputIMDBRating" alignment="CENTER" prefHeight="58.0" prefWidth="138.0" stylesheets="@../CSS/MediaPlayerInfo.css" text="IMDB">
+                    <font>
+                        <Font size="30.0" />
+                    </font>
+                </Label>
+            </children>
+        </HBox>
+        <HBox layoutX="-1.0" layoutY="89.0" prefHeight="40.0" prefWidth="723.0" styleClass="BoxStyleClass" stylesheets="@../CSS/MediaPlayerInfo.css">
+            <children>
+                <Label fx:id="lblInputDirector" stylesheets="@../CSS/MediaPlayerInfo.css" text="Director">
+                    <font>
+                        <Font size="20.0" />
+                    </font>
+                    <padding>
+                        <Insets left="25.0" />
+                    </padding>
+                </Label>
+                <Label fx:id="lblInputDate" stylesheets="@../CSS/MediaPlayerInfo.css" text="Date" HBox.hgrow="ALWAYS">
+                    <font>
+                        <Font size="20.0" />
+                    </font>
+                    <padding>
+                        <Insets left="20.0" />
+                    </padding>
+                </Label>
+            </children>
+        </HBox>
+        <VBox layoutX="720.0" layoutY="55.0" prefHeight="73.6" prefWidth="117.0" styleClass="BoxStyleClass" stylesheets="@../CSS/MediaPlayerInfo.css">
+            <children>
+                <Label prefWidth="116.0" stylesheets="@../CSS/MediaPlayerInfo.css" text="Personal Rating:">
+                    <font>
+                        <Font size="15.0" />
+                    </font>
+                </Label>
+                <TextField fx:id="txtInputPersonalRating" onMouseExited="#btnUpdateRate" prefHeight="27.0" prefWidth="94.0" stylesheets="@../CSS/MediaPlayerInfo.css" promptText="0.0" />
+            </children>
+        </VBox>
+        <Label fx:id="lblInputDesc" alignment="TOP_LEFT" layoutX="265.0" layoutY="145.0" prefHeight="161.0" prefWidth="501.0" stylesheets="@../CSS/MediaPlayerInfo.css" text="Description" wrapText="true">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Label>
+        <Button layoutX="766.0" layoutY="361.0" mnemonicParsing="false" onAction="#btnCloseWindow" prefWidth="60.0" styleClass="buttonCU" stylesheets="@../CSS/MediaPlayerInfo.css" text="Back" />
+        <Button layoutX="332.0" layoutY="348.0" mnemonicParsing="false" onAction="#btnUpdateFile" prefWidth="60.0" styleClass="buttonCU" stylesheets="@../CSS/MediaPlayerInfo.css" text="Update" />
+        <Button fx:id="btnPlay" layoutX="241.0" layoutY="332.0" mnemonicParsing="false" onAction="#btnPlay" prefWidth="80.0" styleClass="buttonCU" stylesheets="@../CSS/MediaPlayerInfo.css" text="Play" />
+        <Button fx:id="btnPlayDirect" layoutX="241.0" layoutY="368.0" mnemonicParsing="false" onAction="#btnPlayDirect" prefHeight="25.0" prefWidth="80.0" styleClass="buttonCU" stylesheets="@../CSS/MediaPlayerInfo.css" text="Play Direct" />
     </children>
 </AnchorPane>

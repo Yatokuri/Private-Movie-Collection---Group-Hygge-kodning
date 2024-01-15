@@ -5,10 +5,7 @@ package easv.PrivateMovieCollection.GUI.Controller;
 
 import easv.PrivateMovieCollection.BE.Category;
 import easv.PrivateMovieCollection.BE.Movie;
-import easv.PrivateMovieCollection.GUI.Model.CategoryModel;
-import easv.PrivateMovieCollection.GUI.Model.CategoryMovieModel;
-import easv.PrivateMovieCollection.GUI.Model.MovieModel;
-import easv.PrivateMovieCollection.GUI.Model.ValidateModel;
+import easv.PrivateMovieCollection.GUI.Model.*;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.css.PseudoClass;
@@ -19,7 +16,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.media.Media;
@@ -57,6 +53,7 @@ public class MediaPlayerCUViewController implements Initializable {
     private final MovieModel movieModel;
     private final CategoryModel categoryModel;
     private final CategoryMovieModel categoryMovieModel;
+    private final DisplayErrorModel displayErrorModel;
     private final ValidateModel validateModel = new ValidateModel();
     private final BooleanProperty isNameValid = new SimpleBooleanProperty(true);
     private final BooleanProperty isArtistValid = new SimpleBooleanProperty(true);
@@ -65,7 +62,6 @@ public class MediaPlayerCUViewController implements Initializable {
     private final BooleanProperty isTimeValid = new SimpleBooleanProperty(true);
     private final BooleanProperty isMyRateValid = new SimpleBooleanProperty(true);
     private final BooleanProperty isIMDBRateValid = new SimpleBooleanProperty(true);
-    private static final Image mainIcon = new Image ("Icons/mainIcon.png");
     private static int typeCU = 0;
     private static Movie currentSelectedMovie = null;
     private static MediaPlayerCUViewController instance;
@@ -74,7 +70,7 @@ public class MediaPlayerCUViewController implements Initializable {
     private final List<Category> categoryNamesOld = new ArrayList<>();
 
     private static String TMDBAPI_KEY, OMDBAPI_KEY;
-    private String posterPath, imdbId = "N/A";
+    private String posterPath, imdbId, movieDescription = "N/A";
 
     private static final String configFile = "config/config.settings";
 
@@ -88,6 +84,7 @@ public class MediaPlayerCUViewController implements Initializable {
             OMDBAPI_KEY = (APIProperties.getProperty("OMDBAPI"));
             movieModel = new MovieModel();
             categoryModel = new CategoryModel();
+            displayErrorModel = new DisplayErrorModel();
             categoryMovieModel = new CategoryMovieModel();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -119,12 +116,8 @@ public class MediaPlayerCUViewController implements Initializable {
         addValidationListener(txtInputPersonalRating, isMyRateValid);
         addValidationListener(txtInputIMDBRating, isIMDBRateValid);
 
-        // Add a listener to the filepath input to make sure its valid and update time automatic
         startupSetup();
     }
-
-
-
 
     private void findGenreForFilm(String filmTitle) {
         try {
@@ -132,6 +125,7 @@ public class MediaPlayerCUViewController implements Initializable {
             filmTitle = filmTitle.substring(filmTitle.indexOf("org/") + 4, filmTitle.indexOf("-", filmTitle.indexOf("org/") + 4));
 
             categoryNames.clear();
+            // Setup for the TMDB API to get the credits and the actual movie information
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://api.themoviedb.org/3/" + filmTitle + "?api_key=" + TMDBAPI_KEY + "&append_to_response=external_id"))
                     .header("accept", "application/json")
@@ -146,21 +140,25 @@ public class MediaPlayerCUViewController implements Initializable {
                     .build();
             HttpResponse<String> responseCrew = HttpClient.newHttpClient().send(requestCrew, HttpResponse.BodyHandlers.ofString());
 
+            // Inserts the results from the HttpRequests into Json objects
             JSONObject jsonCrew = new JSONObject(responseCrew.body());
             JSONObject json = new JSONObject(response.body());
 
+            // Define strings outside the if statements
             String titleString= "N/A";
             String yearString = "N/A";
             String directorName = "N/A";
 
             if (json.has("genres") && json.has("original_title")) { //We look for Genre in the json cause that what we need know in comma separated string
                 //Movie
+                // Grabbing the relevant data from the json results and inserting them into the strings to later be inserted into the movie object
                 titleString = json.getString("original_title");
                 imdbId = json.getString("imdb_id");
                 posterPath = "https://image.tmdb.org/t/p/original/" + json.getString("poster_path");
                 yearString = json.getString("release_date");
                 directorName = "N/A";
                 yearString = yearString.substring(0, yearString.indexOf("-"));
+                movieDescription = json.getString("overview");
                 JSONArray crewArray = jsonCrew.getJSONArray("crew");
                 JSONArray genresArray = json.getJSONArray("genres");
 
@@ -170,7 +168,6 @@ public class MediaPlayerCUViewController implements Initializable {
                     // Check if the crew member has the job title "Director"
                     if ("Director".equals(crewMember.getString("job"))) {
                         directorName = crewMember.getString("name");
-                        System.out.println("Director: " + directorName);
                         break;  // Break the loop once the director is found
                     }
                 }
@@ -178,46 +175,46 @@ public class MediaPlayerCUViewController implements Initializable {
             }
 
             if (json.has("genres") && json.has("original_name")) { //We look for Genre in the json cause that what we need know in comma separated string
-                //Movie
+                //TV-Series
                 titleString = json.getString("original_name");
                 imdbId = json.getString("imdb_id");
                 posterPath = "https://image.tmdb.org/t/p/original/" +json.getString("poster_path");
                 yearString = json.getString("first_air_date");
                 directorName = "N/A";
                 yearString = yearString.substring(0, yearString.indexOf("-"));
+                movieDescription = json.getString("overview");
                 JSONArray crew1Array = jsonCrew.getJSONArray("crew");
                 JSONArray genres1Array = json.getJSONArray("genres");
 
                 for (int i = 0; i < crew1Array.length(); i++) {
                     JSONObject crewMember = crew1Array.getJSONObject(i);
-
                     // Check if the crew member has the job title "Director or Producer"
                     if ("Director".equals(crewMember.getString("job")) || "Producer".equals(crewMember.getString("job"))) {
                         directorName = crewMember.getString("name");
-                        //System.out.println("Director: " + directorName); // Test to check if director searcher works
                         break;  // Break the loop once the director is found
                     }
                 }
                 updateGenreFromAPI(genres1Array);
             }
+            if (titleString.equals("N/A"))    {
+                displayErrorModel.displayErrorC("Error - API could not find movie/Tv Series");
+                return;
+            }
 
             OkHttpClient client = new OkHttpClient(); //We make a request to API
             Request requestIMDBRating = new Request.Builder()
-                    .url("https://www.omdbapi.com/?i=" + imdbId + "&apikey=" + OMDBAPI_KEY)
+                    .url("https://www.omdbapi.com/?i=" + imdbId + "&apikey=" + OMDBAPI_KEY) // We use the imdbId we got from the HTTPRequests above to make a request from the OMDBAPI so we can get IMDBRating
                     .build();
             String responseData;
             try (Response responseIMDBRating = client.newCall(requestIMDBRating).execute()) {
                 assert responseIMDBRating.body() != null;
                 responseData = responseIMDBRating.body().string();
             } //We got answer
+
             JSONObject jsonIMDBRating = new JSONObject(responseData);
+
             String imdbRating = jsonIMDBRating.getString("imdbRating");
 
-            if (titleString.equals("N/A"))    {
-                System.out.println("Error");
-                return;
-            }
-            System.out.println("\nMovie Information:\n" + "Title: " + titleString + " Genre(s): " + categoryNames + "Director" + directorName + " IMDBId: " + imdbId + " Poster Path:" + posterPath + ":");
             txtInputName.setText(titleString);
             txtInputYear.setText(yearString);
             txtInputCategories.setText(String.valueOf(categoryNames));
@@ -231,6 +228,7 @@ public class MediaPlayerCUViewController implements Initializable {
     }
 
     private void updateGenreFromAPI(JSONArray genreArray) throws Exception {
+        // We go through all genre and add it to the lists, and if the genre (category) don't exist we create it.
         for (int i = 0; i < genreArray.length(); i++) {
             JSONObject genreObject = genreArray.getJSONObject(i);
             String genre = genreObject.getString("name");
@@ -243,7 +241,7 @@ public class MediaPlayerCUViewController implements Initializable {
     }
 
     private void updateListviewSelected()  {
-       // Automatically select items in lstCategory that match categoryNames
+        // Automatically select items in lstCategory that match categoryNames
         lstCategory.getItems().clear(); //Should just add new one so select don't get loose
         lstCategory.getItems().addAll(CategoryModel.getObservableCategories());
       for (Category c : categoryNames) { //Find the right instance there is in the list view and select it
@@ -274,8 +272,9 @@ public class MediaPlayerCUViewController implements Initializable {
             txtInputPersonalRating.setText(String.valueOf(currentSelectedMovie.getPersonalRating()));
             imdbId = currentSelectedMovie.getImdbId();
             posterPath = currentSelectedMovie.getPosterPath();
+            movieDescription = currentSelectedMovie.getMovieDescription();
 
-            try { //Duplicate from another Controller?
+            try {
                 List<Integer> categoryIds = categoryMovieModel.getMovieCatList(currentSelectedMovie);
                 List<String> categoryNamesTemp = new ArrayList<>();
 
@@ -289,22 +288,19 @@ public class MediaPlayerCUViewController implements Initializable {
                     lstCategory.getSelectionModel().select(categoryNamesOld);
                 }
 
-
                 if (categoryNamesTemp.isEmpty()) {
                     txtInputCategories.setPromptText("Missing");
                     return;
                 }
                 txtInputCategories.setText(String.valueOf(categoryNamesTemp));
-                categoryNames = new ArrayList<>(categoryNamesOld); //We let it copy a clone, so they don't pointing to the same underlying list.
+                categoryNames = new ArrayList<>(categoryNamesOld); // We let it copy a clone, so they don't pointing to the same underlying list.
 
                 txtInputFilepath.textProperty().addListener((observable, oldValue, newValue) -> {
-                    txtInputTime.setText("00:00:00"); //Also mean not valid file
+                    txtInputTime.setText("00:00:00"); // Also mean not valid file
                     if (validateModel.isValidMediaPath(newValue)) {
                         updateTimeText();
                     }
                 });
-
-
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -316,13 +312,7 @@ public class MediaPlayerCUViewController implements Initializable {
             // Get selected items
             var selectedItems = lstCategory.getSelectionModel().getSelectedItems();
             categoryNames.clear();
-            // Print selected items
-            System.out.println("Selected Items:");
-
-            for (Category item : selectedItems) {
-                System.out.println("- " + item);
-                categoryNames.add(item);
-            }
+            categoryNames.addAll(selectedItems);
             if (!categoryNames.isEmpty())
                 txtInputCategories.setText(categoryNames.toString());
             else {
@@ -409,9 +399,12 @@ public class MediaPlayerCUViewController implements Initializable {
     }
 
     @FXML
-    private void btnAPI()   {
-        if (!txtInputAPI.getText().isEmpty() && txtInputAPI.getText().contains("www.themoviedb.org"))    {
+    private void btnAPI() { // The Button that tries to get all relevant info using the API through the link input in the textField
+        if (!txtInputAPI.getText().isEmpty() && txtInputAPI.getText().contains("www.themoviedb.org/")) {
             findGenreForFilm(txtInputAPI.getText());
+        }
+        else {
+            displayErrorModel.displayErrorC("Error - Please use TMDB to fetch information E.g \nhttps://www.themoviedb.org/movie/771-home-alone \nhttps://www.themoviedb.org/tv/2287-batman");
         }
     }
 
@@ -424,14 +417,15 @@ public class MediaPlayerCUViewController implements Initializable {
         double movieTime = currentMovieLength;
         String category = String.valueOf(txtInputCategories.getText());
         double personalRating = 0;
-        String moviePosterPath;
-        String movieImdbId;
-        if (posterPath != null && !posterPath.isEmpty()) moviePosterPath = posterPath;
+        String moviePosterPath, movieImdbId, movieTMDBDescription;
+        if (posterPath != null && !posterPath.isEmpty()) moviePosterPath = posterPath; // Checks the posterPath to see if there is a poster to save for the info window
         else moviePosterPath = "";
-        if (imdbId != null && !imdbId.isEmpty()) movieImdbId = imdbId;
+        if (movieDescription != null && !movieDescription.isEmpty()) movieTMDBDescription = movieDescription; // Checks if the API found a description, and if it  did not it sets it to empty
+        else movieTMDBDescription = "";
+        if (imdbId != null && !imdbId.isEmpty()) movieImdbId = imdbId; // Checks if the IMDBID is not null or empty, so it can possibly be used by the OMDBAPI in other parts of the program
         else movieImdbId = "";
         // Inputs the values from above into a new movie and tries to send it up the layers into the DB, table view and sound map
-        Movie movie = new Movie(-1, year, title, director, moviePath, movieRating, movieTime, personalRating, null, category, moviePosterPath, movieImdbId);
+        Movie movie = new Movie(-1, year, title, director, moviePath, movieRating, movieTime, personalRating, null, category, moviePosterPath, movieImdbId, movieTMDBDescription);
 
         try {
             Movie newCreatedMovie = movieModel.createNewMovie(movie);
@@ -440,7 +434,6 @@ public class MediaPlayerCUViewController implements Initializable {
             var selectedItems = lstCategory.getSelectionModel().getSelectedItems();
             categoryNames.clear();
             categoryNames.addAll(selectedItems);
-
             if (categoryNames != null) {
                 for (Category c : categoryNames) { //Add all selected category to the movie
                     categoryMovieModel.addMovieToCategoryBypass(newCreatedMovie, c);
@@ -466,17 +459,18 @@ public class MediaPlayerCUViewController implements Initializable {
             currentSelectedMovie.setCategory(txtInputCategories.getText());
             currentSelectedMovie.setImdbId(imdbId);
             currentSelectedMovie.setPosterPath(posterPath);
+            currentSelectedMovie.setMovieDescription(movieDescription);
 
-            var selectedItems = lstCategory.getSelectionModel().getSelectedItems();
-            categoryNames.clear();
-            categoryNames.addAll(selectedItems);
+            var selectedItems = lstCategory.getSelectionModel().getSelectedItems(); // Gets all selected Categories
+            categoryNames.clear(); // Clears the ArrayList, so it can be reused to add movie to each category
+            categoryNames.addAll(selectedItems); // Adds the selected items from the listview to the ArrayList
 
             if (categoryNames != null) {
                 for (Category c : categoryNamesOld) {
-                    categoryMovieModel.deleteMovieFromCategory(currentSelectedMovie, c);
+                    categoryMovieModel.deleteMovieFromCategory(currentSelectedMovie, c); // Deletes movie from all the old categories
                 }
                 for (Category c : categoryNames) {
-                    categoryMovieModel.addMovieToCategoryBypass(currentSelectedMovie, c);
+                    categoryMovieModel.addMovieToCategoryBypass(currentSelectedMovie, c); // Adds them to all the new ones
                 }
             }
             // Updates the movie data and sends it up the layers to the DAL layer and updates the movie path in the sound map in case it got changed

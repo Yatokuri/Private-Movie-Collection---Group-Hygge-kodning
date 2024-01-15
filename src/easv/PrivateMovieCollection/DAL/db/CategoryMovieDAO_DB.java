@@ -24,9 +24,11 @@ public class CategoryMovieDAO_DB {
 
     public List<Movie> getAllMoviesCategory(Category category) throws Exception { // Gets all the movies in each category to get the movie count and movie length
 
+        // Set both counters to 0
         category.setMovieTotalTime(0);
         category.setMovieCount(0);
 
+        // Instantiate the ArrayList
         ArrayList<Movie> allMoviesInCategory = new ArrayList<>();
 
         String sql = """
@@ -37,6 +39,7 @@ public class CategoryMovieDAO_DB {
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql))
         {
+            // Bind parameter
             stmt.setInt(1, category.getId());
             ResultSet rs = stmt.executeQuery();
             // Loop through rows from the database result set
@@ -76,14 +79,14 @@ public class CategoryMovieDAO_DB {
         String sqlAddCount = "UPDATE dbo.Category SET CategoryCount = CategoryCount + 1 WHERE CategoryId = ?";
 
         try (Connection conn = databaseConnector.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-             PreparedStatement stmt2 = conn.prepareStatement(sql2);
-              PreparedStatement stmt3 = conn.prepareStatement(sql3);
-              PreparedStatement stmtAddCount = conn.prepareStatement(sqlAddCount))
+            PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement stmt2 = conn.prepareStatement(sql2);
+            PreparedStatement stmt3 = conn.prepareStatement(sql3);
+            PreparedStatement stmtAddCount = conn.prepareStatement(sqlAddCount))
         {
-        //    stmt2.setInt(1, category.getId());
             ResultSet rs2 = stmt2.executeQuery();
 
+            // Bind Parameters
             stmtAddCount.setInt(1, category.getId());
             stmtAddCount.execute();
             stmt3.setInt(1, category.getId());
@@ -93,7 +96,6 @@ public class CategoryMovieDAO_DB {
             while (rs2.next()) {
                 //Map DB row to category object
                 nextIdNumber = rs2.getInt("next_value");
-                //System.out.println(nextIdNumber + " Next ID (Debug)");
             }
 
             int nextOrderNumber = 1;
@@ -130,6 +132,7 @@ public class CategoryMovieDAO_DB {
              PreparedStatement newMoviePlayOrder = conn.prepareStatement(sqlNewMovie);
              PreparedStatement stmt = conn.prepareStatement(sql))
         {
+            // Binds parameters for the old and new movie
             oldMoviePlayOrder.setInt(1, oldMovie.getId());
             oldMoviePlayOrder.setInt(2, category.getId());
             newMoviePlayOrder.setInt(1, movie.getId());
@@ -186,12 +189,11 @@ public class CategoryMovieDAO_DB {
     }
 
     public void deleteMovieFromCategory(Movie movie, Category category) throws Exception { // deletes a movie from a category
-        //When we delete a movie we also need to change there order
+        //When we delete a movie we also need to change their order
 
         // SQL command
         String sqlMoviesPlayOrder = "SELECT CategoryOrder FROM dbo.CategoryMovies WHERE MovieId = ? AND CategoryId = ?";
         String sqlDeleteMovie = "DELETE FROM dbo.CategoryMovies WHERE MovieID = ? AND CategoryId = ?";
-
         String sqlUpdateCount = "UPDATE dbo.Category SET CategoryCount = CategoryCount - 1 WHERE CategoryId = ?";
 
         try (Connection conn = databaseConnector.getConnection();
@@ -235,8 +237,8 @@ public class CategoryMovieDAO_DB {
     public void deleteAllMoviesFromCategory(Category category) throws Exception { // Empties out the category by deleting all movies within without deleting the category itself
         // SQL command
         String sql = "DELETE FROM dbo.CategoryMovies WHERE CategoryId = ?";
-
         String sql2 = "UPDATE dbo.Category SET CategoryCount = 0 WHERE CategoryId = ?";
+
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              PreparedStatement stmt2 = conn.prepareStatement(sql2))
@@ -248,7 +250,6 @@ public class CategoryMovieDAO_DB {
 
             stmt2.setInt(1, category.getId());
             stmt2.executeUpdate();
-
         }
         catch (SQLException ex)
         {
@@ -261,7 +262,6 @@ public class CategoryMovieDAO_DB {
 
     public List<Integer>  getMoviesCategories(Movie movie) throws Exception { // Empties out the category by deleting all movies within without deleting the category itself
         List<Integer> categoryNames = new ArrayList<>();
-
         // SQL command
         String sql = "SELECT CategoryId FROM dbo.CategoryMovies WHERE MovieId = ?;";
 
@@ -271,26 +271,17 @@ public class CategoryMovieDAO_DB {
             stmt.setInt(1, movie.getId());
             // Run the specified SQL statement
             ResultSet rs = stmt.executeQuery();
-
-
             while (rs.next()) {
                 int categoryId = rs.getInt("CategoryId");
                 categoryNames.add((categoryId));
             }
-
-
         }
-
-
         catch (SQLException ex)
         {
             // create entry in log file
             ex.printStackTrace();
             throw new Exception("Could not delete category", ex);
         }
-
         return categoryNames;
     }
-
-
 }

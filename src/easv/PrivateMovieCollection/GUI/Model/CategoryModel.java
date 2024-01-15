@@ -22,7 +22,7 @@ public class CategoryModel {
     }
 
     public boolean createNewCategory(Category newCategory) throws Exception { // Sends a request to the database to create a new category
-        for (Category existingCategory : categoriesToBeViewed) { //Should use a better way
+        for (Category existingCategory : categoriesToBeViewed) {
             if (existingCategory.getCategoryName().equalsIgnoreCase(newCategory.getCategoryName())) {
                 return false; // Category with the same name already exists
             }
@@ -34,7 +34,7 @@ public class CategoryModel {
 
     public static ObservableList<Category> getObservableCategories() {return categoriesToBeViewed;} // Returns the playlists
     public void updateCategory(Category updatedCategory) throws Exception { // Sends a request to the database to update a category
-        // update movie in DAL layer (through the layers)
+        // Update movie in DAL layer (through the layers)
         categoryManager.updateCategory(updatedCategory);
 
         // update observable list (and UI)

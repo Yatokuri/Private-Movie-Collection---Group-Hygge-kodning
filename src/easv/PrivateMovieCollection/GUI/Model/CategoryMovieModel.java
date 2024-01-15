@@ -54,7 +54,7 @@ public class CategoryMovieModel {
         categoriesMoviesToBeViewed.addAll(categoryMovieManager.getAllMoviesCategory(category)); // Updates the category observable list with the changes
     }
 
-    public List<Integer> getMovieCatList (Movie movie) throws Exception {
+    public List<Integer> getMovieCatList (Movie movie) throws Exception { // Return all categories depends on a movie
         return categoryMovieManager.moviesCategories(movie);
     }
 

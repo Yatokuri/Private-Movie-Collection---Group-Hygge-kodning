@@ -16,5 +16,4 @@ public interface ICategoryDataAccess {
     void updateCategory(Category category) throws Exception;
 
     void deleteCategory(Category category) throws Exception;
-
 }
