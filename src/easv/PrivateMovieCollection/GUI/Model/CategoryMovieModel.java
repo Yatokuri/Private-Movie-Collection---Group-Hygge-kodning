@@ -14,7 +14,7 @@ import java.util.List;
 
 
 public class CategoryMovieModel {
-    private final CategoryMovieManager categoryMovieManager;
+    private static CategoryMovieManager categoryMovieManager = null;
     private final ObservableList<Movie> categoriesMoviesToBeViewed;
 
     public CategoryMovieModel() throws Exception {
@@ -54,7 +54,7 @@ public class CategoryMovieModel {
         categoriesMoviesToBeViewed.addAll(categoryMovieManager.getAllMoviesCategory(category)); // Updates the category observable list with the changes
     }
 
-    public List<Integer> getMovieCatList (Movie movie) throws Exception { // Return all categories depends on a movie
+    public static List<Integer> getMovieCatList (Movie movie) throws Exception { // Return all categories depends on a movie
         return categoryMovieManager.moviesCategories(movie);
     }
 

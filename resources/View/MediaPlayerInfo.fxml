@@ -12,7 +12,7 @@
 <?import javafx.scene.shape.SVGPath?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="anchorPane" onKeyPressed="#keyboardKeyPressed" prefHeight="399.0" prefWidth="824.0" stylesheets="@../CSS/MediaPlayerInfo.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.PrivateMovieCollection.GUI.Controller.MediaPlayerInfoViewController">
+<AnchorPane fx:id="anchorPane" onKeyPressed="#keyboardKeyPressed" prefHeight="399.0" prefWidth="824.0" stylesheets="@../CSS/MediaPlayerInfo.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="easv.PrivateMovieCollection.GUI.Controller.MediaPlayerInfoViewController">
     <children>
         <HBox alignment="CENTER" layoutX="384.0" layoutY="310.0" prefHeight="26.0" prefWidth="191.0" spacing="30.0" stylesheets="@../CSS/MediaPlayerInfo.css" />
         <ImageView fx:id="movieIcon" fitHeight="270.0" fitWidth="234.0" layoutX="-2.0" layoutY="129.0" pickOnBounds="true" smooth="false">
@@ -105,12 +105,12 @@
                         <Font size="15.0" />
                     </font>
                 </Label>
-                <TextField fx:id="txtInputPersonalRating" onMouseExited="#btnUpdateRate" prefHeight="27.0" prefWidth="94.0" stylesheets="@../CSS/MediaPlayerInfo.css" promptText="0.0" />
+                <TextField fx:id="txtInputPersonalRating" onMouseExited="#btnUpdateRate" prefHeight="27.0" prefWidth="94.0" promptText="0.0" stylesheets="@../CSS/MediaPlayerInfo.css" />
             </children>
         </VBox>
         <Label fx:id="lblInputDesc" alignment="TOP_LEFT" layoutX="265.0" layoutY="145.0" prefHeight="161.0" prefWidth="501.0" stylesheets="@../CSS/MediaPlayerInfo.css" text="Description" wrapText="true">
             <font>
-                <Font size="14.0" />
+                <Font size="17.0" />
             </font>
         </Label>
         <Button layoutX="766.0" layoutY="361.0" mnemonicParsing="false" onAction="#btnCloseWindow" prefWidth="60.0" styleClass="buttonCU" stylesheets="@../CSS/MediaPlayerInfo.css" text="Back" />

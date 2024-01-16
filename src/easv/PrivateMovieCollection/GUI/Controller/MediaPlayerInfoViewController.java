@@ -20,7 +20,7 @@ import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +28,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -47,8 +46,6 @@ public class MediaPlayerInfoViewController implements Initializable {
     private ImageView movieIcon;
     private MediaPlayerViewController mediaPlayerViewController;
     private final MovieModel movieModel;
-    private final CategoryModel categoryModel;
-    private final CategoryMovieModel categoryMovieModel;
     private final DisplayErrorModel displayErrorModel;
     private final ValidateModel validateModel = new ValidateModel();
     private static final Image mainIcon = new Image ("Icons/mainIcon.png");
@@ -59,8 +56,6 @@ public class MediaPlayerInfoViewController implements Initializable {
     public MediaPlayerInfoViewController() {
         try {
             movieModel = new MovieModel();
-            categoryModel = new CategoryModel();
-            categoryMovieModel = new CategoryMovieModel();
             displayErrorModel = new DisplayErrorModel();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -118,9 +113,9 @@ public class MediaPlayerInfoViewController implements Initializable {
             try {
                 List<Integer> categoryIds;
                 List<String> categoryNames = new ArrayList<>();
-                categoryIds = categoryMovieModel.getMovieCatList(currentSelectedMovie);
+                categoryIds = CategoryMovieModel.getMovieCatList(currentSelectedMovie);
                 for (Integer categoryId: categoryIds )  {
-                    categoryNames.add(categoryModel.getCategoryById(categoryId).getCategoryName());
+                    categoryNames.add(CategoryModel.getCategoryById(categoryId).getCategoryName());
                 }
                 if (categoryNames.isEmpty())    {
                     lblInputCategories.setText("N/A");
@@ -137,7 +132,7 @@ public class MediaPlayerInfoViewController implements Initializable {
         // Ensure the rating is valid and set the percentage
         double percentage = Math.max(0.0, Math.min(10.0, rating))/10.0;
         // Update the gradient based on the percentage
-        LinearGradient gradient = new LinearGradient(0, 0, 1, 0, true, null,
+        LinearGradient gradient = new LinearGradient(0, 1, 0, 0, true, null,
                 new javafx.scene.paint.Stop(percentage, javafx.scene.paint.Color.YELLOW),
                 new javafx.scene.paint.Stop(percentage, javafx.scene.paint.Color.WHITE));
         starSVGPath.setFill(gradient);

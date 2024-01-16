@@ -915,7 +915,6 @@ public class MediaPlayerViewController implements Initializable {
         }
         if (selectedMovieInCategory != null) { // Deletes a movie from a category, will not show a warning since nothing permanent is done here, you can always re add the movie
             try {
-                currentCategory.setMovieCount(currentCategory.getMovieCount() - 1);
                 categoryMovieModel.deleteMovieFromCategory(selectedMovieInCategory, selectedCategory);
                 refreshCategories();
             } catch (Exception e) {
@@ -1199,7 +1198,6 @@ public class MediaPlayerViewController implements Initializable {
 
         anchorPane.setOnDragDropped(event -> { // When user drop a movie from category movie list into background
             if (draggedMovie != null) {
-                currentCategory.setMovieCount(currentCategory.getMovieCount() - 1);
                 currentCategory.setMovieTotalTime(currentCategory.getMovieTotalTime() - draggedMovie.getMovieLength());
                 tblCategory.refresh(); // We remove in the category and update category movie count and total time
                 try {

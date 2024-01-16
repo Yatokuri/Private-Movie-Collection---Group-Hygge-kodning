@@ -13,7 +13,7 @@ public class CategoryModel {
 
     private static ObservableList<Category> categoriesToBeViewed = null;
 
-    private final CategoryManager categoryManager;
+    private static CategoryManager categoryManager = null;
 
     public CategoryModel() throws Exception {
         categoryManager = new CategoryManager();
@@ -50,5 +50,5 @@ public class CategoryModel {
         categoriesToBeViewed.remove(selectedCategory);
     }
     // Returns a Category based on its id
-    public Category getCategoryById(int ctId) { return categoryManager.getCategoryById(ctId); }
+    public static Category getCategoryById(int ctId) { return categoryManager.getCategoryById(ctId); }
 }

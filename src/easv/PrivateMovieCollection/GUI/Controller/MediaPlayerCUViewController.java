@@ -282,7 +282,7 @@ public class MediaPlayerCUViewController implements Initializable {
             movieDescription = currentSelectedMovie.getMovieDescription();
 
             try {
-                List<Integer> categoryIds = categoryMovieModel.getMovieCatList(currentSelectedMovie);
+                List<Integer> categoryIds = CategoryMovieModel.getMovieCatList(currentSelectedMovie);
                 List<String> categoryNamesTemp = new ArrayList<>();
 
                 for (Integer categoryId : categoryIds) {
