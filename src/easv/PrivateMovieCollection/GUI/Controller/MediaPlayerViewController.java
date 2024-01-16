@@ -162,7 +162,6 @@ public class MediaPlayerViewController implements Initializable {
         txtMovieSearch.textProperty().addListener((observable, oldValue, newValue) ->
                 tblMovies.setItems(movieModel.filterList(MovieModel.getObservableMovies(), newValue.toLowerCase()))
         );
-
         // Initialize the tables with columns.
         initializeTableColumns();
 
@@ -881,9 +880,10 @@ public class MediaPlayerViewController implements Initializable {
             // Sets up relevant information for knowing which movie you are trying to delete
             if (result.isPresent() && result.get() == okButton) {
                 try {
-                    for (Category c : CategoryModel.getObservableCategories()) { // This will check through each category and delete the movie from there since the movieId is a key in the DB
-                        categoryMovieModel.deleteMovieFromCategory(selectedMovie, c);
-                    }
+                    ArrayList<Category> categoryList = new ArrayList<>();
+                    for (Integer i : categoryMovieModel.getMovieCatList(currentMovie)) { categoryList.add(categoryModel.getCategoryById(i)); }
+                    // This will check through each category and delete the movie from there since the movieId is a key in the DB
+                    for (Category c : categoryList) { categoryMovieModel.deleteMovieFromCategory(selectedMovie, c); }
                     movieModel.deleteMovie(selectedMovie); /// removes movie from database
                     refreshCategories(); // Refreshes the categories so the correct time and count is shown
                     refreshMovieList(); // Refreshes the movie list so the deleted movie is no longer there.
@@ -916,7 +916,6 @@ public class MediaPlayerViewController implements Initializable {
         if (selectedMovieInCategory != null) { // Deletes a movie from a category, will not show a warning since nothing permanent is done here, you can always re add the movie
             try {
                 currentCategory.setMovieCount(currentCategory.getMovieCount() - 1);
-                currentCategory.setMovieTotalTime(currentCategory.getMovieTotalTime() - selectedMovieInCategory.getMovieLength());
                 categoryMovieModel.deleteMovieFromCategory(selectedMovieInCategory, selectedCategory);
                 refreshCategories();
             } catch (Exception e) {

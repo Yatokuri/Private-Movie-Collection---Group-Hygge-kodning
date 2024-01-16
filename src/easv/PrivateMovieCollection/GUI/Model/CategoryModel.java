@@ -49,7 +49,6 @@ public class CategoryModel {
         // remove from observable list (and UI)
         categoriesToBeViewed.remove(selectedCategory);
     }
-    public Category getCategoryById(int ctId){ // Returns a Category based on its id
-        return categoryManager.getCategoryById(ctId);
-    }
+    // Returns a Category based on its id
+    public Category getCategoryById(int ctId) { return categoryManager.getCategoryById(ctId); }
 }

@@ -18,6 +18,7 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
@@ -45,15 +46,17 @@ public class MediaPlayerCUViewController implements Initializable {
     @FXML
     public ListView<Category> lstCategory;
     @FXML
+    public AnchorPane anchorPane;
+    @FXML
     private TextField txtInputAPI, txtInputName, txtInputDirector, txtInputYear, txtInputFilepath, txtInputTime, txtInputCategories, txtInputIMDBRating, txtInputPersonalRating;
     @FXML
     private Button btnSave;
     private MediaPlayerViewController mediaPlayerViewController;
     private long currentMovieLength;
-    private final MovieModel movieModel;
-    private final CategoryModel categoryModel;
-    private final CategoryMovieModel categoryMovieModel;
-    private final DisplayErrorModel displayErrorModel;
+    private MovieModel movieModel;
+    private CategoryModel categoryModel;
+    private CategoryMovieModel categoryMovieModel;
+    private DisplayErrorModel displayErrorModel;
     private final ValidateModel validateModel = new ValidateModel();
     private final BooleanProperty isNameValid = new SimpleBooleanProperty(true);
     private final BooleanProperty isArtistValid = new SimpleBooleanProperty(true);
@@ -82,10 +85,13 @@ public class MediaPlayerCUViewController implements Initializable {
             APIProperties.load(new FileInputStream((configFile)));
             TMDBAPI_KEY = (APIProperties.getProperty("TMDBAPI"));
             OMDBAPI_KEY = (APIProperties.getProperty("OMDBAPI"));
-            movieModel = new MovieModel();
-            categoryModel = new CategoryModel();
-            displayErrorModel = new DisplayErrorModel();
-            categoryMovieModel = new CategoryMovieModel();
+
+            if (typeCU != 0) {
+                movieModel = new MovieModel();
+                categoryModel = new CategoryModel();
+                displayErrorModel = new DisplayErrorModel();
+                categoryMovieModel = new CategoryMovieModel();
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -256,11 +262,12 @@ public class MediaPlayerCUViewController implements Initializable {
         lstCategory.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         lstCategory.getItems().addAll(CategoryModel.getObservableCategories());
         categorySystem();
-
+        //if (typeCU == 1)
         if (typeCU == 1) { // If TypeCU is 1 we create Movie
             btnSave.setText("Create");
             txtInputPersonalRating.setText("0");
         }
+        //if (typeCU == 2 & currentSelectedMovie != null)
         if (typeCU == 2 & currentSelectedMovie != null) { // If TypeCU is 2 we update Movie
             btnSave.setText("Update");
             txtInputName.setText(currentSelectedMovie.getTitle());
@@ -487,6 +494,7 @@ public class MediaPlayerCUViewController implements Initializable {
     }
 
     public void btnCloseWindow() { //Close the window
+        typeCU = 0; //Reset back
         Stage parent = (Stage) txtInputYear.getScene().getWindow();
         Event.fireEvent(parent, new WindowEvent(parent, WindowEvent.WINDOW_CLOSE_REQUEST));
     }
