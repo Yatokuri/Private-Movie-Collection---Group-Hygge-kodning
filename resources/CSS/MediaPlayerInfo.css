@@ -24,14 +24,36 @@
 #lblInputDesc{
     -fx-text-fill: black;
 }
+
+.scroll-pane {
+    -fx-background-color: linear-gradient(to bottom, #bbcad2, #c9d5dc);
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+    -fx-border: none; /* Remove border properties */
+}
+
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical .thumb
+{
+    -fx-background-color: linear-gradient(to bottom, #777777, #777777);
+    -fx-background-insets: 2.0, 0.0, 0.0;
+    -fx-background-radius: 2em;
+}
+
+.scroll-bar .virtual-flow .scroll-bar .increment-button,
+.scroll-bar .virtual-flow .scroll-bar .decrement-button {
+    -fx-opacity: 0;
+    -fx-padding: 2;
+}
+
 .text-field{
     -fx-background-color: grey;
     -fx-text-fill: white;
 }
 
 
-.color-transition-star {
-    /*   -fx-background-color: linear-gradient(to right, yellow, #01e7ba);
-       -fx-background-blend-mode: multiply;
-       -fx-shape: "M 50 0 L 100 100 L 0 100 Z"; /* Triangle shape, adjust as needed */
-}

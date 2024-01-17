@@ -45,8 +45,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-
-
 public class MediaPlayerViewController implements Initializable {
     @FXML
     private MenuButton btnCategoryFilter, btnMinimumIMDB;
@@ -71,7 +69,7 @@ public class MediaPlayerViewController implements Initializable {
     @FXML
     private ImageView btnPlayIcon, btnRepeatIcon, btnShuffleIcon;
     @FXML
-    private Button btnCreateCategory, btnUpdateCategory, btnPlay, btnSpeed, btnFilterIMDBArrow;
+    private Button btnCreateCategory, btnUpdateCategory, btnPlay, btnSpeed, btnFilterIMDBArrow, btnFullscreen;
     @FXML
     private TextField txtMovieSearch;
     @FXML
@@ -143,34 +141,17 @@ public class MediaPlayerViewController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         mediaPlayerCUViewController = MediaPlayerCUViewController.getInstance();
 
-        btnRepeatIcon.setImage(repeatDisableIcon); //We set picture here so the button know what is chosen
-        btnShuffleIcon.setImage(shuffleIconDisable); // -||-
-        sliderProgressMovie.setPickOnBounds(false); // So you only can use slider when actually touch it
-        sliderProgressVolume.setPickOnBounds(false); // -||-
-        tblMoviesInCategory.setPlaceholder(new Label("No movies found"));
-        tblMovies.setPlaceholder(new Label("No movies found"));
-        tblCategory.setPlaceholder(new Label("No category found"));
-        tblMoviesInCategoryVBOX.setManaged(false); // Hide movies in category while no category is selected
-        tblMoviesInCategoryVBOX.setVisible(false); // -||-
+        // Set up the standard GUI and hide the media player and its button
+        initializeGUI();
 
-        // Initializes the Observable list into a Filtered list for use in the search function
-        FilteredList<Movie> filteredMovies = new FilteredList<>(FXCollections.observableList(MovieModel.getObservableMovies()));
-        tblMovies.setItems(filteredMovies);
+        // Initialize the search function with a Filter list
+        initializeSearchFunction();
 
-        // Adds a FilterList to the tblMovies that will automatically filter based on search input through the use
-        // of a FilteredList made from our observable list of movies
-        txtMovieSearch.textProperty().addListener((observable, oldValue, newValue) ->
-                tblMovies.setItems(movieModel.filterList(MovieModel.getObservableMovies(), newValue.toLowerCase()))
-        );
         // Initialize the tables with columns.
         initializeTableColumns();
 
         // Add data from observable list
-        tblMovies.setItems(MovieModel.getObservableMovies());
-        tblCategory.setItems(CategoryModel.getObservableCategories());
-
-        colCategoryName.setSortType(TableColumn.SortType.ASCENDING);
-        tblCategory.getSortOrder().add(colCategoryName);
+        initializeTableViews();
 
         // Set default volume to 10% (↓) and updates movie progress
         sliderProgressVolume.setValue(0.1F);
@@ -203,8 +184,43 @@ public class MediaPlayerViewController implements Initializable {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private void initializeGUI(){
+        btnRepeatIcon.setImage(repeatDisableIcon); //We set picture here so the button know what is chosen
+        btnShuffleIcon.setImage(shuffleIconDisable); // -||-
+        sliderProgressMovie.setPickOnBounds(false); // So you only can use slider when actually touch it
+        sliderProgressVolume.setPickOnBounds(false); // -||-
+        tblMoviesInCategory.setPlaceholder(new Label("No movies found"));
+        tblMovies.setPlaceholder(new Label("No movies found"));
+        tblCategory.setPlaceholder(new Label("No category found"));
+        tblMoviesInCategoryVBOX.setManaged(false); // Hide movies in category while no category is selected
+        tblMoviesInCategoryVBOX.setVisible(false); // -||-
+
+        btnFullscreen.setVisible(false);
         hBoxMediaPlayer.setVisible(false);
         AnchorPane.setBottomAnchor(vboxTblBtn, 5.0);
+    }
+
+    private void initializeSearchFunction(){
+        // Initializes the Observable list into a Filtered list for use in the search function
+        FilteredList<Movie> filteredMovies = new FilteredList<>(FXCollections.observableList(MovieModel.getObservableMovies()));
+        tblMovies.setItems(filteredMovies);
+
+        // Adds a FilterList to the tblMovies that will automatically filter based on search input through the use
+        // of a FilteredList made from our observable list of movies
+        txtMovieSearch.textProperty().addListener((observable, oldValue, newValue) ->
+                tblMovies.setItems(movieModel.filterList(MovieModel.getObservableMovies(), newValue.toLowerCase()))
+        );
+    }
+
+    private void initializeTableViews(){
+        // Add data from observable list
+        tblMovies.setItems(MovieModel.getObservableMovies());
+        tblCategory.setItems(CategoryModel.getObservableCategories());
+
+        colCategoryName.setSortType(TableColumn.SortType.ASCENDING);
+        tblCategory.getSortOrder().add(colCategoryName);
     }
 
     private void initializeTableColumns() {
@@ -586,9 +602,8 @@ public class MediaPlayerViewController implements Initializable {
 
     private void playMovieFromTableViewCategory() { // Opens the info View for the selected movie from the movieInCategory Table view
         tblMoviesInCategory.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 1 && event.getButton() == MouseButton.PRIMARY) {
+            if (event.getClickCount() == 1 && event.getButton() == MouseButton.PRIMARY)
                 tblMovies.getSelectionModel().clearSelection(); // Clears the selection from the normal table view for movies to stop delete from deleting the wrong movie
-            }
             if (event.getClickCount() == 2) { // Check for double-click
                 currentMovieList = categoryMovieModel.getObservableCategoriesMovie();
                 currentIndex = currentMovieList.indexOf(tblMoviesInCategory.getSelectionModel().getSelectedItem());
@@ -604,10 +619,6 @@ public class MediaPlayerViewController implements Initializable {
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                    sliderProgressMovie.setValue(0);
-                    isVideoPaused = false;
-                    //PlayMovie(selectedMovie);
-
                 }
             }
         });
@@ -676,7 +687,7 @@ public class MediaPlayerViewController implements Initializable {
         currentVideo = newMovie;
 
         sliderProgressMovie.setMax(newMovie.getTotalDuration().toSeconds()); //Set our progress to the time so, we know maximum value
-        lblPlayingNow.setText("Now playing: " + selectedMovie.getTitle() + " - " + selectedMovie.getDirector());
+        lblPlayingNow.setText("Now playing: " + selectedMovie.getTitle() + " (" + selectedMovie.getYear() + ")");
         currentVideo.seek(Duration.ZERO); //When you start a movie again it should start from start
         currentVideo.setVolume((sliderProgressVolume.getValue())); //We set the volume
         handlePlayingMovieColor();
@@ -753,26 +764,28 @@ public class MediaPlayerViewController implements Initializable {
     }
 
     private void onEndMovieBtnClick() { // Hides the movie player and its buttons and shows the tableviews and other related buttons along with filter again
-        hBoxMediaPlayer.setVisible(false);
         vboxTblBtn.setVisible(true);
         hBoxFilter.setVisible(true);
+        hBoxMediaPlayer.setVisible(false);
         mediaViewBox.setVisible(false);
+        btnFullscreen.setVisible(false);
         mediaView.setMediaPlayer(null);
         anchorPane.setStyle("");
         AnchorPane.setBottomAnchor(vboxTblBtn, 5.0);
-        isVideoModeActive = true;
+        isVideoModeActive = false;
     }
 
     private void onStartMovieBtnClick() { // Shows the movie player and its buttons and hides the tableviews and their related buttons and the filter
         vboxTblBtn.setVisible(false);
-        hBoxMediaPlayer.setVisible(true);
         hBoxFilter.setVisible(false);
+        hBoxMediaPlayer.setVisible(true);
+        btnFullscreen.setVisible(true);
         AnchorPane.setBottomAnchor(vboxTblBtn, 117.0);
         mediaView.fitWidthProperty().bind(mediaViewBox.widthProperty());
         mediaView.fitHeightProperty().bind(mediaViewBox.heightProperty());
         mediaViewBox.setVisible(true);
         anchorPane.setStyle("-fx-background-color: #454b4f;");
-        isVideoModeActive = false;
+        isVideoModeActive = true;
     }
 
 
@@ -881,7 +894,7 @@ public class MediaPlayerViewController implements Initializable {
             if (result.isPresent() && result.get() == okButton) {
                 try {
                     ArrayList<Category> categoryList = new ArrayList<>();
-                    for (Integer i : categoryMovieModel.getMovieCatList(currentMovie)) { categoryList.add(categoryModel.getCategoryById(i)); }
+                    for (Integer i : CategoryMovieModel.getMovieCatList(currentMovie)) { categoryList.add(CategoryModel.getCategoryById(i)); }
                     // This will check through each category and delete the movie from there since the movieId is a key in the DB
                     for (Category c : categoryList) { categoryMovieModel.deleteMovieFromCategory(selectedMovie, c); }
                     movieModel.deleteMovie(selectedMovie); /// removes movie from database
@@ -1320,66 +1333,67 @@ public class MediaPlayerViewController implements Initializable {
 
         KeyCode keyCode = event.getCode(); //Get the button press value
         pressedKeys.add(event.getCode());
-        if (event.getCode() == KeyCode.SPACE) { // Tries to pause the currently playing movie or start the playing movie if it was paused
-            event.consume();
-            tblMovies.getSelectionModel().clearSelection();
-            tblCategory.getSelectionModel().clearSelection();
-            tblMoviesInCategory.getSelectionModel().clearSelection();
-            btnPlay.requestFocus();
-            togglePlayPause();
-        }
 
-        if (keyCode == KeyCode.ESCAPE) { // Clears all selections when escape is pressed
-            tblMovies.getSelectionModel().clearSelection();
-            tblCategory.getSelectionModel().clearSelection();
-            tblMoviesInCategory.getSelectionModel().clearSelection();
-            anchorPane.requestFocus();
-        }
+        if (isVideoModeActive) { //Disable key under media
+            if (event.getCode() == KeyCode.SPACE) { // Tries to pause the currently playing movie or start the playing movie if it was paused
+                event.consume();
+                tblMovies.getSelectionModel().clearSelection();
+                tblCategory.getSelectionModel().clearSelection();
+                tblMoviesInCategory.getSelectionModel().clearSelection();
+                btnPlay.requestFocus();
+                togglePlayPause();
+            }
+            if (keyCode == KeyCode.ESCAPE) { // Clears all selections when escape is pressed
+                btnGoBack();
+            }
+            if (event.isControlDown()) { // Checks if control key is held down
+                if (keyCode == KeyCode.LEFT) { // Tries to move 10 seconds backwards in the currently playing movie
+                    sliderProgressMovie.requestFocus();
+                    seekCurrentVideo10Minus();
+                }
+            }
+            if (event.isControlDown()) {
+                if (keyCode == KeyCode.RIGHT) { // Tries to move 10 seconds forwards in the currently playing movie
+                    sliderProgressMovie.requestFocus();
+                    seekCurrentVideo10Plus();
+                }
+            }
 
-        if (event.isControlDown()) { // Checks if control key is held down
-            if (keyCode == KeyCode.LEFT) { // Tries to move 10 seconds backwards in the currently playing movie
-                sliderProgressMovie.requestFocus();
-                seekCurrentVideo10Minus();
+            if (event.isControlDown()) {
+                if (keyCode == KeyCode.S) { // Opens the create movie window
+                    setSpeedMovie(1);
+                }
             }
-        }
-        if (event.isControlDown()) {
-            if (keyCode == KeyCode.RIGHT) { // Tries to move 10 seconds forwards in the currently playing movie
-                sliderProgressMovie.requestFocus();
-                seekCurrentVideo10Plus();
-            }
-        }
 
-        if (event.isControlDown()) {
-            if (keyCode == KeyCode.S) { // Opens the create movie window
-                setSpeedMovie(1);
+            if (event.isShiftDown()) {
+                if (keyCode == KeyCode.S) { // Opens the create movie window
+                    setSpeedMovie(-1);
+                }
             }
-        }
 
-        if (event.isShiftDown()) {
-            if (keyCode == KeyCode.S) { // Opens the create movie window
-                setSpeedMovie(-1);
+            if (event.isControlDown()) {
+                if (keyCode == KeyCode.H) { // Enable/Disable shuffle movie function
+                    btnShuffleMovie();
+                }
             }
-        }
+            if (event.isControlDown()) {
+                if (keyCode == KeyCode.T) { // Enable/Disable repeat movie function
+                    btnRepeatMovie();
+                }
+            }
 
-        if (event.isControlDown()) {
-            if (keyCode == KeyCode.H) { // Enable/Disable shuffle movie function
-                btnShuffleMovie();
+            if (event.isControlDown()) {
+                if (keyCode == KeyCode.L) { // Go to previously played movie
+                    btnBackwardMovie();
+                }
             }
-        }
-        if (event.isControlDown()) {
-            if (keyCode == KeyCode.T) { // Enable/Disable repeat movie function
-                btnRepeatMovie();
+            if (event.isControlDown()) {
+                if (keyCode == KeyCode.N) { // Go to next movie to be played
+                    btnForwardMovie();
+                }
             }
-        }
-
-        if (event.isControlDown()) {
-            if (keyCode == KeyCode.B) { // Go to previously played movie
-                btnBackwardMovie();
-            }
-        }
-        if (event.isControlDown()) {
-            if (keyCode == KeyCode.F) { // Go to next movie to be played
-                btnForwardMovie();
+            if (keyCode == KeyCode.F) { // Tries to make full screen in the media player
+                btnFullscreenMode();
             }
         }
 
@@ -1407,6 +1421,12 @@ public class MediaPlayerViewController implements Initializable {
                 if (keyCode == KeyCode.U) { // Tries to open the update movie window with information from the currently selected movie
                     btnNewWindowUpdate();
                 }
+            }
+            if (keyCode == KeyCode.ESCAPE) { // Clears all selections when escape is pressed
+                tblMovies.getSelectionModel().clearSelection();
+                tblCategory.getSelectionModel().clearSelection();
+                tblMoviesInCategory.getSelectionModel().clearSelection();
+                anchorPane.requestFocus();
             }
         }
     }
@@ -1492,6 +1512,21 @@ public class MediaPlayerViewController implements Initializable {
     public void btnBackwardMovie() { // Moves backwards a movie in the currently selected table view
         previousPress = true;
         handleMovieSwitch(currentIndex - 1 + currentMovieList.size());
+    }
+
+    public void btnFullscreenMode() { // Shows movie in fullscreen and remove controls
+        if (AnchorPane.getBottomAnchor(mediaViewBox) == 100.0) {
+            AnchorPane.setBottomAnchor(mediaViewBox, 0.0);
+            AnchorPane.setBottomAnchor(btnFullscreen, 5.0);
+            hBoxMediaPlayer.setVisible(false);
+            hBoxMediaPlayer.setManaged(false);
+        }
+        else {
+            AnchorPane.setBottomAnchor(mediaViewBox, 100.0);
+            AnchorPane.setBottomAnchor(btnFullscreen, 25.0);
+            hBoxMediaPlayer.setVisible(true);
+            hBoxMediaPlayer.setManaged(true);
+        }
     }
 
     public void btnPlayMovie() { handleMoviePlay(); }

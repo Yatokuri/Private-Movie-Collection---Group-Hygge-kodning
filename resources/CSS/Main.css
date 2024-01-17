@@ -6,7 +6,6 @@
     -fx-background-color: linear-gradient(to bottom, #6f787e, #6f787e, #60727c); /* Adjust colors as needed */
 }
 
-
 .button {
     -fx-background-color: linear-gradient(to bottom, #22813d, #22813d); /* Adjust colors as needed */
     -fx-border-color: #001618;
@@ -19,6 +18,20 @@
 .button:hover{
     -fx-background-color: linear-gradient(to bottom, #47ff00, #02ea06); /* Adjust colors as needed */
     -fx-background-radius: 15px 15px 15px 15px;
+}
+
+.buttonInvisible:hover{
+    -fx-background-color: none;
+    -fx-border-color: none;
+    -fx-border-radius: none;
+    -fx-background-radius: none;
+}
+
+.buttonInvisible {
+    -fx-background-color: none;
+    -fx-border-color: none;
+    -fx-border-radius: none;
+    -fx-background-radius: none;
 }
 
 .buttonSpeed {
@@ -77,6 +90,9 @@
 .menu-item:focused .label {
     -fx-text-fill: white;
 }
+
+
+
 .table-view .column-header-background{
     -fx-background-color: linear-gradient(to bottom, #22813d, #1b7330);
     -fx-background-radius: 7px 7px 0px 0px;

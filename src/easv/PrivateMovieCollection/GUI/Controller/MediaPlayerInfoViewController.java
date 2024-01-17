@@ -49,6 +49,8 @@ public class MediaPlayerInfoViewController implements Initializable {
     private final DisplayErrorModel displayErrorModel;
     private final ValidateModel validateModel = new ValidateModel();
     private static final Image mainIcon = new Image ("Icons/mainIcon.png");
+
+    private String posterPath;
     private static final  String svgPathData = "M12 17.27l4.15 2.51c.76.46 1.69-.22 1.49-1.08l-1.1-4.72 3.67-3.18c.67-.58.31-1.68-.57-1.75l-4.83-.41" +
             "-1.89-4.46c-.34-.81-1.5-.81-1.84 0L9.19 8.63l-4.83.41c-.88.07-1.24 1.17-.57 1.75l3.67 3.18-1.1 4.72c-.2.86.73 1.54 1.49 1.08l4.15-2.5z";
     private static Movie currentSelectedMovie = null;
@@ -77,55 +79,62 @@ public class MediaPlayerInfoViewController implements Initializable {
     }
 
     public void startupSetup() throws MalformedURLException {
-        String posterPath;
         starSVGPath.setContent(svgPathData);
         if (currentSelectedMovie != null) { //We set the movie text info in
-            lblInputName.setText(currentSelectedMovie.getTitle());
-            lblInputDirector.setText("Director: " + currentSelectedMovie.getDirector());
-            lblInputYear.setText("(" + (currentSelectedMovie.getYear()) + ")");
-            lblInputTime.setText(currentSelectedMovie.getMovieLengthHHMMSS());
-            if (currentSelectedMovie.getLastWatched() == null)
-                lblInputDate.setText("Last seen: Never");
-            else {
-                SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
-                lblInputDate.setText("Last seen: " + sdf.format(Timestamp.valueOf(currentSelectedMovie.getLastWatched())));
-            }
-            if (currentSelectedMovie.getMovieDescription() == null)
-                lblInputDesc.setText("N/A");
-            else {
-                lblInputDesc.setText(currentSelectedMovie.getMovieDescription());}
-            lblInputIMDBRating.setText((currentSelectedMovie.getMovieRating()) + "/10");
-            txtInputPersonalRating.setText(String.valueOf(currentSelectedMovie.getPersonalRating()));
-            setRatingStarGUI(currentSelectedMovie.getMovieRating(), starSVGPath); //We update the star color
-
-            posterPath = currentSelectedMovie.getPosterPath();
-            if (posterPath != null && !posterPath.isEmpty()) {
-                InputStream stream;
-                try {
-                    stream = new URL(posterPath).openStream();
-                    Image image = new Image(stream);
-                    stream.close();
-                    movieIcon.setImage(image);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+            setupMovieInformation();
             }
             try {
-                List<Integer> categoryIds;
-                List<String> categoryNames = new ArrayList<>();
-                categoryIds = CategoryMovieModel.getMovieCatList(currentSelectedMovie);
-                for (Integer categoryId: categoryIds )  {
-                    categoryNames.add(CategoryModel.getCategoryById(categoryId).getCategoryName());
-                }
-                if (categoryNames.isEmpty())    {
-                    lblInputCategories.setText("N/A");
-                    return;
-                }
-                lblInputCategories.setText(String.valueOf(categoryNames));
+                setupMovieCategories();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+    }
+
+    private void setupMovieInformation(){
+        lblInputName.setText(currentSelectedMovie.getTitle());
+        lblInputDirector.setText("Director: " + currentSelectedMovie.getDirector());
+        lblInputYear.setText("(" + (currentSelectedMovie.getYear()) + ")");
+        lblInputTime.setText(currentSelectedMovie.getMovieLengthHHMMSS());
+        if (currentSelectedMovie.getLastWatched() == null)
+            lblInputDate.setText("Last seen: Never");
+        else {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+            lblInputDate.setText("Last seen: " + sdf.format(Timestamp.valueOf(currentSelectedMovie.getLastWatched())));
         }
+        if (currentSelectedMovie.getMovieDescription() == null)
+            lblInputDesc.setText("N/A");
+        else {
+            lblInputDesc.setText(currentSelectedMovie.getMovieDescription());}
+        lblInputIMDBRating.setText((currentSelectedMovie.getMovieRating()) + "/10");
+        txtInputPersonalRating.setText(String.valueOf(currentSelectedMovie.getPersonalRating()));
+        setRatingStarGUI(currentSelectedMovie.getMovieRating(), starSVGPath); //We update the star color
+
+        posterPath = currentSelectedMovie.getPosterPath();
+        if (posterPath != null && !posterPath.isEmpty()) {
+            InputStream stream;
+            try {
+                stream = new URL(posterPath).openStream();
+                Image image = new Image(stream);
+                stream.close();
+                movieIcon.setImage(image);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void setupMovieCategories() throws Exception{
+        List<Integer> categoryIds;
+        List<String> categoryNames = new ArrayList<>();
+        categoryIds = CategoryMovieModel.getMovieCatList(currentSelectedMovie);
+        for (Integer categoryId: categoryIds )  {
+            categoryNames.add(CategoryModel.getCategoryById(categoryId).getCategoryName());
+        }
+        if (categoryNames.isEmpty())    {
+            lblInputCategories.setText("N/A");
+            return;
+        }
+        lblInputCategories.setText(String.valueOf(categoryNames));
     }
 
     public void setRatingStarGUI(double rating, SVGPath starSVGPath) {

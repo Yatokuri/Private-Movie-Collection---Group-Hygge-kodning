@@ -147,8 +147,6 @@ public class MediaPlayerPopUpViewController implements Initializable {
             movieModel.deleteMovie(currentSelectedMovie);
             tblMoviesOld.getItems().clear();
             tblMoviesOld.setItems(MovieModel.getObservableMoviesOld());
-
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -171,7 +169,6 @@ public class MediaPlayerPopUpViewController implements Initializable {
         alert.getButtonTypes().setAll(okButton, cancelButton);
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == okButton) {
-
             for (Movie m : MovieModel.getObservableMoviesOld()) {
                 try {
                     for (Category c : CategoryModel.getObservableCategories()) { // This will check through each category and delete the movie from there since the movieId is a key in the DB

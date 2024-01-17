@@ -125,7 +125,7 @@ public class MediaPlayerCUViewController implements Initializable {
         startupSetup();
     }
 
-    private void findGenreForFilm(String filmTitle) {
+    private void findInformationForMovie(String filmTitle) {
         try {
 
             filmTitle = filmTitle.substring(filmTitle.indexOf("org/") + 4, filmTitle.indexOf("-", filmTitle.indexOf("org/") + 4));
@@ -408,7 +408,7 @@ public class MediaPlayerCUViewController implements Initializable {
     @FXML
     private void btnAPI() { // The Button that tries to get all relevant info using the API through the link input in the textField
         if (!txtInputAPI.getText().isEmpty() && txtInputAPI.getText().contains("www.themoviedb.org/")) {
-            findGenreForFilm(txtInputAPI.getText());
+            findInformationForMovie(txtInputAPI.getText());
         }
         else {
             displayErrorModel.displayErrorC("Error - Please use TMDB to fetch information E.g \nhttps://www.themoviedb.org/movie/771-home-alone \nhttps://www.themoviedb.org/tv/2287-batman");

@@ -17,7 +17,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/View/MediaPlayer.fxml")));
         primaryStage.getIcons().add(new Image("/Icons/mainIcon.png"));
-        primaryStage.setTitle("Private Movie Collection Alpha");
+        primaryStage.setTitle("Private Movie Collection Beta");
         primaryStage.setScene(new Scene(root));
         primaryStage.setResizable(true);
         root.requestFocus();
