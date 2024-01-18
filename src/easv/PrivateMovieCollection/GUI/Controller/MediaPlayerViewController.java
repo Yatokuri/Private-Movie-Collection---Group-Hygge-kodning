@@ -5,6 +5,7 @@ package easv.PrivateMovieCollection.GUI.Controller;
 
 import easv.PrivateMovieCollection.BE.Category;
 import easv.PrivateMovieCollection.BE.Movie;
+import easv.PrivateMovieCollection.BE.Subtitle;
 import easv.PrivateMovieCollection.GUI.Model.CategoryModel;
 import easv.PrivateMovieCollection.GUI.Model.CategoryMovieModel;
 import easv.PrivateMovieCollection.GUI.Model.DisplayErrorModel;
@@ -32,11 +33,15 @@ import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
+import javafx.scene.shape.SVGPath;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -46,6 +51,8 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class MediaPlayerViewController implements Initializable {
+    @FXML
+    private SVGPath subtitleSVGP, fullscreenSVGP;
     @FXML
     private MenuButton btnCategoryFilter, btnMinimumIMDB;
     @FXML
@@ -69,7 +76,7 @@ public class MediaPlayerViewController implements Initializable {
     @FXML
     private ImageView btnPlayIcon, btnRepeatIcon, btnShuffleIcon;
     @FXML
-    private Button btnCreateCategory, btnUpdateCategory, btnPlay, btnSpeed, btnFilterIMDBArrow, btnFullscreen;
+    private Button btnCreateCategory, btnUpdateCategory, btnPlay, btnSpeed, btnFilterIMDBArrow, btnFullscreen, btnToggleSubtitle;
     @FXML
     private TextField txtMovieSearch;
     @FXML
@@ -196,6 +203,8 @@ public class MediaPlayerViewController implements Initializable {
         tblMoviesInCategoryVBOX.setManaged(false); // Hide movies in category while no category is selected
         tblMoviesInCategoryVBOX.setVisible(false); // -||-
 
+        lblSubtitles.setVisible(false);
+        btnToggleSubtitle.setVisible(false);
         btnFullscreen.setVisible(false);
         hBoxMediaPlayer.setVisible(false);
         AnchorPane.setBottomAnchor(vboxTblBtn, 5.0);
@@ -240,7 +249,6 @@ public class MediaPlayerViewController implements Initializable {
     private static final ArrayList<Integer> categoryFilter = new ArrayList<>();
     private static double minimumIMDBRating;
     private static String filterIMDBArrow = "⯅"; // So filter knows we want result Greater Than or Less than a number
-
     public void btnCategoryFilter() { // Button to filter the movie list based on chosen categories
         CategoryModel.getObservableCategories().forEach(category -> {
             CheckMenuItem categoryItem = new CheckMenuItem(category.getCategoryName());
@@ -316,14 +324,12 @@ public class MediaPlayerViewController implements Initializable {
         }   // Make sure we search again what there is already in search text in the new list automatic
         tblMovies.setItems(movieModel.filterList(MovieModel.getObservableMovies(), txtMovieSearch.getText().toLowerCase()));
     };
-
     public static ArrayList<String> getCategoryFilter() { // Getter for category filter, so it can be sent up through the layers
         ArrayList<String> categoryFilterString = new ArrayList<>();
         for (Integer i : categoryFilter)
             categoryFilterString.add(String.valueOf(i));
         return categoryFilterString;
     }
-
     public static double getMinimumIMDBFilter() {
         return minimumIMDBRating;
     }
@@ -359,7 +365,7 @@ public class MediaPlayerViewController implements Initializable {
     private void contextSystem() {
         MenuItem createMovie = new MenuItem("Create Movie");
         MenuItem updateMovie = new MenuItem("Update Movie");
-        MenuItem playMovie = new MenuItem("Play Movie");
+        MenuItem playMovie = new MenuItem("Play Movie Direct");
 
         contextMenuCategory.getItems().addAll(createCategory, updateCategory, deleteCategory, deleteAllMovies);
         contextMenuMovies.getItems().addAll(playMovie, createMovie, updateMovie, deleteMovie, categorySubMenu);
@@ -792,6 +798,8 @@ public class MediaPlayerViewController implements Initializable {
         anchorPane.setStyle("");
         AnchorPane.setBottomAnchor(vboxTblBtn, 5.0);
         isVideoModeActive = false;
+        lblSubtitles.setVisible(false);
+        btnToggleSubtitle.setVisible(false);
     }
 
     private void onStartMovieBtnClick() { // Shows the movie player and its buttons and hides the tableviews and their related buttons and the filter
@@ -805,6 +813,7 @@ public class MediaPlayerViewController implements Initializable {
         mediaViewBox.setVisible(true);
         anchorPane.setStyle("-fx-background-color: #454b4f;");
         isVideoModeActive = true;
+        btnToggleSubtitle.setVisible(true);
     }
 
 
@@ -1436,6 +1445,11 @@ public class MediaPlayerViewController implements Initializable {
                     btnForwardMovie();
                 }
             }
+            if (event.isControlDown()) {
+                if (keyCode == KeyCode.R) { // Disble/Enable subtitle
+                    btnToggleSubtitleMode();
+                }
+            }
             if (keyCode == KeyCode.F) { // Tries to make full screen in the media player
                 btnFullscreenMode();
             }
@@ -1474,7 +1488,6 @@ public class MediaPlayerViewController implements Initializable {
             }
         }
     }
-
     //******************************************BUTTONS*SLIDERS************************************************
     public boolean createUpdateCategory(String buttonText) throws Exception { // Method for updating or creating categories
         TextInputDialog dialog = new TextInputDialog("");
@@ -1525,7 +1538,6 @@ public class MediaPlayerViewController implements Initializable {
     public void btnCreateCategoryNow() throws Exception {
         createUpdateCategory(btnCreateCategory.getText());
     }
-
     // Functionality for context menu
     public void btnUpdateCategoryNow() throws Exception {
         createUpdateCategory(btnUpdateCategory.getText());
@@ -1570,18 +1582,44 @@ public class MediaPlayerViewController implements Initializable {
         if (AnchorPane.getBottomAnchor(mediaViewBox) == 100.0) {
             AnchorPane.setBottomAnchor(mediaViewBox, 0.0);
             AnchorPane.setBottomAnchor(btnFullscreen, 5.0);
+            AnchorPane.setBottomAnchor(lblSubtitles, 5.0);
+            AnchorPane.setBottomAnchor(btnToggleSubtitle, 5.0);
             hBoxMediaPlayer.setVisible(false);
             hBoxMediaPlayer.setManaged(false);
+            fullscreenSVGP.setStyle("-fx-fill: #070707;");
         } else {
             AnchorPane.setBottomAnchor(mediaViewBox, 100.0);
             AnchorPane.setBottomAnchor(btnFullscreen, 25.0);
+            AnchorPane.setBottomAnchor(lblSubtitles, 110.0);
+            AnchorPane.setBottomAnchor(btnToggleSubtitle, 25.0);
             hBoxMediaPlayer.setVisible(true);
             hBoxMediaPlayer.setManaged(true);
+            fullscreenSVGP.setStyle("-fx-fill: #000000;");
         }
     }
 
-    public void btnPlayMovie() {
-        handleMoviePlay();
+    public void btnPlayMovie() { handleMoviePlay(); }
+
+    //Change visibility of lblSubtitles label and change icon color
+    public void btnToggleSubtitleMode() {
+        if (lblSubtitles.isVisible()) {
+            lblSubtitles.setVisible(false);
+            subtitleSVGP.setStyle("-fx-fill: #000000;");
+        } else {
+            lblSubtitles.setVisible(true);
+            subtitleSVGP.setStyle("-fx-fill: #070707;");
+        }
+    }
+
+    //Here user can select there subtiles file, and it will be loaded into the subtitles list
+    public void btnNewSubtitle(ActionEvent actionEvent) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Subtitle Files", "*.srt"));
+        File selectedFile = fileChooser.showOpenDialog(null);
+        if (selectedFile != null) {
+            subtitles = parseSubtitles(selectedFile);
+            displaySubtitle(); //Update showing
+        }
     }
 
     public void btnForwardMovie() { // Moves forward a movie in the currently selected table view
@@ -1661,9 +1699,116 @@ public class MediaPlayerViewController implements Initializable {
     }
 
     private void setSliderMovieProgressStyle() { // Sets the css for the movie progress slider
+        if (subtitles  != null) {displaySubtitle();}
         double percentage = sliderProgressMovie.getValue() / (sliderProgressMovie.getMax() - sliderProgressMovie.getMin());
         String color = String.format(Locale.US, "-fx-background-color: linear-gradient(to right, #04a650 0%%, #04a650 %.10f%%, " +
                 "#92dc9b %.10f%%, #92dc9b 100%%);", percentage * 100, percentage * 100);
         sliderProgressMovie.lookup(".track").setStyle(color);
+    }
+
+    //******************************************SUBTITLES************************************************
+    private List<Subtitle> subtitles; //This hold current uploaded subtiles
+    private static List<Subtitle> parseSubtitles(File subtitlesFile) {
+        List<Subtitle> subtitles = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(subtitlesFile))) {
+            String line;
+            Subtitle subtitle;
+            boolean FoundText = false;
+            reader.readLine();
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+
+                if (line.isEmpty()) {continue;}
+                subtitle = new Subtitle();
+                // Parse start and end time
+                String[] times = line.split(" --> ");
+                subtitle.setStartTime(times[0]);
+                subtitle.setEndTime(times[1]);
+                // Read the next line(s) as text make our StringBuilder
+                StringBuilder textBuilder = new StringBuilder();
+                line = reader.readLine(); // Read the next line
+
+                // Read the next line(s) as text until an empty line or the end of the file is encountered
+                while (line != null) {
+                    if (line.isEmpty() && FoundText)  {
+                        reader.readLine();
+                        break;
+                    }
+                    if (!line.trim().isEmpty()) {
+                        textBuilder.append(line.trim()).append("\n");
+                        FoundText = true;
+                    }
+                    line = reader.readLine();
+                }
+
+
+                subtitle.setText(textBuilder.toString().trim());
+                subtitles.add(subtitle);
+                FoundText = false;
+            }
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return subtitles;
+    }
+
+    //Here we set a subtile if there is one in the list there match the time
+    private void displaySubtitle() {
+        for (Subtitle subtitle : subtitles) {
+            if (isTimeInRange(subtitle)) {
+                if (subtitle.getText().startsWith("{\\an8}")) {
+                    AnchorPane.setBottomAnchor(lblSubtitles, null);  // Remove the bottom anchor
+                    AnchorPane.setTopAnchor(lblSubtitles, 5.0);   // Set the top anchor to 400
+                    lblSubtitles.setText(subtitle.getText().substring(6).trim());
+                    return;
+                } else {
+                    AnchorPane.setTopAnchor(lblSubtitles, null);  // Remove the top anchor
+                    if (AnchorPane.getBottomAnchor(mediaViewBox) == 100.0) { //Mean not fullscreen
+                        AnchorPane.setBottomAnchor(lblSubtitles, 110.0);
+                    } else{
+                        AnchorPane.setBottomAnchor(lblSubtitles, 5.0);
+                    }
+                }
+                lblSubtitles.setText(subtitle.getText());
+                return;
+            }
+        }
+        // If no matching subtitle found, clear the label
+        lblSubtitles.setText("");
+    }
+
+    //This check that our new subtile text time is the same as the movie
+    private boolean isTimeInRange(Subtitle subtitle) {
+        long startTime = parseTime(subtitle.getStartTime());
+        long endTime = parseTime(subtitle.getEndTime());
+        long currentTimeMillis = parseFormattedTime(lblCurrentMovieProgress.getText());
+        return currentTimeMillis >= startTime && currentTimeMillis <= endTime;
+    }
+
+    //This make sure the time from movie have same format as subtile
+    private long parseFormattedTime(String formattedTime) {
+        String[] parts = formattedTime.split(":");
+        int hours = Integer.parseInt(parts[0]) * 3600;
+        int minutes = Integer.parseInt(parts[1]) * 60;
+        int seconds = Integer.parseInt(parts[2]);
+        return (hours + minutes + seconds) * 1000;
+    }
+
+    //This convert str ways to write time to a format we can use
+    private long parseTime(String time) {
+        String[] parts = time.split(":");
+        int hours = Integer.parseInt(parts[0]);
+        int minutes = Integer.parseInt(parts[1]);
+
+        // Splitting the seconds and milliseconds part
+        String[] secondsAndMillis = parts[2].split(",");
+
+        int seconds = Integer.parseInt(secondsAndMillis[0]);
+        int millis = Integer.parseInt(secondsAndMillis[1]);
+
+        return ((hours * 60L + minutes) * 60 + seconds) * 1000 + millis;
     }
 }
