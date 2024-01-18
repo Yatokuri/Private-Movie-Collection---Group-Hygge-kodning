@@ -17,34 +17,21 @@ public class MovieManager {
 
     private final IMovieDataAccess movieDao_DB;
 
+    public MovieManager() throws Exception { movieDao_DB = new MovieDAO_DB(); }
 
-    public MovieManager() throws Exception {
-        movieDao_DB = new MovieDAO_DB();
-    }
+    public Movie createNewMovie(Movie newMovie) throws Exception { return movieDao_DB.createMovie(newMovie); }
 
-    public Movie createNewMovie(Movie newMovie) throws Exception {
-        return movieDao_DB.createMovie(newMovie);
-    }
-
-    public List<Movie> getAllMovies() throws Exception {
-        return movieDao_DB.getAllMovies();
-    }
+    public List<Movie> getAllMovies() throws Exception { return movieDao_DB.getAllMovies(); }
 
     public List<Movie> getAllMoviesFilter(List<String> categoriesFilter, Double IMDBRate, String Way) throws Exception {
         return movieDao_DB.getAllMoviesFilter(categoriesFilter, IMDBRate, Way);
     }
 
-    public List<Movie> getAllMoviesOld() throws Exception {
-        return movieDao_DB.getAllMoviesOld();
-    }
+    public List<Movie> getAllMoviesOld() throws Exception { return movieDao_DB.getAllMoviesOld(); }
 
-    public void updateMovie(Movie selectedMovie) throws Exception {
-        movieDao_DB.updateMovie(selectedMovie);
-    }
+    public void updateMovie(Movie selectedMovie) throws Exception { movieDao_DB.updateMovie(selectedMovie); }
 
-    public void deleteMovie(Movie selectedMovie) throws Exception {
-        movieDao_DB.deleteMovie(selectedMovie);
-    }
+    public void deleteMovie(Movie selectedMovie) throws Exception { movieDao_DB.deleteMovie(selectedMovie); }
 
     public Movie getMovieById(int movieId) {
         for (Movie s : MovieModel.getObservableMovies()) {

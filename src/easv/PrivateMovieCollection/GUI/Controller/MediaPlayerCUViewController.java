@@ -265,7 +265,7 @@ public class MediaPlayerCUViewController implements Initializable {
         //if (typeCU == 1)
         if (typeCU == 1) { // If TypeCU is 1 we create Movie
             btnSave.setText("Create");
-            txtInputPersonalRating.setText("0");
+            txtInputPersonalRating.setText("0.0");
         }
         //if (typeCU == 2 & currentSelectedMovie != null)
         if (typeCU == 2 & currentSelectedMovie != null) { // If TypeCU is 2 we update Movie

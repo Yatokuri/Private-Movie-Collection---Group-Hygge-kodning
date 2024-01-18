@@ -75,7 +75,6 @@ public class MovieDAO_DB implements IMovieDataAccess {
             stmt.setString(12, movie.getMovieDescription());
             // Run the specified SQL statement
             stmt.executeUpdate();
-
             // Get the generated ID from the DB
             ResultSet rs = stmt.getGeneratedKeys();
             int id = 0;
@@ -85,12 +84,10 @@ public class MovieDAO_DB implements IMovieDataAccess {
             }
 
             // Create Movie object and send up the layers
-
             Movie newMovie = new Movie(id, movie.getYear(), movie.getTitle(), movie.getDirector(), movie.getMoviePath(), movie.getMovieRating(), movie.getMovieLength(), movie.getPersonalRating(), movie.getLastWatched(), movie.getCategory(), movie.getPosterPath(), movie.getImdbId(), movie.getMovieDescription());
             allMovies.add(newMovie);
             return newMovie;
         }
-
         catch (SQLException ex)
         {
             // create entry in log file
@@ -144,7 +141,6 @@ public class MovieDAO_DB implements IMovieDataAccess {
             // Bind parameters
             stmt.setInt(1, movie.getId());
             stmt2.setInt(1, movie.getId());
-
             // Run the specified SQL statement
             stmt2.executeUpdate();
             stmt.executeUpdate();
@@ -167,13 +163,11 @@ public class MovieDAO_DB implements IMovieDataAccess {
                     "AND MovieLastViewed < DATEADD(YEAR,-2,CAST(GETDATE() AS DATE));";
 
             ResultSet rs = stmt.executeQuery(sql);
-
             // Loop through rows from the database result set
             while (rs.next()) {
                 //Map DB row to Movie object
                 allMoviesOld.add(generateMovie(rs));
             }
-
             return allMoviesOld;
         }
         catch (SQLException ex)
@@ -206,11 +200,9 @@ public class MovieDAO_DB implements IMovieDataAccess {
             if (categoriesFilter.isEmpty()) {rs = stmt.executeQuery(sqlIMDBOnly);}
             else rs = stmt.executeQuery(sql);
 
-
             // Loop through rows from the database result set
             while (rs.next()) {
                 allMoviesFilter.add(generateMovie(rs));
-                System.out.println(allMoviesFilter);
             }
             return allMoviesFilter;
         }

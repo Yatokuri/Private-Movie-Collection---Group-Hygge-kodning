@@ -22,7 +22,6 @@ public class CategoryDAO_DB implements ICategoryDataAccess {
     }
 
     public List<Category> getAllCategories() throws Exception { // Returns all categories from the database
-
         ArrayList<Category> allCategories = new ArrayList<>();
 
         try (Connection conn = databaseConnector.getConnection();
@@ -33,7 +32,6 @@ public class CategoryDAO_DB implements ICategoryDataAccess {
 
             // Loop through rows from the database result set
             while (rs.next()) {
-
                 //Map DB row to Category object
                 int id = rs.getInt("CategoryId");
                 String title = rs.getString("CategoryName");
@@ -42,7 +40,6 @@ public class CategoryDAO_DB implements ICategoryDataAccess {
                 allCategories.add(category);
             }
             return allCategories;
-
         }
         catch (SQLException ex)
         {
@@ -55,7 +52,6 @@ public class CategoryDAO_DB implements ICategoryDataAccess {
 
         // SQL command
         String sql = "INSERT INTO dbo.Category (CategoryName) VALUES (?);";
-
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
         {
@@ -63,43 +59,35 @@ public class CategoryDAO_DB implements ICategoryDataAccess {
             stmt.setString(1, category.getCategoryName());
             // Run the specified SQL statement
             stmt.executeUpdate();
-
             // Get the generated ID from the DB
             ResultSet rs = stmt.getGeneratedKeys();
             int id = 0;
-
             if (rs.next()) {
                 id = rs.getInt(1);
             }
-
             // Create category object and send up the layers
             Category createdCategory;
             createdCategory = new Category(id, category.getCategoryName(), category.getMovieCount());
-
             return createdCategory;
         }
-
         catch (SQLException ex)
         {
             // create entry in log file
             ex.printStackTrace();
             throw new Exception("Could not create category", ex);
         }
-
     }
 
     public void updateCategory(Category category) throws Exception { // Updates the name of a category in the database where the id matches the given category
 
         // SQL command
         String sql = "UPDATE dbo.Category SET CategoryName = ? WHERE CategoryId = ?";
-
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql))
         {
             // Bind parameters
             stmt.setString(1, category.getCategoryName());
             stmt.setInt(2, category.getId());
-
             // Run the specified SQL statement
             stmt.executeUpdate();
         }
@@ -116,7 +104,6 @@ public class CategoryDAO_DB implements ICategoryDataAccess {
         String  sql = "DELETE FROM dbo.CategoryMovies WHERE CategoryId = ?;";
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql))
-
         {
             // Bind parameters
             stmt.setInt(1, category.getId());
@@ -129,13 +116,8 @@ public class CategoryDAO_DB implements ICategoryDataAccess {
             ex.printStackTrace();
             throw new Exception("Could not delete category", ex);
         }
-
-
         // SQL command
         sql = "DELETE FROM dbo.Category WHERE CategoryId = ?;";
-
-
-        // DELETE FROM dbo.CategoryMovies WHERE CategoryId = ?;
 
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql))
@@ -152,6 +134,4 @@ public class CategoryDAO_DB implements ICategoryDataAccess {
             throw new Exception("Could not delete category", ex);
         }
     }
-
-
 }

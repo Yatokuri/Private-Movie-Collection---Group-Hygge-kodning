@@ -27,7 +27,6 @@ public class CategoryMovieDAO_DB {
         // Set both counters to 0
         category.setMovieTotalTime(0);
         category.setMovieCount(0);
-
         // Instantiate the ArrayList
         ArrayList<Movie> allMoviesInCategory = new ArrayList<>();
 
@@ -85,7 +84,6 @@ public class CategoryMovieDAO_DB {
             PreparedStatement stmtAddCount = conn.prepareStatement(sqlAddCount))
         {
             ResultSet rs2 = stmt2.executeQuery();
-
             // Bind Parameters
             stmtAddCount.setInt(1, category.getId());
             stmtAddCount.execute();
@@ -97,19 +95,16 @@ public class CategoryMovieDAO_DB {
                 //Map DB row to category object
                 nextIdNumber = rs2.getInt("next_value");
             }
-
             int nextOrderNumber = 1;
             while (rs3.next()) {
                 //Map DB row to category object
                 nextOrderNumber = rs3.getInt("highest_value");
             }
-
             // Bind parameters
             stmt.setInt(1, movie.getId());
             stmt.setInt(2, category.getId());
             stmt.setInt(3, nextIdNumber);
             stmt.setInt(4, nextOrderNumber+1);
-
             // Run the specified SQL statement
             stmt.executeUpdate();
             category.setMovieCount(category.getMovieCount() + 1); //We add 1 to movie count because we add a new song
@@ -137,7 +132,6 @@ public class CategoryMovieDAO_DB {
             oldMoviePlayOrder.setInt(2, category.getId());
             newMoviePlayOrder.setInt(1, movie.getId());
             newMoviePlayOrder.setInt(2, category.getId());
-
             // Makes a result set of both the old and new play order position
             ResultSet rs = oldMoviePlayOrder.executeQuery();
             ResultSet rs2 = newMoviePlayOrder.executeQuery();
@@ -150,7 +144,6 @@ public class CategoryMovieDAO_DB {
             while (rs2.next()){
                 playOrderNewMovie = rs2.getInt("CategoryOrder");
             }
-
             // Bind parameters
             stmt.setInt(1, playOrderOld);
             stmt.setInt(2, movie.getId());
@@ -225,7 +218,6 @@ public class CategoryMovieDAO_DB {
             }
             category.setMovieCount(category.getMovieCount() - 1); //We remove 1 to movie count because we remove an old song
         }
-
         catch (SQLException ex)
         {
             // create entry in log file
@@ -264,7 +256,6 @@ public class CategoryMovieDAO_DB {
         List<Integer> categoryNames = new ArrayList<>();
         // SQL command
         String sql = "SELECT CategoryId FROM dbo.CategoryMovies WHERE MovieId = ?;";
-
         try (Connection conn = databaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             // Bind parameters

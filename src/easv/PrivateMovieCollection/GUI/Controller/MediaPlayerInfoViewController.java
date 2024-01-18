@@ -50,7 +50,6 @@ public class MediaPlayerInfoViewController implements Initializable {
     private final ValidateModel validateModel = new ValidateModel();
     private static final Image mainIcon = new Image ("Icons/mainIcon.png");
 
-    private String posterPath;
     private static final  String svgPathData = "M12 17.27l4.15 2.51c.76.46 1.69-.22 1.49-1.08l-1.1-4.72 3.67-3.18c.67-.58.31-1.68-.57-1.75l-4.83-.41" +
             "-1.89-4.46c-.34-.81-1.5-.81-1.84 0L9.19 8.63l-4.83.41c-.88.07-1.24 1.17-.57 1.75l3.67 3.18-1.1 4.72c-.2.86.73 1.54 1.49 1.08l4.15-2.5z";
     private static Movie currentSelectedMovie = null;
@@ -109,7 +108,7 @@ public class MediaPlayerInfoViewController implements Initializable {
         txtInputPersonalRating.setText(String.valueOf(currentSelectedMovie.getPersonalRating()));
         setRatingStarGUI(currentSelectedMovie.getMovieRating(), starSVGPath); //We update the star color
 
-        posterPath = currentSelectedMovie.getPosterPath();
+        String posterPath = currentSelectedMovie.getPosterPath();
         if (posterPath != null && !posterPath.isEmpty()) {
             InputStream stream;
             try {

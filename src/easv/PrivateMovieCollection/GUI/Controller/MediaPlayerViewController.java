@@ -73,7 +73,7 @@ public class MediaPlayerViewController implements Initializable {
     @FXML
     private TextField txtMovieSearch;
     @FXML
-    private Label lblPlayingNow, lblMovieDuration, lblCurrentMovieProgress, lblVolume;
+    private Label lblPlayingNow, lblMovieDuration, lblCurrentMovieProgress, lblVolume, lblSubtitles;
     @FXML
     private Slider sliderProgressMovie, sliderProgressVolume;
     @FXML
@@ -158,7 +158,7 @@ public class MediaPlayerViewController implements Initializable {
         setVolume();
         updateProgressStyle();
 
-        speeds.addAll(Arrays.asList(0.25, 0.50 ,0.75, 1.00, 1.25, 1.5, 1.75, 2.0, 3.0, 4.0, 5.0)); // We add the speeds to the list
+        speeds.addAll(Arrays.asList(0.25, 0.50, 0.75, 1.00, 1.25, 1.5, 1.75, 2.0, 3.0, 4.0, 5.0)); // We add the speeds to the list
         btnSpeed.setText(currentSpeed + "x");
 
         // Add tableview functionality
@@ -170,10 +170,9 @@ public class MediaPlayerViewController implements Initializable {
         // Adds filter functionality for Categories and IMDB Rating
         btnCategoryFilter();
         btnMinimumIMDBRating();
-
         //Open new window
 
-        if (!MovieModel.getObservableMoviesOld().isEmpty())  {
+        if (!MovieModel.getObservableMoviesOld().isEmpty()) {
             try {
                 warningWindow("Warning");
                 Platform.runLater(() -> {
@@ -186,7 +185,7 @@ public class MediaPlayerViewController implements Initializable {
         }
     }
 
-    private void initializeGUI(){
+    private void initializeGUI() {
         btnRepeatIcon.setImage(repeatDisableIcon); //We set picture here so the button know what is chosen
         btnShuffleIcon.setImage(shuffleIconDisable); // -||-
         sliderProgressMovie.setPickOnBounds(false); // So you only can use slider when actually touch it
@@ -202,7 +201,7 @@ public class MediaPlayerViewController implements Initializable {
         AnchorPane.setBottomAnchor(vboxTblBtn, 5.0);
     }
 
-    private void initializeSearchFunction(){
+    private void initializeSearchFunction() {
         // Initializes the Observable list into a Filtered list for use in the search function
         FilteredList<Movie> filteredMovies = new FilteredList<>(FXCollections.observableList(MovieModel.getObservableMovies()));
         tblMovies.setItems(filteredMovies);
@@ -214,7 +213,7 @@ public class MediaPlayerViewController implements Initializable {
         );
     }
 
-    private void initializeTableViews(){
+    private void initializeTableViews() {
         // Add data from observable list
         tblMovies.setItems(MovieModel.getObservableMovies());
         tblCategory.setItems(CategoryModel.getObservableCategories());
@@ -241,7 +240,8 @@ public class MediaPlayerViewController implements Initializable {
     private static final ArrayList<Integer> categoryFilter = new ArrayList<>();
     private static double minimumIMDBRating;
     private static String filterIMDBArrow = "⯅"; // So filter knows we want result Greater Than or Less than a number
-    public void btnCategoryFilter(){ // Button to filter the movie list based on chosen categories
+
+    public void btnCategoryFilter() { // Button to filter the movie list based on chosen categories
         CategoryModel.getObservableCategories().forEach(category -> {
             CheckMenuItem categoryItem = new CheckMenuItem(category.getCategoryName());
             categoryItem.setUserData(category.getId()); // Store the category as user data id
@@ -250,7 +250,7 @@ public class MediaPlayerViewController implements Initializable {
         });
     }
 
-    public void btnMinimumIMDBRating(){ // Button to filter movie list either greater than or less than the chosen IMDB Rating
+    public void btnMinimumIMDBRating() { // Button to filter movie list either greater than or less than the chosen IMDB Rating
         ToggleGroup imdbToggleGroup = new ToggleGroup();
 
         RadioMenuItem imdbOffItem = new RadioMenuItem("Off");
@@ -266,17 +266,23 @@ public class MediaPlayerViewController implements Initializable {
             imdbItem.setToggleGroup(imdbToggleGroup);
 
             imdbOffItem.setOnAction(event -> {
-                if (imdbOffItem.isSelected() && categoryFilter.isEmpty())   {
+                if (imdbOffItem.isSelected() && categoryFilter.isEmpty()) {
                     minimumIMDBRating = 0.0;
-                    try {tblMovies.setItems(movieModel.updateMovieList());}
-                    catch (Exception ex) { throw new RuntimeException(ex);}
+                    try {
+                        tblMovies.setItems(movieModel.updateMovieList());
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
             });
             imdbItem.setOnAction(event -> {
                 if (imdbItem.isSelected() || imdbOffItem.isSelected()) {
                     minimumIMDBRating = imdbRating;
-                    try {tblMovies.setItems(movieModel.updateMovieListFilter());}
-                    catch (Exception ex) { throw new RuntimeException(ex);}
+                    try {
+                        tblMovies.setItems(movieModel.updateMovieListFilter());
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
             });
             btnMinimumIMDB.getItems().add(imdbItem);
@@ -288,30 +294,43 @@ public class MediaPlayerViewController implements Initializable {
             // Parse the ID as an integer and add it to categoryFilter
             categoryFilter.add((Integer) ((CheckMenuItem) e.getSource()).getUserData());
             // Retrieve and print the Category object stored as user data
-            try {tblMovies.setItems(movieModel.updateMovieListFilter());}
-            catch (Exception ex) { throw new RuntimeException(ex); }
-        }
-        else {
+            try {
+                tblMovies.setItems(movieModel.updateMovieListFilter());
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        } else {
             categoryFilter.remove((Integer) ((CheckMenuItem) e.getSource()).getUserData());
             if (categoryFilter.isEmpty()) {
-                try {tblMovies.setItems(movieModel.updateMovieList());}
-                catch (Exception ex) { throw new RuntimeException(ex);}
-            }
-            else
-                try {tblMovies.setItems(movieModel.updateMovieListFilter());}
-                catch (Exception ex) { throw new RuntimeException(ex); }
+                try {
+                    tblMovies.setItems(movieModel.updateMovieList());
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            } else
+                try {
+                    tblMovies.setItems(movieModel.updateMovieListFilter());
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
         }   // Make sure we search again what there is already in search text in the new list automatic
         tblMovies.setItems(movieModel.filterList(MovieModel.getObservableMovies(), txtMovieSearch.getText().toLowerCase()));
     };
-    public static ArrayList<String> getCategoryFilter(){ // Getter for category filter, so it can be sent up through the layers
+
+    public static ArrayList<String> getCategoryFilter() { // Getter for category filter, so it can be sent up through the layers
         ArrayList<String> categoryFilterString = new ArrayList<>();
-        for (Integer i: categoryFilter)
+        for (Integer i : categoryFilter)
             categoryFilterString.add(String.valueOf(i));
         return categoryFilterString;
     }
-    public static double getMinimumIMDBFilter(){ return minimumIMDBRating; }
 
-    public static String getFilterIMDBArrow() { return filterIMDBArrow; }
+    public static double getMinimumIMDBFilter() {
+        return minimumIMDBRating;
+    }
+
+    public static String getFilterIMDBArrow() {
+        return filterIMDBArrow;
+    }
 
 //*******************************************CONTEXT*MENU**************************************************
 
@@ -407,7 +426,7 @@ public class MediaPlayerViewController implements Initializable {
                 if (event.getSource() instanceof MenuItem) {
                     MenuItem selectedItem = (MenuItem) event.getTarget();
                     Category selectedCategory = (Category) selectedItem.getUserData();
-                    currentCategory = categoryModel.getCategoryById(selectedCategory.getId());
+                    currentCategory = CategoryModel.getCategoryById(selectedCategory.getId());
                 }
                 categoryMovieModel.categoryMovies(currentCategory);
 
@@ -742,7 +761,7 @@ public class MediaPlayerViewController implements Initializable {
         }
     }
 
-    public void onEndOfMovie(){
+    public void onEndOfMovie() {
         if (repeatMode == 2) {//Repeat 1
             handleNewMovie(currentVideo, currentMoviePlaying);
             return;
@@ -874,15 +893,22 @@ public class MediaPlayerViewController implements Initializable {
     }
 
     public void handleDelete() { // Handles the delete functionality of the table views
+        // These variables store the selected items from different table views
         Movie selectedMovie = tblMovies.getSelectionModel().getSelectedItem();
         Category selectedCategory = tblCategory.getSelectionModel().getSelectedItem();
         Movie selectedMovieInCategory = tblMoviesInCategory.getSelectionModel().getSelectedItem();
+        // An Alert object is created with a type of WARNING for displaying warning messages.
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setContentText("Are you ok with this?");
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(mainIcon);
-        // This sets up the schematic for deleting categories & movies
 
+        // This sets up the schematic for deleting categories & movies
+        // If a movie is selected (selectedMovie) and no movie within a category is selected (selectedMovieInCategory),
+        // a confirmation dialog specific to movie deletion is shown.
+
+        // If the user confirms, it iterates over categories associated with the movie, removing the movie from each category,
+        // and then deletes the movie from the database. The categories and movie lists are refreshed.
         if (selectedMovie != null & selectedMovieInCategory == null) {
             alert.setTitle("Movie");
             alert.setHeaderText("You want to delete " + currentMovie.getTitle());
@@ -894,10 +920,15 @@ public class MediaPlayerViewController implements Initializable {
             if (result.isPresent() && result.get() == okButton) {
                 try {
                     ArrayList<Category> categoryList = new ArrayList<>();
-                    for (Integer i : CategoryMovieModel.getMovieCatList(currentMovie)) { categoryList.add(CategoryModel.getCategoryById(i)); }
-                    // This will check through each category and delete the movie from there since the movieId is a key in the DB
-                    for (Category c : categoryList) { categoryMovieModel.deleteMovieFromCategory(selectedMovie, c); }
-                    movieModel.deleteMovie(selectedMovie); /// removes movie from database
+                    // This will check through each category and delete the movie from there since the movieId is an integer key in the DB
+                    // The enhanced for loop makes it possible to delete a movie from every category at the same time
+                    for (Integer i : CategoryMovieModel.getMovieCatList(currentMovie)) {
+                        categoryList.add(CategoryModel.getCategoryById(i));
+                    }
+                    for (Category c : categoryList) {
+                        categoryMovieModel.deleteMovieFromCategory(selectedMovie, c);
+                    }
+                    movieModel.deleteMovie(selectedMovie); // removes movie from database
                     refreshCategories(); // Refreshes the categories so the correct time and count is shown
                     refreshMovieList(); // Refreshes the movie list so the deleted movie is no longer there.
                 } catch (Exception e) {
@@ -907,7 +938,10 @@ public class MediaPlayerViewController implements Initializable {
             }
             return;
         }
+        // If a category is selected (selectedCategory) and no movie within a category is selected (selectedMovieInCategory),
+        // a confirmation dialog specific to category deletion is shown.
         if (selectedCategory != null & selectedMovieInCategory == null) {
+            // If the user confirms, it deletes the category from the database and refreshes the category table view.
             alert.setTitle("Category");
             alert.setHeaderText("You want to delete " + currentCategory.getCategoryName());
             ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
@@ -926,6 +960,7 @@ public class MediaPlayerViewController implements Initializable {
             }
             return;
         }
+
         if (selectedMovieInCategory != null) { // Deletes a movie from a category, will not show a warning since nothing permanent is done here, you can always re add the movie
             try {
                 categoryMovieModel.deleteMovieFromCategory(selectedMovieInCategory, selectedCategory);
@@ -934,11 +969,18 @@ public class MediaPlayerViewController implements Initializable {
                 throw new RuntimeException(e);
             }
         }
+
+        // Exceptions are caught and logged, and an error message is displayed using displayErrorModel.
+        // Refresh: refreshCategories() and refreshMovieList() are called after deletion operations to update the UI.
     }
+
     //*****************************************WINDOWS********************************************
     private Stage stage;
 
-    public Stage getUpdateStage() {return stage; }
+    public Stage getUpdateStage() {
+        return stage;
+    }
+
     public void newUCWindow(String windowTitle) throws IOException { // Creates the second window that will allow you to update and create new movies
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/View/MediaPlayerCU.fxml"));
         Parent root = loader.load();
@@ -990,7 +1032,7 @@ public class MediaPlayerViewController implements Initializable {
         stage.initModality(Modality.APPLICATION_MODAL); //Lock the first window until second is close
     }
 
-//******************************************HELPER*METHOD********************************************
+    //******************************************HELPER*METHOD********************************************
     public void setSpeedMovie(int value) { // Method to change what speed we use
         if (currentSpeedIndex == speeds.size())
             currentSpeedIndex = -1;
@@ -1044,7 +1086,7 @@ public class MediaPlayerViewController implements Initializable {
         }
     }
 
-//******************************************DRAG*DROP************************************************
+    //******************************************DRAG*DROP************************************************
     @FXML
     private void initializeDragAndDrop() { // Sets up the drag & drop functionality for the entire program
         tblMovies.setOnDragDetected(event -> { //When user drag a movie from movie list
@@ -1326,7 +1368,9 @@ public class MediaPlayerViewController implements Initializable {
     Set<KeyCode> pressedKeys = new HashSet<>();
 
     @FXML
-    private void keyboardKeyReleased(KeyEvent event) { pressedKeys.remove(event.getCode()); }
+    private void keyboardKeyReleased(KeyEvent event) {
+        pressedKeys.remove(event.getCode());
+    }
 
     @FXML
     private void keyboardKeyPressed(KeyEvent event) throws Exception { // Controls keyboard Functionality for the window
@@ -1430,6 +1474,7 @@ public class MediaPlayerViewController implements Initializable {
             }
         }
     }
+
     //******************************************BUTTONS*SLIDERS************************************************
     public boolean createUpdateCategory(String buttonText) throws Exception { // Method for updating or creating categories
         TextInputDialog dialog = new TextInputDialog("");
@@ -1457,7 +1502,7 @@ public class MediaPlayerViewController implements Initializable {
 
             if (buttonText.equals(btnCreateCategory.getText()) && !inputValue.isEmpty()) {
                 Category p = new Category(-1, inputValue, 0);
-                if (!categoryModel.createNewCategory(p))    {
+                if (!categoryModel.createNewCategory(p)) {
                     displayErrorModel.displayErrorC("This category already exist in the system");
                 }
             }
@@ -1477,9 +1522,14 @@ public class MediaPlayerViewController implements Initializable {
     }
 
     // Functionality for context menu
-    public void btnCreateCategoryNow() throws Exception { createUpdateCategory(btnCreateCategory.getText()); }
+    public void btnCreateCategoryNow() throws Exception {
+        createUpdateCategory(btnCreateCategory.getText());
+    }
+
     // Functionality for context menu
-    public void btnUpdateCategoryNow() throws Exception { createUpdateCategory(btnUpdateCategory.getText()); }
+    public void btnUpdateCategoryNow() throws Exception {
+        createUpdateCategory(btnUpdateCategory.getText());
+    }
 
     public void btnNewWindowCreate() throws IOException { // Opens the CU FXML window to create a new movie
         MediaPlayerCUViewController.setTypeCU(1);
@@ -1497,7 +1547,9 @@ public class MediaPlayerViewController implements Initializable {
     }
 
     // Calls the delete function to try and delete the selected movie, category or movie in category with relevant warnings where applicable
-    public void btnDelete() { handleDelete(); }
+    public void btnDelete() {
+        handleDelete();
+    }
 
     public void btnShuffleMovie() { // Changes the shuffle mode and shuffle icon when clicked
         if (btnShuffleIcon.getImage().equals(shuffleIcon)) {
@@ -1520,8 +1572,7 @@ public class MediaPlayerViewController implements Initializable {
             AnchorPane.setBottomAnchor(btnFullscreen, 5.0);
             hBoxMediaPlayer.setVisible(false);
             hBoxMediaPlayer.setManaged(false);
-        }
-        else {
+        } else {
             AnchorPane.setBottomAnchor(mediaViewBox, 100.0);
             AnchorPane.setBottomAnchor(btnFullscreen, 25.0);
             hBoxMediaPlayer.setVisible(true);
@@ -1529,7 +1580,9 @@ public class MediaPlayerViewController implements Initializable {
         }
     }
 
-    public void btnPlayMovie() { handleMoviePlay(); }
+    public void btnPlayMovie() {
+        handleMoviePlay();
+    }
 
     public void btnForwardMovie() { // Moves forward a movie in the currently selected table view
         previousPress = false;
@@ -1549,13 +1602,15 @@ public class MediaPlayerViewController implements Initializable {
         if (Objects.equals(btnFilterIMDBArrow.getText(), "⯆")) {
             filterIMDBArrow = "U";
             btnFilterIMDBArrow.setText("⯅");
-        }
-        else {
+        } else {
             filterIMDBArrow = "D";
             btnFilterIMDBArrow.setText("⯆");
         }
-        try {tblMovies.setItems(movieModel.updateMovieListFilter());}
-        catch (Exception ex) { throw new RuntimeException(ex);}
+        try {
+            tblMovies.setItems(movieModel.updateMovieListFilter());
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     public void btnRepeatMovie() { // Enables or disables the repeat mode and sets the icon to the relevant one
@@ -1574,8 +1629,7 @@ public class MediaPlayerViewController implements Initializable {
     public void btnSpeedMovie(MouseEvent event) { // Here we change the movies speed
         if (event.getButton() == MouseButton.SECONDARY) {
             setSpeedMovie(-1);
-        }
-        else
+        } else
             setSpeedMovie(1);
     }
 
@@ -1612,5 +1666,4 @@ public class MediaPlayerViewController implements Initializable {
                 "#92dc9b %.10f%%, #92dc9b 100%%);", percentage * 100, percentage * 100);
         sliderProgressMovie.lookup(".track").setStyle(color);
     }
-
 }
