@@ -435,18 +435,18 @@ public class MediaPlayerCUViewController implements Initializable {
         Movie movie = new Movie(-1, year, title, director, moviePath, movieRating, movieTime, personalRating, null, category, moviePosterPath, movieImdbId, movieTMDBDescription);
 
         try {
-            Movie newCreatedMovie = movieModel.createNewMovie(movie);
-            mediaPlayerViewController.addMovieToSoundMap(newCreatedMovie);
+            Movie newCreatedMovie = movieModel.createNewMovie(movie); // We create the new movie through the layer
+            mediaPlayerViewController.addMovieToMovieMap(newCreatedMovie); // And add it to the movie list in program
 
             var selectedItems = lstCategory.getSelectionModel().getSelectedItems();
-            categoryNames.clear();
+            categoryNames.clear(); // Add all selected item from the listview and put into a list
             categoryNames.addAll(selectedItems);
             if (categoryNames != null) {
                 for (Category c : categoryNames) { //Add all selected category to the movie
                     categoryMovieModel.addMovieToCategoryBypass(newCreatedMovie, c);
                 }
             }
-            mediaPlayerViewController.refreshCategories();
+            mediaPlayerViewController.refreshCategories(); // Update stuff so the table view show the right
             mediaPlayerViewController.refreshMovieList();
             btnCloseWindow();
         } catch (Exception e) {
@@ -483,7 +483,7 @@ public class MediaPlayerCUViewController implements Initializable {
             // Updates the movie data and sends it up the layers to the DAL layer and updates the movie path in the sound map in case it got changed
             try {
                 movieModel.updateMovie(currentSelectedMovie);
-                mediaPlayerViewController.updateMoviePathSoundMap(currentSelectedMovie);
+                mediaPlayerViewController.updateMoviePathMovieMap(currentSelectedMovie);
                 mediaPlayerViewController.refreshMovieList();
                 mediaPlayerViewController.refreshCategories();
                 btnCloseWindow();

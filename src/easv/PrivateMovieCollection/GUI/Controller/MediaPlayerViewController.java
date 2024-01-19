@@ -47,6 +47,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -85,7 +87,7 @@ public class MediaPlayerViewController implements Initializable {
     private Slider sliderProgressMovie, sliderProgressVolume;
     @FXML
     private MediaPlayer currentVideo = null;
-    private final Map<Integer, MediaPlayer> soundMap = new HashMap<>(); //Every movie has a unique id
+    private final Map<Integer, MediaPlayer> movieMap = new HashMap<>(); //Every movie has a unique id
     private List<Movie> currentMovieList = new ArrayList<>();
     private boolean isUserChangingSlider = false;
     private boolean isVideoPaused = false;
@@ -106,6 +108,7 @@ public class MediaPlayerViewController implements Initializable {
     private MediaPlayerCUViewController mediaPlayerCUViewController;
     private Movie draggedMovie;
     private String currentTableview;
+    private File videoFile;
     private static MediaPlayerViewController instance;
 
     private static final Image shuffleIcon = new Image("Icons/shuffle.png");
@@ -547,9 +550,9 @@ public class MediaPlayerViewController implements Initializable {
     }
 //********************************MEDIA*PLAYER*FUNCTION**************************************************
 
-    private CompletableFuture<Void> addMoviesToSoundMap(Movie s) { // Will try to add the selected movie to the sound map when trying to play it
+    private CompletableFuture<Void> addMoviesToMovieMap(Movie s) { // Will try to add the selected movie to the movieMap when trying to play it
         CompletableFuture<Void> future = new CompletableFuture<>(); // We use to make sure the Media player is 100% done before going next
-        if (soundMap.get(s.getId()) == null) { // Check if the movie is not already in the soundMap
+        if (movieMap.get(s.getId()) == null) { // Check if the movie is not already in the movieMap
             Path filePath = Paths.get(s.getMoviePath());
             try {
                 CompletableFuture.runAsync(() -> {
@@ -557,14 +560,14 @@ public class MediaPlayerViewController implements Initializable {
                         MediaPlayer mp = new MediaPlayer(new Media(new File(String.valueOf(filePath)).toURI().toString()));
                         mp.setOnReady(() -> {
                             mp.getTotalDuration();
-                            soundMap.put(s.getId(), mp);
+                            movieMap.put(s.getId(), mp);
                             future.complete(null); // Signal completion
                         });
                     } else { // File does not exist, use the error sound
-                        MediaPlayer mp = new MediaPlayer(new Media(new File("resources/Sounds/missingFileErrorSound.mp3").toURI().toString()));
+                        MediaPlayer mp = new MediaPlayer(new Media(new File("resources/Sounds/missingFileErrorSoundMovie.mp3").toURI().toString()));
                         mp.setOnReady(() -> {
                             mp.getTotalDuration();
-                            soundMap.put(s.getId(), mp);
+                            movieMap.put(s.getId(), mp);
                             future.complete(null); // Signal completion
                         });
                     }
@@ -592,9 +595,9 @@ public class MediaPlayerViewController implements Initializable {
             selectedMovie = null;
         }
         if (selectedMovie != null) {
-            addMoviesToSoundMap(selectedMovie).thenRun(() -> {
+            addMoviesToMovieMap(selectedMovie).thenRun(() -> {
 
-                MediaPlayer newMovie = soundMap.get(selectedMovie.getId());
+                MediaPlayer newMovie = movieMap.get(selectedMovie.getId());
                 if (currentVideo != newMovie && newMovie != null) {
                     handleNewMovie(newMovie, selectedMovie);
                 }
@@ -739,14 +742,22 @@ public class MediaPlayerViewController implements Initializable {
     }
 
     public void PlayMovie(Movie movie) {
-        addMoviesToSoundMap(movie).thenRun(() -> {
-            MediaPlayer newVideo = soundMap.get(movie.getId());
-            if (newVideo == null) {// Checks if the selected video will work or if it should throw this error instead
-                soundMap.put(movie.getId(), new MediaPlayer(new Media(new File("resources/Sounds/missingFileErrorSound.mp3").toURI().toString())));
-                newVideo = soundMap.get(movie.getId());
-                sliderProgressMovie.setValue(0);
+        addMoviesToMovieMap(movie).thenRun(() -> {
+            MediaPlayer newVideo = movieMap.get(movie.getId());
+            videoFile = new File(movie.getMoviePath());
+            if (videoFile.exists()) {
+                LocalDateTime truncatedDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+                movie.setLastWatched(String.valueOf(truncatedDateTime));
+                try {
+                    movieModel.updateMovie(movie);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                handleNewMovie(newVideo, movie);
             }
-            handleNewMovie(newVideo, movie);
+            else {
+                displayErrorModel.displayErrorC("Movie could not be found\n(It might have been moved to a different location)");
+            }
         });
     }
 
@@ -892,13 +903,13 @@ public class MediaPlayerViewController implements Initializable {
 
 //*****************************************CREATE*UPDATE*DELETE********************************************
 
-    public void updateMoviePathSoundMap(Movie currentSelectedMovie) { //We remove old path and add new one
-        soundMap.remove(currentSelectedMovie.getId());
-        soundMap.put(currentSelectedMovie.getId(), new MediaPlayer(new Media(new File(currentSelectedMovie.getMoviePath()).toURI().toString()))); //We add new movie to the hashmap
+    public void updateMoviePathMovieMap(Movie currentSelectedMovie) { //We remove old path and add new one
+        movieMap.remove(currentSelectedMovie.getId());
+        movieMap.put(currentSelectedMovie.getId(), new MediaPlayer(new Media(new File(currentSelectedMovie.getMoviePath()).toURI().toString()))); //We add new movie to the hashmap
     }
 
-    public void addMovieToSoundMap(Movie newCreatedMovie) { //We add the movie to our hashmap, so it can be played
-        soundMap.put(newCreatedMovie.getId(), new MediaPlayer(new Media(new File(newCreatedMovie.getMoviePath()).toURI().toString())));
+    public void addMovieToMovieMap(Movie newCreatedMovie) { //We add the movie to our hashmap, so it can be played
+        movieMap.put(newCreatedMovie.getId(), new MediaPlayer(new Media(new File(newCreatedMovie.getMoviePath()).toURI().toString())));
     }
 
     public void handleDelete() { // Handles the delete functionality of the table views
@@ -1632,7 +1643,6 @@ public class MediaPlayerViewController implements Initializable {
             repeatMode = -1;
             currentVideo.seek(Duration.millis(1000000000)); //So its 100% is done
         }
-        btnRepeatMovie();
         onEndMovieBtnClick();
     }
 
@@ -1707,7 +1717,7 @@ public class MediaPlayerViewController implements Initializable {
     }
 
     //******************************************SUBTITLES************************************************
-    private List<Subtitle> subtitles; //This hold current uploaded subtiles
+    private List<Subtitle> subtitles; //This hold current uploaded subtitles
     private static List<Subtitle> parseSubtitles(File subtitlesFile) {
         List<Subtitle> subtitles = new ArrayList<>();
 
@@ -1755,7 +1765,7 @@ public class MediaPlayerViewController implements Initializable {
         return subtitles;
     }
 
-    //Here we set a subtile if there is one in the list there match the time
+    //Here we set a subtitle if there is one in the list there match the time
     private void displaySubtitle() {
         for (Subtitle subtitle : subtitles) {
             if (isTimeInRange(subtitle)) {
@@ -1780,7 +1790,7 @@ public class MediaPlayerViewController implements Initializable {
         lblSubtitles.setText("");
     }
 
-    //This check that our new subtile text time is the same as the movie
+    //This check that our new subtitle text time is the same as the movie
     private boolean isTimeInRange(Subtitle subtitle) {
         long startTime = parseTime(subtitle.getStartTime());
         long endTime = parseTime(subtitle.getEndTime());
