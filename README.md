@@ -44,7 +44,7 @@ Naylin
 * Esc = Close window
 * CTRL + F = Choose a file
 * CTRL + C = Create new Category
-* CTRL + S = Attempt to Save/Update Song
+* CTRL + S = Attempt to Save/Update Movie
 
 # Info Window Hotkeys
 * Esc = Close window

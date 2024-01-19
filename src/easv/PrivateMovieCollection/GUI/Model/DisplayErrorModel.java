@@ -21,6 +21,17 @@ public class DisplayErrorModel {
         alert.showAndWait();
     }
 
+    //This is used to show a specific error where movie could not be found
+    public void displayErrorNMF(String movieNameNotFound) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        String truncatedTitle = movieNameNotFound.substring(0, Math.min(movieNameNotFound.length(), 30));
+        String errorMessage = truncatedTitle + (movieNameNotFound.length() > 30 ? "..." : "") + " could not be found\n(It might have been moved to a different location)";
+        setIcon(alert);
+        alert.setTitle("Something went wrong");
+        alert.setHeaderText(errorMessage);
+        alert.showAndWait();
+    }
+
     //This is used to make the auto generated error message
     public void displayError(Throwable t) {
         Alert alert = new Alert(Alert.AlertType.ERROR);

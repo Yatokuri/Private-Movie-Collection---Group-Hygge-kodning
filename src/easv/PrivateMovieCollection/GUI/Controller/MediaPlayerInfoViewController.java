@@ -97,8 +97,13 @@ public class MediaPlayerInfoViewController implements Initializable {
         if (currentSelectedMovie.getLastWatched() == null)
             lblInputDate.setText("Last seen: Never");
         else {
+            String originalTimestampString = currentSelectedMovie.getLastWatched();
+            // Replace 'T' with a space and add ".0" if the format should be wrong
+            if (originalTimestampString.contains("T")) {
+                originalTimestampString = originalTimestampString.replace('T', ' ') + ".0";
+            }
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
-            lblInputDate.setText("Last seen: " + sdf.format(Timestamp.valueOf(currentSelectedMovie.getLastWatched())));
+            lblInputDate.setText("Last seen: " + sdf.format(Timestamp.valueOf(originalTimestampString)));
         }
         if (currentSelectedMovie.getMovieDescription() == null)
             lblInputDesc.setText("N/A");
@@ -209,7 +214,7 @@ public class MediaPlayerInfoViewController implements Initializable {
             btnCloseWindow();
         }
         else {
-            displayErrorModel.displayErrorC("Movie could not be found\n(It might have been moved to a different location)");
+            displayErrorModel.displayErrorNMF(currentSelectedMovie.getTitle());
         }
     }
     public void btnPlay() throws Exception { // Play the movie in the computer default media player
@@ -224,7 +229,7 @@ public class MediaPlayerInfoViewController implements Initializable {
             lblInputDate.setText("Last seen : " + truncatedDateTime.format(formatter));
         }
         else {
-            displayErrorModel.displayErrorC("Movie could not be found\n(It might have been moved to a different location)");
+            displayErrorModel.displayErrorNMF(currentSelectedMovie.getTitle());
         }
     }
 

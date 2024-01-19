@@ -756,7 +756,7 @@ public class MediaPlayerViewController implements Initializable {
                 handleNewMovie(newVideo, movie);
             }
             else {
-                displayErrorModel.displayErrorC("Movie could not be found\n(It might have been moved to a different location)");
+                displayErrorModel.displayErrorNMF(movie.getTitle());
             }
         });
     }
