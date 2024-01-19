@@ -1424,13 +1424,13 @@ public class MediaPlayerViewController implements Initializable {
             }
 
             if (event.isControlDown()) {
-                if (keyCode == KeyCode.S) { // Opens the create movie window
+                if (keyCode == KeyCode.S) { // Speeds movie up
                     setSpeedMovie(1);
                 }
             }
 
             if (event.isShiftDown()) {
-                if (keyCode == KeyCode.S) { // Opens the create movie window
+                if (keyCode == KeyCode.S) { // Slows movie down
                     setSpeedMovie(-1);
                 }
             }

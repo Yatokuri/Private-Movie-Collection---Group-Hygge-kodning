@@ -164,12 +164,12 @@ public class MediaPlayerInfoViewController implements Initializable {
             }
         }
         if (event.isControlDown()) {
-            if (keyCode == KeyCode.P) { // attempts to play the movie in user standard program
+            if (keyCode == KeyCode.P) { // Attempts to play the movie in user standard program
                 btnPlay();
             }
         }
         if (event.isControlDown()) {
-            if (keyCode == KeyCode.D) { // attempts to play the movie in user standard program
+            if (keyCode == KeyCode.D) { // Plays movie directly
                 btnPlayDirect();
             }
         }
